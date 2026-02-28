@@ -87,3 +87,10 @@ Before running `git commit`, mentally verify:
 - [ ] README updated (if public-facing change)?
 - [ ] System diagram updated (if architecture changed)?
 - [ ] ADR written (if major design decision)?
+
+### Deployment
+- **CI/CD** is handled by GitHub Actions (`.github/workflows/ci-cd.yml`). Push to `master` triggers: TypeScript check → unit tests with coverage → E2E tests → build → deploy to Vercel.
+- **Vercel auto-deploy is disabled** (`vercel.json` → `github.enabled: false`). Deployments ONLY happen through the GitHub Actions pipeline after all tests pass.
+- **If any CI step fails, deployment is skipped.** No manual rollback needed — the previous production deployment stays live.
+- **Production URL:** https://medical-data-app.vercel.app
+- **Never deploy manually** with `vercel deploy`. Always push to `master` and let CI/CD handle it.
