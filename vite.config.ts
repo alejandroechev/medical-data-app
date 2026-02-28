@@ -45,7 +45,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/domain/**', 'src/ui/**'],
-      exclude: ['src/**/*.d.ts', 'src/**/index.ts'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/**/index.ts',
+        'src/domain/services/**', // interfaces only, no runtime code
+        'src/domain/models/event-photo.ts', // interfaces only
+      ],
     },
   },
 })
