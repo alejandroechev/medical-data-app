@@ -1,19 +1,19 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Registro Médico Familiar — E2E', () => {
-  test('debe cargar la página de inicio', async ({ page }) => {
+test.describe('Medical Family Registry — E2E', () => {
+  test('should load the home page', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('header')).toContainText('Registro Médico Familiar');
   });
 
-  test('debe mostrar la barra de navegación inferior', async ({ page }) => {
+  test('should show the bottom navigation bar', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByLabel('Inicio')).toBeVisible();
     await expect(page.getByLabel('Nuevo')).toBeVisible();
     await expect(page.getByLabel('Historial')).toBeVisible();
   });
 
-  test('debe navegar a la página de nuevo evento', async ({ page }) => {
+  test('should navigate to the new event page', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     await expect(page.locator('header')).toContainText('Nuevo Evento');
@@ -23,7 +23,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
     await expect(page.getByLabel('Descripción')).toBeVisible();
   });
 
-  test('debe navegar a la página de historial', async ({ page }) => {
+  test('should navigate to the history page', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Historial').click();
     await expect(page.locator('header')).toContainText('Historial');
@@ -33,14 +33,14 @@ test.describe('Registro Médico Familiar — E2E', () => {
     await expect(page.getByLabel('Hasta')).toBeVisible();
   });
 
-  test('debe mostrar errores de validación al enviar formulario vacío', async ({ page }) => {
+  test('should show validation errors when submitting empty form', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await expect(page.getByText('La descripción es obligatoria')).toBeVisible();
   });
 
-  test('debe volver a inicio con el botón de volver', async ({ page }) => {
+  test('should go back to home with the back button', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     await expect(page.locator('header')).toContainText('Nuevo Evento');
@@ -48,7 +48,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
     await expect(page.locator('header')).toContainText('Registro Médico Familiar');
   });
 
-  test('debe tener los tipos de evento disponibles', async ({ page }) => {
+  test('should have all event types available', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     const select = page.getByLabel('Tipo de evento');
@@ -61,7 +61,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
     expect(options).toContain('Otro');
   });
 
-  test('debe tener los miembros de familia en el select de paciente', async ({ page }) => {
+  test('should have family members in the patient select', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     const select = page.getByLabel('Paciente');
@@ -70,7 +70,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
     expect(options.some(o => o.includes('Alejandro'))).toBe(true);
   });
 
-  test('debe tener checkboxes de reembolso', async ({ page }) => {
+  test('should have reimbursement checkboxes', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     await expect(page.getByLabel('Reembolsado por ISAPRE')).toBeVisible();
@@ -79,7 +79,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
 
   // --- Full data flow E2E tests (uses in-memory stubs when Supabase not configured) ---
 
-  test('flujo completo: crear evento → ver en inicio → ver detalle', async ({ page }) => {
+  test('full flow: create event → see on home → view detail', async ({ page }) => {
     await page.goto('/');
 
     // Inicio vacío
@@ -110,7 +110,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
     await expect(page.getByText('No reembolsada').first()).toBeVisible();
   });
 
-  test('flujo completo: crear evento con reembolso ISAPRE', async ({ page }) => {
+  test('full flow: create event with ISAPRE reimbursement', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     await page.getByLabel('Tipo de evento').selectOption('Consulta Dental');
@@ -125,7 +125,7 @@ test.describe('Registro Médico Familiar — E2E', () => {
     await expect(page.getByText('ISAPRE ✓')).toBeVisible();
   });
 
-  test('historial: filtrar eventos por tipo', async ({ page }) => {
+  test('history: filter events by type', async ({ page }) => {
     await page.goto('/');
 
     // Crear dos eventos de tipos diferentes

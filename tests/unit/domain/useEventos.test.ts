@@ -1,144 +1,144 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useEventos, useEvento } from '../../../src/ui/hooks/useEventos';
+import { useEvents, useEvent } from '../../../src/ui/hooks/useEventos';
 
 vi.mock('../../../src/infra/store-provider', () => ({
-  listarEventos: vi.fn(),
-  crearEvento: vi.fn(),
-  obtenerEventoPorId: vi.fn(),
-  actualizarEvento: vi.fn(),
-  eliminarEvento: vi.fn(),
+  listEvents: vi.fn(),
+  createEvent: vi.fn(),
+  getEventById: vi.fn(),
+  updateEvent: vi.fn(),
+  deleteEvent: vi.fn(),
 }));
 
 import {
-  listarEventos,
-  crearEvento,
-  obtenerEventoPorId,
-  actualizarEvento,
-  eliminarEvento,
+  listEvents,
+  createEvent,
+  getEventById,
+  updateEvent,
+  deleteEvent,
 } from '../../../src/infra/store-provider';
 
-const mockListar = vi.mocked(listarEventos);
-const mockCrear = vi.mocked(crearEvento);
-const mockObtener = vi.mocked(obtenerEventoPorId);
-const mockActualizar = vi.mocked(actualizarEvento);
-const mockEliminar = vi.mocked(eliminarEvento);
+const mockList = vi.mocked(listEvents);
+const mockCreate = vi.mocked(createEvent);
+const mockGetById = vi.mocked(getEventById);
+const mockUpdate = vi.mocked(updateEvent);
+const mockDelete = vi.mocked(deleteEvent);
 
-const mockEvento = {
+const mockEvent = {
   id: '1',
-  fecha: '2024-06-15',
-  tipo: 'Consulta Médica' as const,
-  descripcion: 'Control',
-  pacienteId: '1',
-  reembolsoIsapre: false,
-  reembolsoSeguro: false,
-  creadoEn: '2024-06-15T10:00:00Z',
-  actualizadoEn: '2024-06-15T10:00:00Z',
+  date: '2024-06-15',
+  type: 'Consulta Médica' as const,
+  description: 'Control',
+  patientId: '1',
+  isapreReimbursed: false,
+  insuranceReimbursed: false,
+  createdAt: '2024-06-15T10:00:00Z',
+  updatedAt: '2024-06-15T10:00:00Z',
 };
 
-describe('useEventos', () => {
+describe('useEvents', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('debe cargar eventos al iniciar', async () => {
-    mockListar.mockResolvedValue([mockEvento]);
-    const { result } = renderHook(() => useEventos());
+  it('should load events on init', async () => {
+    mockList.mockResolvedValue([mockEvent]);
+    const { result } = renderHook(() => useEvents());
 
     expect(result.current.loading).toBe(true);
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.eventos).toEqual([mockEvento]);
+    expect(result.current.events).toEqual([mockEvent]);
     expect(result.current.error).toBeNull();
   });
 
-  it('debe manejar error de carga', async () => {
-    mockListar.mockRejectedValue(new Error('Error de red'));
-    const { result } = renderHook(() => useEventos());
+  it('should handle load error', async () => {
+    mockList.mockRejectedValue(new Error('Error de red'));
+    const { result } = renderHook(() => useEvents());
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBe('Error de red');
-    expect(result.current.eventos).toEqual([]);
+    expect(result.current.events).toEqual([]);
   });
 
-  it('debe crear evento y recargar', async () => {
-    mockListar.mockResolvedValue([]);
-    mockCrear.mockResolvedValue(mockEvento);
+  it('should create event and reload', async () => {
+    mockList.mockResolvedValue([]);
+    mockCreate.mockResolvedValue(mockEvent);
 
-    const { result } = renderHook(() => useEventos());
+    const { result } = renderHook(() => useEvents());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    mockListar.mockResolvedValue([mockEvento]);
-    await result.current.crear({
-      fecha: '2024-06-15',
-      tipo: 'Consulta Médica',
-      descripcion: 'Control',
-      pacienteId: '1',
+    mockList.mockResolvedValue([mockEvent]);
+    await result.current.create({
+      date: '2024-06-15',
+      type: 'Consulta Médica',
+      description: 'Control',
+      patientId: '1',
     });
 
-    await waitFor(() => expect(result.current.eventos).toHaveLength(1));
-    expect(mockCrear).toHaveBeenCalledOnce();
+    await waitFor(() => expect(result.current.events).toHaveLength(1));
+    expect(mockCreate).toHaveBeenCalledOnce();
   });
 
-  it('debe actualizar evento y recargar', async () => {
-    mockListar.mockResolvedValue([mockEvento]);
-    const updated = { ...mockEvento, reembolsoIsapre: true };
-    mockActualizar.mockResolvedValue(updated);
+  it('should update event and reload', async () => {
+    mockList.mockResolvedValue([mockEvent]);
+    const updated = { ...mockEvent, isapreReimbursed: true };
+    mockUpdate.mockResolvedValue(updated);
 
-    const { result } = renderHook(() => useEventos());
+    const { result } = renderHook(() => useEvents());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    mockListar.mockResolvedValue([updated]);
-    await result.current.actualizar('1', { reembolsoIsapre: true });
+    mockList.mockResolvedValue([updated]);
+    await result.current.update('1', { isapreReimbursed: true });
 
-    expect(mockActualizar).toHaveBeenCalledWith('1', { reembolsoIsapre: true });
+    expect(mockUpdate).toHaveBeenCalledWith('1', { isapreReimbursed: true });
   });
 
-  it('debe eliminar evento y recargar', async () => {
-    mockListar.mockResolvedValue([mockEvento]);
-    mockEliminar.mockResolvedValue(undefined);
+  it('should remove event and reload', async () => {
+    mockList.mockResolvedValue([mockEvent]);
+    mockDelete.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useEventos());
+    const { result } = renderHook(() => useEvents());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    mockListar.mockResolvedValue([]);
-    await result.current.eliminar('1');
+    mockList.mockResolvedValue([]);
+    await result.current.remove('1');
 
-    expect(mockEliminar).toHaveBeenCalledWith('1');
-    await waitFor(() => expect(result.current.eventos).toHaveLength(0));
+    expect(mockDelete).toHaveBeenCalledWith('1');
+    await waitFor(() => expect(result.current.events).toHaveLength(0));
   });
 
-  it('debe pasar filtros a listarEventos', async () => {
-    mockListar.mockResolvedValue([]);
-    renderHook(() => useEventos({ pacienteId: '1', tipo: 'Urgencia' }));
+  it('should pass filters to listEvents', async () => {
+    mockList.mockResolvedValue([]);
+    renderHook(() => useEvents({ patientId: '1', type: 'Urgencia' }));
 
     await waitFor(() =>
-      expect(mockListar).toHaveBeenCalledWith({ pacienteId: '1', tipo: 'Urgencia', desde: undefined, hasta: undefined })
+      expect(mockList).toHaveBeenCalledWith({ patientId: '1', type: 'Urgencia', from: undefined, to: undefined })
     );
   });
 });
 
-describe('useEvento', () => {
+describe('useEvent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('no debe cargar cuando id es null', () => {
-    const { result } = renderHook(() => useEvento(null));
+  it('should not load when id is null', () => {
+    const { result } = renderHook(() => useEvent(null));
     expect(result.current.loading).toBe(false);
-    expect(result.current.evento).toBeNull();
+    expect(result.current.event).toBeNull();
   });
 
-  it('debe cargar evento por id', async () => {
-    mockObtener.mockResolvedValue(mockEvento);
-    const { result } = renderHook(() => useEvento('1'));
+  it('should load event by id', async () => {
+    mockGetById.mockResolvedValue(mockEvent);
+    const { result } = renderHook(() => useEvent('1'));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.evento).toEqual(mockEvento);
+    expect(result.current.event).toEqual(mockEvent);
   });
 
-  it('debe manejar error de carga', async () => {
-    mockObtener.mockRejectedValue(new Error('No encontrado'));
-    const { result } = renderHook(() => useEvento('999'));
+  it('should handle load error', async () => {
+    mockGetById.mockRejectedValue(new Error('No encontrado'));
+    const { result } = renderHook(() => useEvent('999'));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBe('No encontrado');

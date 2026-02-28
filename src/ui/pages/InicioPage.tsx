@@ -1,4 +1,4 @@
-import { useEventos } from '../hooks/useEventos';
+import { useEvents } from '../hooks/useEventos';
 import { EventCard } from '../components/EventCard';
 
 interface InicioPageProps {
@@ -6,7 +6,7 @@ interface InicioPageProps {
 }
 
 export function InicioPage({ onEventClick }: InicioPageProps) {
-  const { eventos, loading, error } = useEventos();
+  const { events, loading, error } = useEvents();
 
   if (loading) {
     return (
@@ -26,7 +26,7 @@ export function InicioPage({ onEventClick }: InicioPageProps) {
     );
   }
 
-  if (eventos.length === 0) {
+  if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center px-4">
         <span className="text-4xl mb-3">📋</span>
@@ -43,7 +43,7 @@ export function InicioPage({ onEventClick }: InicioPageProps) {
       <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
         Eventos recientes
       </h2>
-      {eventos.map((evento) => (
+      {events.map((evento) => (
         <EventCard key={evento.id} evento={evento} onClick={onEventClick} />
       ))}
     </div>

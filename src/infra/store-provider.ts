@@ -23,36 +23,36 @@ export function isUsingSupabase(): boolean {
 
 // --- Medical Events ---
 
-export async function crearEvento(input: CreateMedicalEventInput): Promise<MedicalEvent> {
-  return useSupabase ? supabaseEventStore.crearEvento(input) : memoryEventStore.crear(input);
+export async function createEvent(input: CreateMedicalEventInput): Promise<MedicalEvent> {
+  return useSupabase ? supabaseEventStore.createEvent(input) : memoryEventStore.create(input);
 }
 
-export async function obtenerEventoPorId(id: string): Promise<MedicalEvent | null> {
-  return useSupabase ? supabaseEventStore.obtenerEventoPorId(id) : memoryEventStore.obtenerPorId(id);
+export async function getEventById(id: string): Promise<MedicalEvent | null> {
+  return useSupabase ? supabaseEventStore.getEventById(id) : memoryEventStore.getById(id);
 }
 
-export async function listarEventos(filtros?: MedicalEventFilters): Promise<MedicalEvent[]> {
-  return useSupabase ? supabaseEventStore.listarEventos(filtros) : memoryEventStore.listar(filtros);
+export async function listEvents(filters?: MedicalEventFilters): Promise<MedicalEvent[]> {
+  return useSupabase ? supabaseEventStore.listEvents(filters) : memoryEventStore.list(filters);
 }
 
-export async function actualizarEvento(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent> {
-  return useSupabase ? supabaseEventStore.actualizarEvento(id, input) : memoryEventStore.actualizar(id, input);
+export async function updateEvent(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent> {
+  return useSupabase ? supabaseEventStore.updateEvent(id, input) : memoryEventStore.update(id, input);
 }
 
-export async function eliminarEvento(id: string): Promise<void> {
-  return useSupabase ? supabaseEventStore.eliminarEvento(id) : memoryEventStore.eliminar(id);
+export async function deleteEvent(id: string): Promise<void> {
+  return useSupabase ? supabaseEventStore.deleteEvent(id) : memoryEventStore.delete(id);
 }
 
 // --- Event Photos ---
 
-export async function vincularFoto(input: LinkPhotoInput): Promise<EventPhoto> {
-  return useSupabase ? supabasePhotoStore.vincularFoto(input) : memoryPhotoStore.vincular(input);
+export async function linkPhoto(input: LinkPhotoInput): Promise<EventPhoto> {
+  return useSupabase ? supabasePhotoStore.linkPhoto(input) : memoryPhotoStore.link(input);
 }
 
-export async function listarFotosPorEvento(eventoId: string): Promise<EventPhoto[]> {
-  return useSupabase ? supabasePhotoStore.listarFotosPorEvento(eventoId) : memoryPhotoStore.listarPorEvento(eventoId);
+export async function listPhotosByEvent(eventId: string): Promise<EventPhoto[]> {
+  return useSupabase ? supabasePhotoStore.listPhotosByEvent(eventId) : memoryPhotoStore.listByEvent(eventId);
 }
 
-export async function desvincularFoto(id: string): Promise<void> {
-  return useSupabase ? supabasePhotoStore.desvincularFoto(id) : memoryPhotoStore.desvincular(id);
+export async function unlinkPhoto(id: string): Promise<void> {
+  return useSupabase ? supabasePhotoStore.unlinkPhoto(id) : memoryPhotoStore.unlink(id);
 }

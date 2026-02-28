@@ -1,7 +1,7 @@
 import type { EventPhoto, LinkPhotoInput } from '../models/event-photo.js';
 
 export interface EventPhotoRepository {
-  vincular(input: LinkPhotoInput): Promise<EventPhoto>;
-  listarPorEvento(eventoId: string): Promise<EventPhoto[]>;
-  desvincular(id: string): Promise<void>;
+  link(input: LinkPhotoInput): Promise<EventPhoto>;
+  listByEvent(eventId: string): Promise<EventPhoto[]>;
+  unlink(id: string): Promise<void>;
 }

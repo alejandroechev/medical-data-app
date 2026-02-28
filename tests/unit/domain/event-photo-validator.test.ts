@@ -1,58 +1,58 @@
 import { describe, it, expect } from 'vitest';
-import { validarVincularFoto } from '../../../src/domain/validators/event-photo-validator';
+import { validateLinkPhoto } from '../../../src/domain/validators/event-photo-validator';
 import { LinkPhotoInput } from '../../../src/domain/models/event-photo';
 
-describe('validarVincularFoto', () => {
-  const inputValido: LinkPhotoInput = {
-    eventoId: 'evento-123',
+describe('validateLinkPhoto', () => {
+  const validInput: LinkPhotoInput = {
+    eventId: 'evento-123',
     googlePhotosUrl: 'https://photos.google.com/photo/abc123',
     googlePhotosId: 'abc123',
-    descripcion: 'Receta médica',
+    description: 'Receta médica',
   };
 
-  it('debe validar correctamente un input completo', () => {
-    const resultado = validarVincularFoto(inputValido);
-    expect(resultado.valido).toBe(true);
-    expect(resultado.errores).toHaveLength(0);
+  it('should validate a complete input', () => {
+    const result = validateLinkPhoto(validInput);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('debe rechazar eventoId vacío', () => {
-    const resultado = validarVincularFoto({ ...inputValido, eventoId: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'eventoId' })
+  it('should reject empty eventId', () => {
+    const result = validateLinkPhoto({ ...validInput, eventId: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'eventId' })
     );
   });
 
-  it('debe rechazar googlePhotosUrl vacío', () => {
-    const resultado = validarVincularFoto({ ...inputValido, googlePhotosUrl: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'googlePhotosUrl' })
+  it('should reject empty googlePhotosUrl', () => {
+    const result = validateLinkPhoto({ ...validInput, googlePhotosUrl: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'googlePhotosUrl' })
     );
   });
 
-  it('debe rechazar googlePhotosId vacío', () => {
-    const resultado = validarVincularFoto({ ...inputValido, googlePhotosId: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'googlePhotosId' })
+  it('should reject empty googlePhotosId', () => {
+    const result = validateLinkPhoto({ ...validInput, googlePhotosId: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'googlePhotosId' })
     );
   });
 
-  it('debe aceptar input sin descripción (es opcional)', () => {
-    const { descripcion, ...sinDescripcion } = inputValido;
-    const resultado = validarVincularFoto(sinDescripcion as LinkPhotoInput);
-    expect(resultado.valido).toBe(true);
+  it('should accept input without description (optional)', () => {
+    const { description, ...withoutDescription } = validInput;
+    const result = validateLinkPhoto(withoutDescription as LinkPhotoInput);
+    expect(result.valid).toBe(true);
   });
 
-  it('debe reportar múltiples errores simultáneamente', () => {
-    const resultado = validarVincularFoto({
-      eventoId: '',
+  it('should report multiple errors simultaneously', () => {
+    const result = validateLinkPhoto({
+      eventId: '',
       googlePhotosUrl: '',
       googlePhotosId: '',
     });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toHaveLength(3);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toHaveLength(3);
   });
 });

@@ -1,15 +1,15 @@
 export interface EventPhoto {
   id: string;
-  eventoId: string;
+  eventId: string;
   googlePhotosUrl: string;
   googlePhotosId: string;
-  descripcion?: string;
-  creadoEn: string; // ISO timestamp
+  description?: string;
+  createdAt: string; // ISO timestamp
 }
 
 export interface LinkPhotoInput {
-  eventoId: string;
+  eventId: string;
   googlePhotosUrl: string;
   googlePhotosId: string;
-  descripcion?: string;
+  description?: string;
 }

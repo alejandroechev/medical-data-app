@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { EVENT_TYPES } from '../../../src/domain/models/medical-event';
 
 describe('MedicalEvent Model', () => {
-  it('debe tener todos los tipos de evento definidos', () => {
+  it('should have all event types defined', () => {
     expect(EVENT_TYPES).toContain('Consulta Médica');
     expect(EVENT_TYPES).toContain('Consulta Dental');
     expect(EVENT_TYPES).toContain('Urgencia');
@@ -11,7 +11,7 @@ describe('MedicalEvent Model', () => {
     expect(EVENT_TYPES).toContain('Otro');
   });
 
-  it('debe tener exactamente 6 tipos de evento', () => {
+  it('should have exactly 6 event types', () => {
     expect(EVENT_TYPES).toHaveLength(6);
   });
 });

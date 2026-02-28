@@ -3,10 +3,10 @@ import type { FamilyMember } from '../../domain/models/family-member.js';
 // Fixed family members - configured at setup
 // Update this list with your family members
 const SEED_MEMBERS: FamilyMember[] = [
-  { id: '1', nombre: 'Alejandro', parentesco: 'Padre' },
-  { id: '2', nombre: 'Pareja', parentesco: 'Madre' },
-  { id: '3', nombre: 'Hijo 1', parentesco: 'Hijo/a' },
-  { id: '4', nombre: 'Hijo 2', parentesco: 'Hijo/a' },
+  { id: '1', name: 'Alejandro', relationship: 'Padre' },
+  { id: '2', name: 'Pareja', relationship: 'Madre' },
+  { id: '3', name: 'Hijo 1', relationship: 'Hijo/a' },
+  { id: '4', name: 'Hijo 2', relationship: 'Hijo/a' },
 ];
 
 export function getFamilyMembers(): FamilyMember[] {
@@ -17,8 +17,8 @@ export function getFamilyMemberById(id: string): FamilyMember | undefined {
   return SEED_MEMBERS.find((m) => m.id === id);
 }
 
-export function getFamilyMemberByName(nombre: string): FamilyMember | undefined {
+export function getFamilyMemberByName(name: string): FamilyMember | undefined {
   return SEED_MEMBERS.find(
-    (m) => m.nombre.toLowerCase() === nombre.toLowerCase()
+    (m) => m.name.toLowerCase() === name.toLowerCase()
   );
 }

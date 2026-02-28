@@ -26,30 +26,30 @@ interface DbMedicalEvent {
 function mapFromDb(row: DbMedicalEvent): MedicalEvent {
   return {
     id: row.id,
-    fecha: row.fecha,
-    tipo: row.tipo as MedicalEvent['tipo'],
-    descripcion: row.descripcion,
-    pacienteId: row.paciente_id,
-    reembolsoIsapre: row.reembolso_isapre,
-    reembolsoSeguro: row.reembolso_seguro,
-    creadoEn: row.creado_en,
-    actualizadoEn: row.actualizado_en,
+    date: row.fecha,
+    type: row.tipo as MedicalEvent['type'],
+    description: row.descripcion,
+    patientId: row.paciente_id,
+    isapreReimbursed: row.reembolso_isapre,
+    insuranceReimbursed: row.reembolso_seguro,
+    createdAt: row.creado_en,
+    updatedAt: row.actualizado_en,
   };
 }
 
-export async function crearEvento(
+export async function createEvent(
   input: CreateMedicalEventInput
 ): Promise<MedicalEvent> {
   const db = requireSupabase();
   const { data, error } = await db
     .from('medical_events')
     .insert({
-      fecha: input.fecha,
-      tipo: input.tipo,
-      descripcion: input.descripcion,
-      paciente_id: input.pacienteId,
-      reembolso_isapre: input.reembolsoIsapre ?? false,
-      reembolso_seguro: input.reembolsoSeguro ?? false,
+      fecha: input.date,
+      tipo: input.type,
+      descripcion: input.description,
+      paciente_id: input.patientId,
+      reembolso_isapre: input.isapreReimbursed ?? false,
+      reembolso_seguro: input.insuranceReimbursed ?? false,
     })
     .select()
     .single();
@@ -58,7 +58,7 @@ export async function crearEvento(
   return mapFromDb(data as DbMedicalEvent);
 }
 
-export async function obtenerEventoPorId(
+export async function getEventById(
   id: string
 ): Promise<MedicalEvent | null> {
   const db = requireSupabase();
@@ -75,8 +75,8 @@ export async function obtenerEventoPorId(
   return mapFromDb(data as DbMedicalEvent);
 }
 
-export async function listarEventos(
-  filtros?: MedicalEventFilters
+export async function listEvents(
+  filters?: MedicalEventFilters
 ): Promise<MedicalEvent[]> {
   const db = requireSupabase();
   let query = db
@@ -84,17 +84,17 @@ export async function listarEventos(
     .select()
     .order('fecha', { ascending: false });
 
-  if (filtros?.pacienteId) {
-    query = query.eq('paciente_id', filtros.pacienteId);
+  if (filters?.patientId) {
+    query = query.eq('paciente_id', filters.patientId);
   }
-  if (filtros?.tipo) {
-    query = query.eq('tipo', filtros.tipo);
+  if (filters?.type) {
+    query = query.eq('tipo', filters.type);
   }
-  if (filtros?.desde) {
-    query = query.gte('fecha', filtros.desde);
+  if (filters?.from) {
+    query = query.gte('fecha', filters.from);
   }
-  if (filtros?.hasta) {
-    query = query.lte('fecha', filtros.hasta);
+  if (filters?.to) {
+    query = query.lte('fecha', filters.to);
   }
 
   const { data, error } = await query;
@@ -102,20 +102,20 @@ export async function listarEventos(
   return (data as DbMedicalEvent[]).map(mapFromDb);
 }
 
-export async function actualizarEvento(
+export async function updateEvent(
   id: string,
   input: UpdateMedicalEventInput
 ): Promise<MedicalEvent> {
   const db = requireSupabase();
   const updateData: Record<string, unknown> = {};
-  if (input.fecha !== undefined) updateData.fecha = input.fecha;
-  if (input.tipo !== undefined) updateData.tipo = input.tipo;
-  if (input.descripcion !== undefined) updateData.descripcion = input.descripcion;
-  if (input.pacienteId !== undefined) updateData.paciente_id = input.pacienteId;
-  if (input.reembolsoIsapre !== undefined)
-    updateData.reembolso_isapre = input.reembolsoIsapre;
-  if (input.reembolsoSeguro !== undefined)
-    updateData.reembolso_seguro = input.reembolsoSeguro;
+  if (input.date !== undefined) updateData.fecha = input.date;
+  if (input.type !== undefined) updateData.tipo = input.type;
+  if (input.description !== undefined) updateData.descripcion = input.description;
+  if (input.patientId !== undefined) updateData.paciente_id = input.patientId;
+  if (input.isapreReimbursed !== undefined)
+    updateData.reembolso_isapre = input.isapreReimbursed;
+  if (input.insuranceReimbursed !== undefined)
+    updateData.reembolso_seguro = input.insuranceReimbursed;
 
   const { data, error } = await db
     .from('medical_events')
@@ -128,7 +128,7 @@ export async function actualizarEvento(
   return mapFromDb(data as DbMedicalEvent);
 }
 
-export async function eliminarEvento(id: string): Promise<void> {
+export async function deleteEvent(id: string): Promise<void> {
   const db = requireSupabase();
   const { error } = await db
     .from('medical_events')

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { obtenerEventoPorId, listarFotosPorEvento } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto } from '../../domain/models/event-photo';
@@ -28,8 +28,8 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
       setLoading(true);
       try {
         const [ev, ph] = await Promise.all([
-          obtenerEventoPorId(eventoId),
-          listarFotosPorEvento(eventoId),
+          getEventById(eventoId),
+          listPhotosByEvent(eventoId),
         ]);
         setEvento(ev);
         setFotos(ph);
@@ -60,8 +60,8 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
     );
   }
 
-  const paciente = getFamilyMemberById(evento.pacienteId);
-  const icon = TYPE_ICONS[evento.tipo] ?? '📋';
+  const paciente = getFamilyMemberById(evento.patientId);
+  const icon = TYPE_ICONS[evento.type] ?? '📋';
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -70,29 +70,29 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
         <div className="flex items-center gap-3 mb-3">
           <span className="text-3xl">{icon}</span>
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">{evento.tipo}</h2>
-            <p className="text-sm text-gray-500">{evento.fecha}</p>
+            <h2 className="text-lg font-semibold text-gray-800">{evento.type}</h2>
+            <p className="text-sm text-gray-500">{evento.date}</p>
           </div>
         </div>
-        <p className="text-gray-700">{evento.descripcion}</p>
+        <p className="text-gray-700">{evento.description}</p>
       </div>
 
       {/* Details */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Paciente</span>
-          <span className="text-sm font-medium">{paciente?.nombre ?? 'Desconocido'}</span>
+          <span className="text-sm font-medium">{paciente?.name ?? 'Desconocido'}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">ISAPRE</span>
-          <span className={`text-sm font-medium ${evento.reembolsoIsapre ? 'text-green-600' : 'text-gray-400'}`}>
-            {evento.reembolsoIsapre ? 'Reembolsada ✓' : 'No reembolsada'}
+          <span className={`text-sm font-medium ${evento.isapreReimbursed ? 'text-green-600' : 'text-gray-400'}`}>
+            {evento.isapreReimbursed ? 'Reembolsada ✓' : 'No reembolsada'}
           </span>
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Seguro Complementario</span>
-          <span className={`text-sm font-medium ${evento.reembolsoSeguro ? 'text-green-600' : 'text-gray-400'}`}>
-            {evento.reembolsoSeguro ? 'Reembolsada ✓' : 'No reembolsada'}
+          <span className={`text-sm font-medium ${evento.insuranceReimbursed ? 'text-green-600' : 'text-gray-400'}`}>
+            {evento.insuranceReimbursed ? 'Reembolsada ✓' : 'No reembolsada'}
           </span>
         </div>
       </div>
@@ -118,7 +118,7 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
               >
                 <span className="text-lg">📷</span>
                 <span className="text-sm text-blue-600 underline truncate">
-                  {foto.descripcion ?? foto.googlePhotosId}
+                  {foto.description ?? foto.googlePhotosId}
                 </span>
               </a>
             ))}

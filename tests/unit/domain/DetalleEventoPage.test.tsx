@@ -3,46 +3,46 @@ import { render, screen } from '@testing-library/react';
 import { DetalleEventoPage } from '../../../src/ui/pages/DetalleEventoPage';
 
 vi.mock('../../../src/infra/store-provider', () => ({
-  obtenerEventoPorId: vi.fn(),
-  crearEvento: vi.fn(),
-  listarEventos: vi.fn(),
-  actualizarEvento: vi.fn(),
-  eliminarEvento: vi.fn(),
-  listarFotosPorEvento: vi.fn(),
-  vincularFoto: vi.fn(),
-  desvincularFoto: vi.fn(),
+  getEventById: vi.fn(),
+  createEvent: vi.fn(),
+  listEvents: vi.fn(),
+  updateEvent: vi.fn(),
+  deleteEvent: vi.fn(),
+  listPhotosByEvent: vi.fn(),
+  linkPhoto: vi.fn(),
+  unlinkPhoto: vi.fn(),
 }));
 
-import { obtenerEventoPorId, listarFotosPorEvento } from '../../../src/infra/store-provider';
+import { getEventById, listPhotosByEvent } from '../../../src/infra/store-provider';
 
-const mockObtener = vi.mocked(obtenerEventoPorId);
-const mockListarFotos = vi.mocked(listarFotosPorEvento);
+const mockGetById = vi.mocked(getEventById);
+const mockListPhotos = vi.mocked(listPhotosByEvent);
 
 describe('DetalleEventoPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('debe mostrar mensaje de carga', () => {
-    mockObtener.mockReturnValue(new Promise(() => {}));
-    mockListarFotos.mockReturnValue(new Promise(() => {}));
+  it('should show loading message', () => {
+    mockGetById.mockReturnValue(new Promise(() => {}));
+    mockListPhotos.mockReturnValue(new Promise(() => {}));
     render(<DetalleEventoPage eventoId="test-1" />);
     expect(screen.getByText('Cargando...')).toBeInTheDocument();
   });
 
-  it('debe mostrar detalles del evento', async () => {
-    mockObtener.mockResolvedValue({
+  it('should show event details', async () => {
+    mockGetById.mockResolvedValue({
       id: 'test-1',
-      fecha: '2024-06-15',
-      tipo: 'Urgencia',
-      descripcion: 'Dolor abdominal severo',
-      pacienteId: '1',
-      reembolsoIsapre: true,
-      reembolsoSeguro: false,
-      creadoEn: '2024-06-15T10:00:00Z',
-      actualizadoEn: '2024-06-15T10:00:00Z',
+      date: '2024-06-15',
+      type: 'Urgencia',
+      description: 'Dolor abdominal severo',
+      patientId: '1',
+      isapreReimbursed: true,
+      insuranceReimbursed: false,
+      createdAt: '2024-06-15T10:00:00Z',
+      updatedAt: '2024-06-15T10:00:00Z',
     });
-    mockListarFotos.mockResolvedValue([]);
+    mockListPhotos.mockResolvedValue([]);
 
     render(<DetalleEventoPage eventoId="test-1" />);
     expect(await screen.findByText('Urgencia')).toBeInTheDocument();
@@ -53,26 +53,26 @@ describe('DetalleEventoPage', () => {
     expect(screen.getByText('Alejandro')).toBeInTheDocument();
   });
 
-  it('debe mostrar fotos vinculadas', async () => {
-    mockObtener.mockResolvedValue({
+  it('should show linked photos', async () => {
+    mockGetById.mockResolvedValue({
       id: 'test-1',
-      fecha: '2024-06-15',
-      tipo: 'Examen',
-      descripcion: 'Examen de sangre',
-      pacienteId: '1',
-      reembolsoIsapre: false,
-      reembolsoSeguro: false,
-      creadoEn: '2024-06-15T10:00:00Z',
-      actualizadoEn: '2024-06-15T10:00:00Z',
+      date: '2024-06-15',
+      type: 'Examen',
+      description: 'Examen de sangre',
+      patientId: '1',
+      isapreReimbursed: false,
+      insuranceReimbursed: false,
+      createdAt: '2024-06-15T10:00:00Z',
+      updatedAt: '2024-06-15T10:00:00Z',
     });
-    mockListarFotos.mockResolvedValue([
+    mockListPhotos.mockResolvedValue([
       {
         id: 'foto-1',
-        eventoId: 'test-1',
+        eventId: 'test-1',
         googlePhotosUrl: 'https://photos.google.com/photo/abc',
         googlePhotosId: 'abc',
-        descripcion: 'Resultado examen',
-        creadoEn: '2024-06-15T10:00:00Z',
+        description: 'Resultado examen',
+        createdAt: '2024-06-15T10:00:00Z',
       },
     ]);
 
@@ -81,17 +81,17 @@ describe('DetalleEventoPage', () => {
     expect(screen.getByText('Documentos (1)')).toBeInTheDocument();
   });
 
-  it('debe mostrar error cuando evento no se encuentra', async () => {
-    mockObtener.mockResolvedValue(null);
-    mockListarFotos.mockResolvedValue([]);
+  it('should show error when event is not found', async () => {
+    mockGetById.mockResolvedValue(null);
+    mockListPhotos.mockResolvedValue([]);
 
     render(<DetalleEventoPage eventoId="no-existe" />);
     expect(await screen.findByText('Evento no encontrado')).toBeInTheDocument();
   });
 
-  it('debe mostrar error de carga', async () => {
-    mockObtener.mockRejectedValue(new Error('Error de red'));
-    mockListarFotos.mockResolvedValue([]);
+  it('should show load error', async () => {
+    mockGetById.mockRejectedValue(new Error('Error de red'));
+    mockListPhotos.mockResolvedValue([]);
 
     render(<DetalleEventoPage eventoId="test-1" />);
     expect(await screen.findByText('Error de red')).toBeInTheDocument();

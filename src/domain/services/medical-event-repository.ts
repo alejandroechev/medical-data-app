@@ -1,16 +1,16 @@
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../models/medical-event.js';
 
 export interface MedicalEventFilters {
-  pacienteId?: string;
-  tipo?: string;
-  desde?: string; // ISO date
-  hasta?: string; // ISO date
+  patientId?: string;
+  type?: string;
+  from?: string; // ISO date
+  to?: string; // ISO date
 }
 
 export interface MedicalEventRepository {
-  crear(input: CreateMedicalEventInput): Promise<MedicalEvent>;
-  obtenerPorId(id: string): Promise<MedicalEvent | null>;
-  listar(filtros?: MedicalEventFilters): Promise<MedicalEvent[]>;
-  actualizar(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent>;
-  eliminar(id: string): Promise<void>;
+  create(input: CreateMedicalEventInput): Promise<MedicalEvent>;
+  getById(id: string): Promise<MedicalEvent | null>;
+  list(filters?: MedicalEventFilters): Promise<MedicalEvent[]>;
+  update(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent>;
+  remove(id: string): Promise<void>;
 }

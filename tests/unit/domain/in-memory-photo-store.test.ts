@@ -8,38 +8,38 @@ describe('InMemoryEventPhotoStore', () => {
     store = new InMemoryEventPhotoStore();
   });
 
-  it('debe vincular una foto y retornarla con ID', async () => {
-    const foto = await store.vincular({
-      eventoId: 'ev-1',
+  it('should link a photo and return it with ID', async () => {
+    const photo = await store.link({
+      eventId: 'ev-1',
       googlePhotosUrl: 'https://photos.google.com/photo/abc',
       googlePhotosId: 'abc',
-      descripcion: 'Receta',
+      description: 'Receta',
     });
-    expect(foto.id).toBeDefined();
-    expect(foto.eventoId).toBe('ev-1');
-    expect(foto.googlePhotosUrl).toBe('https://photos.google.com/photo/abc');
-    expect(foto.descripcion).toBe('Receta');
+    expect(photo.id).toBeDefined();
+    expect(photo.eventId).toBe('ev-1');
+    expect(photo.googlePhotosUrl).toBe('https://photos.google.com/photo/abc');
+    expect(photo.description).toBe('Receta');
   });
 
-  it('debe listar fotos por evento', async () => {
-    await store.vincular({ eventoId: 'ev-1', googlePhotosUrl: 'url1', googlePhotosId: 'id1' });
-    await store.vincular({ eventoId: 'ev-1', googlePhotosUrl: 'url2', googlePhotosId: 'id2' });
-    await store.vincular({ eventoId: 'ev-2', googlePhotosUrl: 'url3', googlePhotosId: 'id3' });
+  it('should list photos by event', async () => {
+    await store.link({ eventId: 'ev-1', googlePhotosUrl: 'url1', googlePhotosId: 'id1' });
+    await store.link({ eventId: 'ev-1', googlePhotosUrl: 'url2', googlePhotosId: 'id2' });
+    await store.link({ eventId: 'ev-2', googlePhotosUrl: 'url3', googlePhotosId: 'id3' });
 
-    const fotos = await store.listarPorEvento('ev-1');
-    expect(fotos).toHaveLength(2);
-    expect(fotos.every((f) => f.eventoId === 'ev-1')).toBe(true);
+    const photos = await store.listByEvent('ev-1');
+    expect(photos).toHaveLength(2);
+    expect(photos.every((f) => f.eventId === 'ev-1')).toBe(true);
   });
 
-  it('debe retornar lista vacía para evento sin fotos', async () => {
-    const fotos = await store.listarPorEvento('no-existe');
-    expect(fotos).toEqual([]);
+  it('should return empty list for event without photos', async () => {
+    const photos = await store.listByEvent('no-existe');
+    expect(photos).toEqual([]);
   });
 
-  it('debe desvincular una foto por ID', async () => {
-    const foto = await store.vincular({ eventoId: 'ev-1', googlePhotosUrl: 'url1', googlePhotosId: 'id1' });
-    await store.desvincular(foto.id);
-    const fotos = await store.listarPorEvento('ev-1');
-    expect(fotos).toHaveLength(0);
+  it('should unlink a photo by ID', async () => {
+    const photo = await store.link({ eventId: 'ev-1', googlePhotosUrl: 'url1', googlePhotosId: 'id1' });
+    await store.unlink(photo.id);
+    const photos = await store.listByEvent('ev-1');
+    expect(photos).toHaveLength(0);
   });
 });

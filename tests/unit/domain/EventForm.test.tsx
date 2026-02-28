@@ -10,7 +10,7 @@ describe('EventForm', () => {
     mockSubmit = vi.fn().mockResolvedValue(undefined);
   });
 
-  it('debe renderizar todos los campos del formulario', () => {
+  it('should render all form fields', () => {
     render(<EventForm onSubmit={mockSubmit} />);
     expect(screen.getByLabelText('Fecha')).toBeInTheDocument();
     expect(screen.getByLabelText('Tipo de evento')).toBeInTheDocument();
@@ -20,12 +20,12 @@ describe('EventForm', () => {
     expect(screen.getByLabelText('Reembolsado por Seguro Complementario')).toBeInTheDocument();
   });
 
-  it('debe renderizar el botón de guardar', () => {
+  it('should render the save button', () => {
     render(<EventForm onSubmit={mockSubmit} />);
     expect(screen.getByRole('button', { name: 'Guardar Evento' })).toBeInTheDocument();
   });
 
-  it('debe mostrar errores de validación con descripción vacía', async () => {
+  it('should show validation errors with empty description', async () => {
     const user = userEvent.setup();
     render(<EventForm onSubmit={mockSubmit} />);
 
@@ -35,7 +35,7 @@ describe('EventForm', () => {
     expect(mockSubmit).not.toHaveBeenCalled();
   });
 
-  it('debe llamar onSubmit con input válido', async () => {
+  it('should call onSubmit with valid input', async () => {
     const user = userEvent.setup();
     render(<EventForm onSubmit={mockSubmit} />);
 
@@ -45,15 +45,15 @@ describe('EventForm', () => {
     expect(mockSubmit).toHaveBeenCalledOnce();
     expect(mockSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
-        descripcion: 'Control anual',
-        tipo: 'Consulta Médica',
-        reembolsoIsapre: false,
-        reembolsoSeguro: false,
+        description: 'Control anual',
+        type: 'Consulta Médica',
+        isapreReimbursed: false,
+        insuranceReimbursed: false,
       })
     );
   });
 
-  it('debe permitir marcar checkboxes de reembolso', async () => {
+  it('should allow checking reimbursement checkboxes', async () => {
     const user = userEvent.setup();
     render(<EventForm onSubmit={mockSubmit} />);
 
@@ -63,19 +63,19 @@ describe('EventForm', () => {
 
     expect(mockSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
-        reembolsoIsapre: true,
-        reembolsoSeguro: false,
+        isapreReimbursed: true,
+        insuranceReimbursed: false,
       })
     );
   });
 
-  it('debe mostrar Guardando... cuando loading es true', () => {
+  it('should show Guardando... when loading is true', () => {
     render(<EventForm onSubmit={mockSubmit} loading={true} />);
     expect(screen.getByRole('button', { name: 'Guardando...' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Guardando...' })).toBeDisabled();
   });
 
-  it('debe limpiar descripción después de submit exitoso', async () => {
+  it('should clear description after successful submit', async () => {
     const user = userEvent.setup();
     render(<EventForm onSubmit={mockSubmit} />);
 
@@ -86,7 +86,7 @@ describe('EventForm', () => {
     expect(descInput).toHaveValue('');
   });
 
-  it('debe mostrar error si onSubmit lanza excepción', async () => {
+  it('should show error if onSubmit throws', async () => {
     const user = userEvent.setup();
     const failingSubmit = vi.fn().mockRejectedValue(new Error('Falló la conexión'));
     render(<EventForm onSubmit={failingSubmit} />);
@@ -97,7 +97,7 @@ describe('EventForm', () => {
     expect(screen.getByText('Falló la conexión')).toBeInTheDocument();
   });
 
-  it('debe renderizar todos los tipos de evento en el select', () => {
+  it('should render all event types in the select', () => {
     render(<EventForm onSubmit={mockSubmit} />);
     const select = screen.getByLabelText('Tipo de evento');
     expect(select).toBeInTheDocument();
@@ -106,7 +106,7 @@ describe('EventForm', () => {
     expect(options.length).toBe(6);
   });
 
-  it('debe renderizar todos los miembros de familia en el select', () => {
+  it('should render all family members in the select', () => {
     render(<EventForm onSubmit={mockSubmit} />);
     const select = screen.getByLabelText('Paciente');
     const options = select.querySelectorAll('option');

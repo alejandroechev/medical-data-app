@@ -2,17 +2,17 @@
 import { Command } from 'commander';
 import { getFamilyMembers, getFamilyMemberByName } from '../infra/supabase/family-member-store.js';
 import {
-  crearEvento,
-  obtenerEventoPorId,
-  listarEventos,
-  actualizarEvento,
-  eliminarEvento,
-  vincularFoto,
-  listarFotosPorEvento,
-  desvincularFoto,
+  createEvent,
+  getEventById,
+  listEvents,
+  updateEvent,
+  deleteEvent,
+  linkPhoto,
+  listPhotosByEvent,
+  unlinkPhoto,
 } from '../infra/store-provider.js';
-import { validarCrearEvento, validarActualizarEvento } from '../domain/validators/medical-event-validator.js';
-import { validarVincularFoto } from '../domain/validators/event-photo-validator.js';
+import { validateCreateEvent, validateUpdateEvent } from '../domain/validators/medical-event-validator.js';
+import { validateLinkPhoto } from '../domain/validators/event-photo-validator.js';
 import type { EventType } from '../domain/models/medical-event.js';
 
 const program = new Command();
@@ -49,28 +49,28 @@ evento
     const member = getFamilyMemberByName(opts.paciente);
     if (!member) {
       console.error(`Error: Paciente "${opts.paciente}" no encontrado.`);
-      console.error('Miembros disponibles:', getFamilyMembers().map((m) => m.nombre).join(', '));
+      console.error('Miembros disponibles:', getFamilyMembers().map((m) => m.name).join(', '));
       process.exit(1);
     }
 
     const input = {
-      fecha: opts.fecha,
-      tipo: opts.tipo as EventType,
-      descripcion: opts.descripcion,
-      pacienteId: member.id,
-      reembolsoIsapre: opts.reembolsoIsapre,
-      reembolsoSeguro: opts.reembolsoSeguro,
+      date: opts.fecha,
+      type: opts.tipo as EventType,
+      description: opts.descripcion,
+      patientId: member.id,
+      isapreReimbursed: opts.reembolsoIsapre,
+      insuranceReimbursed: opts.reembolsoSeguro,
     };
 
-    const validation = validarCrearEvento(input);
-    if (!validation.valido) {
+    const validation = validateCreateEvent(input);
+    if (!validation.valid) {
       console.error('Errores de validación:');
-      validation.errores.forEach((e) => console.error(`  - ${e.campo}: ${e.mensaje}`));
+      validation.errors.forEach((e) => console.error(`  - ${e.field}: ${e.message}`));
       process.exit(1);
     }
 
     try {
-      const event = await crearEvento(input);
+      const event = await createEvent(input);
       console.log('Evento creado exitosamente:');
       console.log(JSON.stringify(event, null, 2));
     } catch (err) {
@@ -98,11 +98,11 @@ evento
         pacienteId = member.id;
       }
 
-      const events = await listarEventos({
-        pacienteId,
-        tipo: opts.tipo,
-        desde: opts.desde,
-        hasta: opts.hasta,
+      const events = await listEvents({
+        patientId: pacienteId,
+        type: opts.tipo,
+        from: opts.desde,
+        to: opts.hasta,
       });
 
       if (events.length === 0) {
@@ -113,12 +113,12 @@ evento
       const members = getFamilyMembers();
       const table = events.map((e) => ({
         ID: e.id.substring(0, 8),
-        Fecha: e.fecha,
-        Tipo: e.tipo,
-        Paciente: members.find((m) => m.id === e.pacienteId)?.nombre ?? e.pacienteId,
-        Descripción: e.descripcion.substring(0, 40),
-        ISAPRE: e.reembolsoIsapre ? 'Sí' : 'No',
-        Seguro: e.reembolsoSeguro ? 'Sí' : 'No',
+        Fecha: e.date,
+        Tipo: e.type,
+        Paciente: members.find((m) => m.id === e.patientId)?.name ?? e.patientId,
+        Descripción: e.description.substring(0, 40),
+        ISAPRE: e.isapreReimbursed ? 'Sí' : 'No',
+        Seguro: e.insuranceReimbursed ? 'Sí' : 'No',
       }));
       console.table(table);
     } catch (err) {
@@ -132,29 +132,29 @@ evento
   .description('Ver detalle de un evento médico')
   .action(async (id: string) => {
     try {
-      const event = await obtenerEventoPorId(id);
+      const event = await getEventById(id);
       if (!event) {
         console.error(`Evento con ID "${id}" no encontrado.`);
         process.exit(1);
       }
 
       const members = getFamilyMembers();
-      const paciente = members.find((m) => m.id === event.pacienteId);
+      const paciente = members.find((m) => m.id === event.patientId);
 
       console.log('Evento Médico:');
       console.log(`  ID:          ${event.id}`);
-      console.log(`  Fecha:       ${event.fecha}`);
-      console.log(`  Tipo:        ${event.tipo}`);
-      console.log(`  Paciente:    ${paciente?.nombre ?? event.pacienteId}`);
-      console.log(`  Descripción: ${event.descripcion}`);
-      console.log(`  ISAPRE:      ${event.reembolsoIsapre ? 'Sí' : 'No'}`);
-      console.log(`  Seguro:      ${event.reembolsoSeguro ? 'Sí' : 'No'}`);
+      console.log(`  Fecha:       ${event.date}`);
+      console.log(`  Tipo:        ${event.type}`);
+      console.log(`  Paciente:    ${paciente?.name ?? event.patientId}`);
+      console.log(`  Descripción: ${event.description}`);
+      console.log(`  ISAPRE:      ${event.isapreReimbursed ? 'Sí' : 'No'}`);
+      console.log(`  Seguro:      ${event.insuranceReimbursed ? 'Sí' : 'No'}`);
 
-      const fotos = await listarFotosPorEvento(id);
+      const fotos = await listPhotosByEvent(id);
       if (fotos.length > 0) {
         console.log(`  Fotos (${fotos.length}):`);
         fotos.forEach((f) => {
-          console.log(`    - ${f.descripcion ?? 'Sin descripción'}: ${f.googlePhotosUrl}`);
+          console.log(`    - ${f.description ?? 'Sin descripción'}: ${f.googlePhotosUrl}`);
         });
       }
     } catch (err) {
@@ -175,32 +175,32 @@ evento
   .action(async (id: string, opts) => {
     try {
       const input: Record<string, unknown> = {};
-      if (opts.fecha) input.fecha = opts.fecha;
-      if (opts.tipo) input.tipo = opts.tipo;
-      if (opts.descripcion) input.descripcion = opts.descripcion;
+      if (opts.fecha) input.date = opts.fecha;
+      if (opts.tipo) input.type = opts.tipo;
+      if (opts.descripcion) input.description = opts.descripcion;
       if (opts.paciente) {
         const member = getFamilyMemberByName(opts.paciente);
         if (!member) {
           console.error(`Error: Paciente "${opts.paciente}" no encontrado.`);
           process.exit(1);
         }
-        input.pacienteId = member.id;
+        input.patientId = member.id;
       }
       if (opts.reembolsoIsapre !== undefined) {
-        input.reembolsoIsapre = opts.reembolsoIsapre === 'si';
+        input.isapreReimbursed = opts.reembolsoIsapre === 'si';
       }
       if (opts.reembolsoSeguro !== undefined) {
-        input.reembolsoSeguro = opts.reembolsoSeguro === 'si';
+        input.insuranceReimbursed = opts.reembolsoSeguro === 'si';
       }
 
-      const validation = validarActualizarEvento(input);
-      if (!validation.valido) {
+      const validation = validateUpdateEvent(input);
+      if (!validation.valid) {
         console.error('Errores de validación:');
-        validation.errores.forEach((e) => console.error(`  - ${e.campo}: ${e.mensaje}`));
+        validation.errors.forEach((e) => console.error(`  - ${e.field}: ${e.message}`));
         process.exit(1);
       }
 
-      const updated = await actualizarEvento(id, input);
+      const updated = await updateEvent(id, input);
       console.log('Evento actualizado:');
       console.log(JSON.stringify(updated, null, 2));
     } catch (err) {
@@ -214,7 +214,7 @@ evento
   .description('Eliminar un evento médico')
   .action(async (id: string) => {
     try {
-      await eliminarEvento(id);
+      await deleteEvent(id);
       console.log(`Evento ${id} eliminado exitosamente.`);
     } catch (err) {
       console.error('Error:', (err as Error).message);
@@ -233,21 +233,21 @@ foto
   .option('--descripcion <texto>', 'Descripción de la foto')
   .action(async (eventoId: string, opts) => {
     const input = {
-      eventoId,
+      eventId: eventoId,
       googlePhotosUrl: opts.url,
       googlePhotosId: opts.googlePhotosId,
-      descripcion: opts.descripcion,
+      description: opts.descripcion,
     };
 
-    const validation = validarVincularFoto(input);
-    if (!validation.valido) {
+    const validation = validateLinkPhoto(input);
+    if (!validation.valid) {
       console.error('Errores de validación:');
-      validation.errores.forEach((e) => console.error(`  - ${e.campo}: ${e.mensaje}`));
+      validation.errors.forEach((e) => console.error(`  - ${e.field}: ${e.message}`));
       process.exit(1);
     }
 
     try {
-      const photo = await vincularFoto(input);
+      const photo = await linkPhoto(input);
       console.log('Foto vinculada exitosamente:');
       console.log(JSON.stringify(photo, null, 2));
     } catch (err) {
@@ -261,7 +261,7 @@ foto
   .description('Listar fotos vinculadas a un evento')
   .action(async (eventoId: string) => {
     try {
-      const photos = await listarFotosPorEvento(eventoId);
+      const photos = await listPhotosByEvent(eventoId);
       if (photos.length === 0) {
         console.log('No hay fotos vinculadas a este evento.');
         return;
@@ -270,7 +270,7 @@ foto
         photos.map((p) => ({
           ID: p.id.substring(0, 8),
           GoogleID: p.googlePhotosId,
-          Descripción: p.descripcion ?? '-',
+          Descripción: p.description ?? '-',
           URL: p.googlePhotosUrl,
         }))
       );
@@ -285,7 +285,7 @@ foto
   .description('Desvincular una foto de un evento')
   .action(async (fotoId: string) => {
     try {
-      await desvincularFoto(fotoId);
+      await unlinkPhoto(fotoId);
       console.log(`Foto ${fotoId} desvinculada exitosamente.`);
     } catch (err) {
       console.error('Error:', (err as Error).message);

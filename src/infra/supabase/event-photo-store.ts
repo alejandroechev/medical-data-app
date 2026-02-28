@@ -18,23 +18,23 @@ interface DbEventPhoto {
 function mapFromDb(row: DbEventPhoto): EventPhoto {
   return {
     id: row.id,
-    eventoId: row.evento_id,
+    eventId: row.evento_id,
     googlePhotosUrl: row.google_photos_url,
     googlePhotosId: row.google_photos_id,
-    descripcion: row.descripcion ?? undefined,
-    creadoEn: row.creado_en,
+    description: row.descripcion ?? undefined,
+    createdAt: row.creado_en,
   };
 }
 
-export async function vincularFoto(input: LinkPhotoInput): Promise<EventPhoto> {
+export async function linkPhoto(input: LinkPhotoInput): Promise<EventPhoto> {
   const db = requireSupabase();
   const { data, error } = await db
     .from('event_photos')
     .insert({
-      evento_id: input.eventoId,
+      evento_id: input.eventId,
       google_photos_url: input.googlePhotosUrl,
       google_photos_id: input.googlePhotosId,
-      descripcion: input.descripcion ?? null,
+      descripcion: input.description ?? null,
     })
     .select()
     .single();
@@ -43,21 +43,21 @@ export async function vincularFoto(input: LinkPhotoInput): Promise<EventPhoto> {
   return mapFromDb(data as DbEventPhoto);
 }
 
-export async function listarFotosPorEvento(
-  eventoId: string
+export async function listPhotosByEvent(
+  eventId: string
 ): Promise<EventPhoto[]> {
   const db = requireSupabase();
   const { data, error } = await db
     .from('event_photos')
     .select()
-    .eq('evento_id', eventoId)
+    .eq('evento_id', eventId)
     .order('creado_en', { ascending: true });
 
   if (error) throw new Error(`Error al listar fotos: ${error.message}`);
   return (data as DbEventPhoto[]).map(mapFromDb);
 }
 
-export async function desvincularFoto(id: string): Promise<void> {
+export async function unlinkPhoto(id: string): Promise<void> {
   const db = requireSupabase();
   const { error } = await db
     .from('event_photos')

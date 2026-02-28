@@ -4,27 +4,27 @@ import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo
 export class InMemoryEventPhotoStore {
   private photos: Map<string, EventPhoto> = new Map();
 
-  async vincular(input: LinkPhotoInput): Promise<EventPhoto> {
-    const foto: EventPhoto = {
+  async link(input: LinkPhotoInput): Promise<EventPhoto> {
+    const photo: EventPhoto = {
       id: uuidv4(),
-      eventoId: input.eventoId,
+      eventId: input.eventId,
       googlePhotosUrl: input.googlePhotosUrl,
       googlePhotosId: input.googlePhotosId,
-      descripcion: input.descripcion,
-      creadoEn: new Date().toISOString(),
+      description: input.description,
+      createdAt: new Date().toISOString(),
     };
-    this.photos.set(foto.id, foto);
-    return { ...foto };
+    this.photos.set(photo.id, photo);
+    return { ...photo };
   }
 
-  async listarPorEvento(eventoId: string): Promise<EventPhoto[]> {
+  async listByEvent(eventId: string): Promise<EventPhoto[]> {
     return Array.from(this.photos.values())
-      .filter((p) => p.eventoId === eventoId)
-      .sort((a, b) => a.creadoEn.localeCompare(b.creadoEn))
+      .filter((p) => p.eventId === eventId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       .map((p) => ({ ...p }));
   }
 
-  async desvincular(id: string): Promise<void> {
+  async unlink(id: string): Promise<void> {
     this.photos.delete(id);
   }
 }

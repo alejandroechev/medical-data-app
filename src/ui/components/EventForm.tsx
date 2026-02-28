@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { CreateMedicalEventInput, EventType } from '../../domain/models/medical-event';
 import { EVENT_TYPES } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { validarCrearEvento } from '../../domain/validators/medical-event-validator';
+import { validateCreateEvent } from '../../domain/validators/medical-event-validator';
 
 interface EventFormProps {
   onSubmit: (input: CreateMedicalEventInput) => Promise<void>;
@@ -13,12 +13,12 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const members = getFamilyMembers();
   const today = new Date().toISOString().split('T')[0];
 
-  const [fecha, setFecha] = useState(today);
-  const [tipo, setTipo] = useState<EventType>('Consulta Médica');
-  const [descripcion, setDescripcion] = useState('');
-  const [pacienteId, setPacienteId] = useState(members[0]?.id ?? '');
-  const [reembolsoIsapre, setReembolsoIsapre] = useState(false);
-  const [reembolsoSeguro, setReembolsoSeguro] = useState(false);
+  const [date, setDate] = useState(today);
+  const [type, setType] = useState<EventType>('Consulta Médica');
+  const [description, setDescription] = useState('');
+  const [patientId, setPatientId] = useState(members[0]?.id ?? '');
+  const [isapreReimbursed, setIsapreReimbursed] = useState(false);
+  const [insuranceReimbursed, setInsuranceReimbursed] = useState(false);
   const [errores, setErrores] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,26 +26,26 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
     setErrores([]);
 
     const input: CreateMedicalEventInput = {
-      fecha,
-      tipo,
-      descripcion,
-      pacienteId,
-      reembolsoIsapre,
-      reembolsoSeguro,
+      date,
+      type,
+      description,
+      patientId,
+      isapreReimbursed,
+      insuranceReimbursed,
     };
 
-    const validation = validarCrearEvento(input);
-    if (!validation.valido) {
-      setErrores(validation.errores.map((e) => e.mensaje));
+    const validation = validateCreateEvent(input);
+    if (!validation.valid) {
+      setErrores(validation.errors.map((e) => e.message));
       return;
     }
 
     try {
       await onSubmit(input);
       // Reset form
-      setDescripcion('');
-      setReembolsoIsapre(false);
-      setReembolsoSeguro(false);
+      setDescription('');
+      setIsapreReimbursed(false);
+      setInsuranceReimbursed(false);
     } catch (err) {
       setErrores([(err as Error).message]);
     }
@@ -68,8 +68,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         <input
           id="fecha"
           type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
@@ -80,8 +80,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         </label>
         <select
           id="tipo"
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value as EventType)}
+          value={type}
+          onChange={(e) => setType(e.target.value as EventType)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           {EVENT_TYPES.map((t) => (
@@ -96,12 +96,12 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         </label>
         <select
           id="paciente"
-          value={pacienteId}
-          onChange={(e) => setPacienteId(e.target.value)}
+          value={patientId}
+          onChange={(e) => setPatientId(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           {members.map((m) => (
-            <option key={m.id} value={m.id}>{m.nombre} ({m.parentesco})</option>
+            <option key={m.id} value={m.id}>{m.name} ({m.relationship})</option>
           ))}
         </select>
       </div>
@@ -112,8 +112,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         </label>
         <textarea
           id="descripcion"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder="Describe el evento médico..."
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -125,8 +125,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
-            checked={reembolsoIsapre}
-            onChange={(e) => setReembolsoIsapre(e.target.checked)}
+            checked={isapreReimbursed}
+            onChange={(e) => setIsapreReimbursed(e.target.checked)}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <span className="text-sm text-gray-700">Reembolsado por ISAPRE</span>
@@ -134,8 +134,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
-            checked={reembolsoSeguro}
-            onChange={(e) => setReembolsoSeguro(e.target.checked)}
+            checked={insuranceReimbursed}
+            onChange={(e) => setInsuranceReimbursed(e.target.checked)}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <span className="text-sm text-gray-700">Reembolsado por Seguro Complementario</span>

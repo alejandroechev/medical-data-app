@@ -3,24 +3,24 @@ import { render, screen } from '@testing-library/react';
 import { HistorialPage } from '../../../src/ui/pages/HistorialPage';
 
 vi.mock('../../../src/infra/store-provider', () => ({
-  listarEventos: vi.fn(),
-  crearEvento: vi.fn(),
-  obtenerEventoPorId: vi.fn(),
-  actualizarEvento: vi.fn(),
-  eliminarEvento: vi.fn(),
+  listEvents: vi.fn(),
+  createEvent: vi.fn(),
+  getEventById: vi.fn(),
+  updateEvent: vi.fn(),
+  deleteEvent: vi.fn(),
 }));
 
-import { listarEventos } from '../../../src/infra/store-provider';
+import { listEvents } from '../../../src/infra/store-provider';
 
-const mockListar = vi.mocked(listarEventos);
+const mockList = vi.mocked(listEvents);
 
 describe('HistorialPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('debe renderizar los filtros', () => {
-    mockListar.mockResolvedValue([]);
+  it('should render the filters', () => {
+    mockList.mockResolvedValue([]);
     render(<HistorialPage onEventClick={() => {}} />);
     expect(screen.getByLabelText('Paciente')).toBeInTheDocument();
     expect(screen.getByLabelText('Tipo')).toBeInTheDocument();
@@ -28,40 +28,40 @@ describe('HistorialPage', () => {
     expect(screen.getByLabelText('Hasta')).toBeInTheDocument();
   });
 
-  it('debe mostrar mensaje cuando no hay resultados', async () => {
-    mockListar.mockResolvedValue([]);
+  it('should show message when there are no results', async () => {
+    mockList.mockResolvedValue([]);
     render(<HistorialPage onEventClick={() => {}} />);
     expect(
       await screen.findByText('No se encontraron eventos con los filtros seleccionados')
     ).toBeInTheDocument();
   });
 
-  it('debe mostrar conteo de eventos', async () => {
-    mockListar.mockResolvedValue([
+  it('should show event count', async () => {
+    mockList.mockResolvedValue([
       {
         id: '1',
-        fecha: '2024-06-15',
-        tipo: 'Consulta Médica' as const,
-        descripcion: 'Control',
-        pacienteId: '1',
-        reembolsoIsapre: false,
-        reembolsoSeguro: false,
-        creadoEn: '2024-06-15T10:00:00Z',
-        actualizadoEn: '2024-06-15T10:00:00Z',
+        date: '2024-06-15',
+        type: 'Consulta Médica' as const,
+        description: 'Control',
+        patientId: '1',
+        isapreReimbursed: false,
+        insuranceReimbursed: false,
+        createdAt: '2024-06-15T10:00:00Z',
+        updatedAt: '2024-06-15T10:00:00Z',
       },
     ]);
     render(<HistorialPage onEventClick={() => {}} />);
     expect(await screen.findByText('1 evento encontrado')).toBeInTheDocument();
   });
 
-  it('debe mostrar error cuando la carga falla', async () => {
-    mockListar.mockRejectedValue(new Error('Sin conexión'));
+  it('should show error when load fails', async () => {
+    mockList.mockRejectedValue(new Error('Sin conexión'));
     render(<HistorialPage onEventClick={() => {}} />);
     expect(await screen.findByText('Error: Sin conexión')).toBeInTheDocument();
   });
 
-  it('debe tener opción Todos en los selects de filtro', () => {
-    mockListar.mockResolvedValue([]);
+  it('should have "Todos" option in filter selects', () => {
+    mockList.mockResolvedValue([]);
     render(<HistorialPage onEventClick={() => {}} />);
 
     const pacienteSelect = screen.getByLabelText('Paciente');

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useEventos } from '../hooks/useEventos';
+import { useEvents } from '../hooks/useEventos';
 import { EventCard } from '../components/EventCard';
 import { EVENT_TYPES } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
@@ -11,22 +11,22 @@ interface HistorialPageProps {
 
 export function HistorialPage({ onEventClick }: HistorialPageProps) {
   const members = getFamilyMembers();
-  const [pacienteId, setPacienteId] = useState('');
-  const [tipo, setTipo] = useState('');
-  const [desde, setDesde] = useState('');
-  const [hasta, setHasta] = useState('');
+  const [patientId, setPatientId] = useState('');
+  const [type, setType] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
 
-  const filtros: MedicalEventFilters = useMemo(
+  const filters: MedicalEventFilters = useMemo(
     () => ({
-      pacienteId: pacienteId || undefined,
-      tipo: tipo || undefined,
-      desde: desde || undefined,
-      hasta: hasta || undefined,
+      patientId: patientId || undefined,
+      type: type || undefined,
+      from: from || undefined,
+      to: to || undefined,
     }),
-    [pacienteId, tipo, desde, hasta]
+    [patientId, type, from, to]
   );
 
-  const { eventos, loading, error } = useEventos(filtros);
+  const { events, loading, error } = useEvents(filters);
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -39,13 +39,13 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
             <label htmlFor="filtro-paciente" className="block text-xs text-gray-500 mb-1">Paciente</label>
             <select
               id="filtro-paciente"
-              value={pacienteId}
-              onChange={(e) => setPacienteId(e.target.value)}
+              value={patientId}
+              onChange={(e) => setPatientId(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
             >
               <option value="">Todos</option>
               {members.map((m) => (
-                <option key={m.id} value={m.id}>{m.nombre}</option>
+                <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
           </div>
@@ -54,8 +54,8 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
             <label htmlFor="filtro-tipo" className="block text-xs text-gray-500 mb-1">Tipo</label>
             <select
               id="filtro-tipo"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value)}
+              value={type}
+              onChange={(e) => setType(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
             >
               <option value="">Todos</option>
@@ -70,8 +70,8 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
             <input
               id="filtro-desde"
               type="date"
-              value={desde}
-              onChange={(e) => setDesde(e.target.value)}
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
             />
           </div>
@@ -81,8 +81,8 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
             <input
               id="filtro-hasta"
               type="date"
-              value={hasta}
-              onChange={(e) => setHasta(e.target.value)}
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
             />
           </div>
@@ -105,14 +105,14 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
       {!loading && !error && (
         <>
           <p className="text-xs text-gray-400">
-            {eventos.length} evento{eventos.length !== 1 ? 's' : ''} encontrado{eventos.length !== 1 ? 's' : ''}
+            {events.length} evento{events.length !== 1 ? 's' : ''} encontrado{events.length !== 1 ? 's' : ''}
           </p>
           <div className="space-y-3">
-            {eventos.map((evento) => (
+            {events.map((evento) => (
               <EventCard key={evento.id} evento={evento} onClick={onEventClick} />
             ))}
           </div>
-          {eventos.length === 0 && (
+          {events.length === 0 && (
             <p className="text-center text-gray-400 text-sm py-8">
               No se encontraron eventos con los filtros seleccionados
             </p>

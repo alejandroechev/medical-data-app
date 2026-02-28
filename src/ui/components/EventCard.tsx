@@ -16,8 +16,8 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 export function EventCard({ evento, onClick }: EventCardProps) {
-  const paciente = getFamilyMemberById(evento.pacienteId);
-  const icon = TYPE_ICONS[evento.tipo] ?? '📋';
+  const paciente = getFamilyMemberById(evento.patientId);
+  const icon = TYPE_ICONS[evento.type] ?? '📋';
 
   return (
     <button
@@ -25,25 +25,25 @@ export function EventCard({ evento, onClick }: EventCardProps) {
       className="w-full text-left bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl" role="img" aria-label={evento.tipo}>
+        <span className="text-2xl" role="img" aria-label={evento.type}>
           {icon}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-600">{evento.tipo}</span>
-            <span className="text-xs text-gray-500">{evento.fecha}</span>
+            <span className="text-sm font-medium text-blue-600">{evento.type}</span>
+            <span className="text-xs text-gray-500">{evento.date}</span>
           </div>
-          <p className="text-sm text-gray-800 mt-1 line-clamp-2">{evento.descripcion}</p>
+          <p className="text-sm text-gray-800 mt-1 line-clamp-2">{evento.description}</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-              {paciente?.nombre ?? 'Desconocido'}
+              {paciente?.name ?? 'Desconocido'}
             </span>
-            {evento.reembolsoIsapre && (
+            {evento.isapreReimbursed && (
               <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                 ISAPRE ✓
               </span>
             )}
-            {evento.reembolsoSeguro && (
+            {evento.insuranceReimbursed && (
               <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                 Seguro ✓
               </span>

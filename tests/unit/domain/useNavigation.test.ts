@@ -3,13 +3,13 @@ import { renderHook, act } from '@testing-library/react';
 import { useNavigation } from '../../../src/ui/hooks/useNavigation';
 
 describe('useNavigation', () => {
-  it('debe iniciar en la página de inicio', () => {
+  it('should start on the home page', () => {
     const { result } = renderHook(() => useNavigation());
     expect(result.current.currentPage).toBe('inicio');
     expect(result.current.params).toEqual({});
   });
 
-  it('debe navegar a otra página', () => {
+  it('should navigate to another page', () => {
     const { result } = renderHook(() => useNavigation());
     act(() => {
       result.current.navigateTo('nuevo-evento');
@@ -17,7 +17,7 @@ describe('useNavigation', () => {
     expect(result.current.currentPage).toBe('nuevo-evento');
   });
 
-  it('debe navegar con parámetros', () => {
+  it('should navigate with parameters', () => {
     const { result } = renderHook(() => useNavigation());
     act(() => {
       result.current.navigateTo('detalle-evento', { eventoId: '123' });
@@ -26,7 +26,7 @@ describe('useNavigation', () => {
     expect(result.current.params).toEqual({ eventoId: '123' });
   });
 
-  it('debe volver a inicio con goBack', () => {
+  it('should go back to home with goBack', () => {
     const { result } = renderHook(() => useNavigation());
     act(() => {
       result.current.navigateTo('historial');

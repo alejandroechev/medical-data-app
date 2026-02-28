@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { EventForm } from '../components/EventForm';
 import type { CreateMedicalEventInput } from '../../domain/models/medical-event';
-import { crearEvento } from '../../infra/store-provider';
+import { createEvent } from '../../infra/store-provider';
 
 interface NuevoEventoPageProps {
   onCreated: () => void;
@@ -15,7 +15,7 @@ export function NuevoEventoPage({ onCreated }: NuevoEventoPageProps) {
     setLoading(true);
     setSuccess(false);
     try {
-      await crearEvento(input);
+      await createEvent(input);
       setSuccess(true);
       setTimeout(() => {
         onCreated();

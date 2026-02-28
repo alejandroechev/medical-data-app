@@ -9,66 +9,66 @@ import type { MedicalEventFilters } from '../../domain/services/medical-event-re
 export class InMemoryMedicalEventStore {
   private events: Map<string, MedicalEvent> = new Map();
 
-  async crear(input: CreateMedicalEventInput): Promise<MedicalEvent> {
+  async create(input: CreateMedicalEventInput): Promise<MedicalEvent> {
     const now = new Date().toISOString();
-    const evento: MedicalEvent = {
+    const event: MedicalEvent = {
       id: uuidv4(),
-      fecha: input.fecha,
-      tipo: input.tipo,
-      descripcion: input.descripcion,
-      pacienteId: input.pacienteId,
-      reembolsoIsapre: input.reembolsoIsapre ?? false,
-      reembolsoSeguro: input.reembolsoSeguro ?? false,
-      creadoEn: now,
-      actualizadoEn: now,
+      date: input.date,
+      type: input.type,
+      description: input.description,
+      patientId: input.patientId,
+      isapreReimbursed: input.isapreReimbursed ?? false,
+      insuranceReimbursed: input.insuranceReimbursed ?? false,
+      createdAt: now,
+      updatedAt: now,
     };
-    this.events.set(evento.id, evento);
-    return { ...evento };
+    this.events.set(event.id, event);
+    return { ...event };
   }
 
-  async obtenerPorId(id: string): Promise<MedicalEvent | null> {
-    const evento = this.events.get(id);
-    return evento ? { ...evento } : null;
+  async getById(id: string): Promise<MedicalEvent | null> {
+    const event = this.events.get(id);
+    return event ? { ...event } : null;
   }
 
-  async listar(filtros?: MedicalEventFilters): Promise<MedicalEvent[]> {
+  async list(filters?: MedicalEventFilters): Promise<MedicalEvent[]> {
     let results = Array.from(this.events.values());
 
-    if (filtros?.pacienteId) {
-      results = results.filter((e) => e.pacienteId === filtros.pacienteId);
+    if (filters?.patientId) {
+      results = results.filter((e) => e.patientId === filters.patientId);
     }
-    if (filtros?.tipo) {
-      results = results.filter((e) => e.tipo === filtros.tipo);
+    if (filters?.type) {
+      results = results.filter((e) => e.type === filters.type);
     }
-    if (filtros?.desde) {
-      results = results.filter((e) => e.fecha >= filtros.desde!);
+    if (filters?.from) {
+      results = results.filter((e) => e.date >= filters.from!);
     }
-    if (filtros?.hasta) {
-      results = results.filter((e) => e.fecha <= filtros.hasta!);
+    if (filters?.to) {
+      results = results.filter((e) => e.date <= filters.to!);
     }
 
-    return results.sort((a, b) => b.fecha.localeCompare(a.fecha)).map((e) => ({ ...e }));
+    return results.sort((a, b) => b.date.localeCompare(a.date)).map((e) => ({ ...e }));
   }
 
-  async actualizar(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent> {
+  async update(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent> {
     const existing = this.events.get(id);
     if (!existing) throw new Error(`Evento ${id} no encontrado`);
 
     const updated: MedicalEvent = {
       ...existing,
-      ...(input.fecha !== undefined && { fecha: input.fecha }),
-      ...(input.tipo !== undefined && { tipo: input.tipo }),
-      ...(input.descripcion !== undefined && { descripcion: input.descripcion }),
-      ...(input.pacienteId !== undefined && { pacienteId: input.pacienteId }),
-      ...(input.reembolsoIsapre !== undefined && { reembolsoIsapre: input.reembolsoIsapre }),
-      ...(input.reembolsoSeguro !== undefined && { reembolsoSeguro: input.reembolsoSeguro }),
-      actualizadoEn: new Date().toISOString(),
+      ...(input.date !== undefined && { date: input.date }),
+      ...(input.type !== undefined && { type: input.type }),
+      ...(input.description !== undefined && { description: input.description }),
+      ...(input.patientId !== undefined && { patientId: input.patientId }),
+      ...(input.isapreReimbursed !== undefined && { isapreReimbursed: input.isapreReimbursed }),
+      ...(input.insuranceReimbursed !== undefined && { insuranceReimbursed: input.insuranceReimbursed }),
+      updatedAt: new Date().toISOString(),
     };
     this.events.set(id, updated);
     return { ...updated };
   }
 
-  async eliminar(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     this.events.delete(id);
   }
 }

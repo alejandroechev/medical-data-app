@@ -2,85 +2,85 @@ import { EVENT_TYPES } from '../models/medical-event.js';
 import type { CreateMedicalEventInput, EventType, UpdateMedicalEventInput } from '../models/medical-event.js';
 
 export interface ValidationError {
-  campo: string;
-  mensaje: string;
+  field: string;
+  message: string;
 }
 
 export interface ValidationResult {
-  valido: boolean;
-  errores: ValidationError[];
+  valid: boolean;
+  errors: ValidationError[];
 }
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 function isValidDate(dateStr: string): boolean {
   if (!ISO_DATE_REGEX.test(dateStr)) return false;
-  const date = new Date(dateStr + 'T00:00:00Z');
-  return !isNaN(date.getTime());
+  const d = new Date(dateStr + 'T00:00:00Z');
+  return !isNaN(d.getTime());
 }
 
-function isValidEventType(tipo: string): tipo is EventType {
-  return (EVENT_TYPES as readonly string[]).includes(tipo);
+function isValidEventType(type: string): type is EventType {
+  return (EVENT_TYPES as readonly string[]).includes(type);
 }
 
-export function validarCrearEvento(input: CreateMedicalEventInput): ValidationResult {
-  const errores: ValidationError[] = [];
+export function validateCreateEvent(input: CreateMedicalEventInput): ValidationResult {
+  const errors: ValidationError[] = [];
 
-  if (!input.fecha || !input.fecha.trim()) {
-    errores.push({ campo: 'fecha', mensaje: 'La fecha es obligatoria' });
-  } else if (!isValidDate(input.fecha)) {
-    errores.push({ campo: 'fecha', mensaje: 'La fecha debe tener formato YYYY-MM-DD válido' });
+  if (!input.date || !input.date.trim()) {
+    errors.push({ field: 'date', message: 'La fecha es obligatoria' });
+  } else if (!isValidDate(input.date)) {
+    errors.push({ field: 'date', message: 'La fecha debe tener formato YYYY-MM-DD válido' });
   }
 
-  if (!input.tipo || !input.tipo.trim()) {
-    errores.push({ campo: 'tipo', mensaje: 'El tipo de evento es obligatorio' });
-  } else if (!isValidEventType(input.tipo)) {
-    errores.push({
-      campo: 'tipo',
-      mensaje: `Tipo inválido. Debe ser uno de: ${EVENT_TYPES.join(', ')}`,
+  if (!input.type || !input.type.trim()) {
+    errors.push({ field: 'type', message: 'El tipo de evento es obligatorio' });
+  } else if (!isValidEventType(input.type)) {
+    errors.push({
+      field: 'type',
+      message: `Tipo inválido. Debe ser uno de: ${EVENT_TYPES.join(', ')}`,
     });
   }
 
-  if (!input.descripcion || !input.descripcion.trim()) {
-    errores.push({ campo: 'descripcion', mensaje: 'La descripción es obligatoria' });
+  if (!input.description || !input.description.trim()) {
+    errors.push({ field: 'description', message: 'La descripción es obligatoria' });
   }
 
-  if (!input.pacienteId || !input.pacienteId.trim()) {
-    errores.push({ campo: 'pacienteId', mensaje: 'El paciente es obligatorio' });
+  if (!input.patientId || !input.patientId.trim()) {
+    errors.push({ field: 'patientId', message: 'El paciente es obligatorio' });
   }
 
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }
 
-export function validarActualizarEvento(input: UpdateMedicalEventInput): ValidationResult {
-  const errores: ValidationError[] = [];
+export function validateUpdateEvent(input: UpdateMedicalEventInput): ValidationResult {
+  const errors: ValidationError[] = [];
 
-  if (input.fecha !== undefined) {
-    if (!input.fecha.trim()) {
-      errores.push({ campo: 'fecha', mensaje: 'La fecha no puede estar vacía' });
-    } else if (!isValidDate(input.fecha)) {
-      errores.push({ campo: 'fecha', mensaje: 'La fecha debe tener formato YYYY-MM-DD válido' });
+  if (input.date !== undefined) {
+    if (!input.date.trim()) {
+      errors.push({ field: 'date', message: 'La fecha no puede estar vacía' });
+    } else if (!isValidDate(input.date)) {
+      errors.push({ field: 'date', message: 'La fecha debe tener formato YYYY-MM-DD válido' });
     }
   }
 
-  if (input.tipo !== undefined) {
-    if (!input.tipo.trim()) {
-      errores.push({ campo: 'tipo', mensaje: 'El tipo no puede estar vacío' });
-    } else if (!isValidEventType(input.tipo)) {
-      errores.push({
-        campo: 'tipo',
-        mensaje: `Tipo inválido. Debe ser uno de: ${EVENT_TYPES.join(', ')}`,
+  if (input.type !== undefined) {
+    if (!input.type.trim()) {
+      errors.push({ field: 'type', message: 'El tipo no puede estar vacío' });
+    } else if (!isValidEventType(input.type)) {
+      errors.push({
+        field: 'type',
+        message: `Tipo inválido. Debe ser uno de: ${EVENT_TYPES.join(', ')}`,
       });
     }
   }
 
-  if (input.descripcion !== undefined && !input.descripcion.trim()) {
-    errores.push({ campo: 'descripcion', mensaje: 'La descripción no puede estar vacía' });
+  if (input.description !== undefined && !input.description.trim()) {
+    errors.push({ field: 'description', message: 'La descripción no puede estar vacía' });
   }
 
-  if (input.pacienteId !== undefined && !input.pacienteId.trim()) {
-    errores.push({ campo: 'pacienteId', mensaje: 'El paciente no puede estar vacío' });
+  if (input.patientId !== undefined && !input.patientId.trim()) {
+    errors.push({ field: 'patientId', message: 'El paciente no puede estar vacío' });
   }
 
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }

@@ -6,41 +6,41 @@ import {
 } from '../../../src/infra/supabase/family-member-store';
 
 describe('FamilyMemberStore', () => {
-  it('debe retornar la lista de miembros de familia', () => {
+  it('should return the family members list', () => {
     const members = getFamilyMembers();
     expect(members.length).toBeGreaterThan(0);
     expect(members[0]).toHaveProperty('id');
-    expect(members[0]).toHaveProperty('nombre');
-    expect(members[0]).toHaveProperty('parentesco');
+    expect(members[0]).toHaveProperty('name');
+    expect(members[0]).toHaveProperty('relationship');
   });
 
-  it('debe retornar una copia, no la referencia original', () => {
+  it('should return a copy, not the original reference', () => {
     const a = getFamilyMembers();
     const b = getFamilyMembers();
     expect(a).not.toBe(b);
     expect(a).toEqual(b);
   });
 
-  it('debe encontrar un miembro por ID', () => {
+  it('should find a member by ID', () => {
     const member = getFamilyMemberById('1');
     expect(member).toBeDefined();
     expect(member!.id).toBe('1');
   });
 
-  it('debe retornar undefined para ID inexistente', () => {
+  it('should return undefined for non-existent ID', () => {
     const member = getFamilyMemberById('999');
     expect(member).toBeUndefined();
   });
 
-  it('debe encontrar un miembro por nombre (case insensitive)', () => {
+  it('should find a member by name (case insensitive)', () => {
     const members = getFamilyMembers();
-    const firstName = members[0].nombre;
+    const firstName = members[0].name;
     const member = getFamilyMemberByName(firstName.toLowerCase());
     expect(member).toBeDefined();
-    expect(member!.nombre).toBe(firstName);
+    expect(member!.name).toBe(firstName);
   });
 
-  it('debe retornar undefined para nombre inexistente', () => {
+  it('should return undefined for non-existent name', () => {
     const member = getFamilyMemberByName('NoExiste');
     expect(member).toBeUndefined();
   });

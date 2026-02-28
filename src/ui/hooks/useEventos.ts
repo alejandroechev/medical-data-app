@@ -2,57 +2,57 @@ import { useState, useEffect, useCallback } from 'react';
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../../domain/models/medical-event';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository';
 import {
-  crearEvento,
-  listarEventos,
-  obtenerEventoPorId,
-  actualizarEvento,
-  eliminarEvento,
+  createEvent,
+  listEvents,
+  getEventById,
+  updateEvent,
+  deleteEvent,
 } from '../../infra/store-provider';
 
-export function useEventos(filtros?: MedicalEventFilters) {
-  const [eventos, setEventos] = useState<MedicalEvent[]>([]);
+export function useEvents(filters?: MedicalEventFilters) {
+  const [events, setEvents] = useState<MedicalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cargar = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listarEventos(filtros);
-      setEventos(data);
+      const data = await listEvents(filters);
+      setEvents(data);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [filtros?.pacienteId, filtros?.tipo, filtros?.desde, filtros?.hasta]);
+  }, [filters?.patientId, filters?.type, filters?.from, filters?.to]);
 
   useEffect(() => {
-    cargar();
-  }, [cargar]);
+    load();
+  }, [load]);
 
-  const crear = async (input: CreateMedicalEventInput) => {
-    const evento = await crearEvento(input);
-    await cargar();
-    return evento;
+  const create = async (input: CreateMedicalEventInput) => {
+    const event = await createEvent(input);
+    await load();
+    return event;
   };
 
-  const actualizar = async (id: string, input: UpdateMedicalEventInput) => {
-    const evento = await actualizarEvento(id, input);
-    await cargar();
-    return evento;
+  const update = async (id: string, input: UpdateMedicalEventInput) => {
+    const event = await updateEvent(id, input);
+    await load();
+    return event;
   };
 
-  const eliminar = async (id: string) => {
-    await eliminarEvento(id);
-    await cargar();
+  const remove = async (id: string) => {
+    await deleteEvent(id);
+    await load();
   };
 
-  return { eventos, loading, error, cargar, crear, actualizar, eliminar };
+  return { events, loading, error, load, create, update, remove };
 }
 
-export function useEvento(id: string | null) {
-  const [evento, setEvento] = useState<MedicalEvent | null>(null);
+export function useEvent(id: string | null) {
+  const [event, setEvent] = useState<MedicalEvent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,11 +60,11 @@ export function useEvento(id: string | null) {
     if (!id) return;
     setLoading(true);
     setError(null);
-    obtenerEventoPorId(id)
-      .then(setEvento)
+    getEventById(id)
+      .then(setEvent)
       .catch((err) => setError((err as Error).message))
       .finally(() => setLoading(false));
   }, [id]);
 
-  return { evento, loading, error };
+  return { event, loading, error };
 }

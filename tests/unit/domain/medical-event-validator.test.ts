@@ -1,133 +1,133 @@
 import { describe, it, expect } from 'vitest';
 import {
-  validarCrearEvento,
-  validarActualizarEvento,
+  validateCreateEvent,
+  validateUpdateEvent,
 } from '../../../src/domain/validators/medical-event-validator';
 import { CreateMedicalEventInput, UpdateMedicalEventInput } from '../../../src/domain/models/medical-event';
 
-describe('validarCrearEvento', () => {
-  const inputValido: CreateMedicalEventInput = {
-    fecha: '2024-06-15',
-    tipo: 'Consulta Médica',
-    descripcion: 'Control anual con médico general',
-    pacienteId: 'abc-123',
+describe('validateCreateEvent', () => {
+  const validInput: CreateMedicalEventInput = {
+    date: '2024-06-15',
+    type: 'Consulta Médica',
+    description: 'Control anual con médico general',
+    patientId: 'abc-123',
   };
 
-  it('debe validar correctamente un input completo y válido', () => {
-    const resultado = validarCrearEvento(inputValido);
-    expect(resultado.valido).toBe(true);
-    expect(resultado.errores).toHaveLength(0);
+  it('should validate a complete and valid input', () => {
+    const result = validateCreateEvent(validInput);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('debe rechazar fecha vacía', () => {
-    const resultado = validarCrearEvento({ ...inputValido, fecha: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'fecha' })
+  it('should reject empty date', () => {
+    const result = validateCreateEvent({ ...validInput, date: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'date' })
     );
   });
 
-  it('debe rechazar fecha con formato inválido', () => {
-    const resultado = validarCrearEvento({ ...inputValido, fecha: '15-06-2024' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'fecha', mensaje: expect.stringContaining('YYYY-MM-DD') })
+  it('should reject date with invalid format', () => {
+    const result = validateCreateEvent({ ...validInput, date: '15-06-2024' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'date', message: expect.stringContaining('YYYY-MM-DD') })
     );
   });
 
-  it('debe rechazar fecha imposible', () => {
-    const resultado = validarCrearEvento({ ...inputValido, fecha: '2024-13-45' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'fecha' })
+  it('should reject impossible date', () => {
+    const result = validateCreateEvent({ ...validInput, date: '2024-13-45' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'date' })
     );
   });
 
-  it('debe rechazar tipo vacío', () => {
-    const resultado = validarCrearEvento({ ...inputValido, tipo: '' as any });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'tipo' })
+  it('should reject empty type', () => {
+    const result = validateCreateEvent({ ...validInput, type: '' as any });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'type' })
     );
   });
 
-  it('debe rechazar tipo inválido', () => {
-    const resultado = validarCrearEvento({ ...inputValido, tipo: 'Fisioterapia' as any });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'tipo', mensaje: expect.stringContaining('Tipo inválido') })
+  it('should reject invalid type', () => {
+    const result = validateCreateEvent({ ...validInput, type: 'Fisioterapia' as any });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'type', message: expect.stringContaining('Tipo inválido') })
     );
   });
 
-  it('debe rechazar descripción vacía', () => {
-    const resultado = validarCrearEvento({ ...inputValido, descripcion: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'descripcion' })
+  it('should reject empty description', () => {
+    const result = validateCreateEvent({ ...validInput, description: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'description' })
     );
   });
 
-  it('debe rechazar pacienteId vacío', () => {
-    const resultado = validarCrearEvento({ ...inputValido, pacienteId: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'pacienteId' })
+  it('should reject empty patientId', () => {
+    const result = validateCreateEvent({ ...validInput, patientId: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'patientId' })
     );
   });
 
-  it('debe reportar múltiples errores simultáneamente', () => {
-    const resultado = validarCrearEvento({
-      fecha: '',
-      tipo: '' as any,
-      descripcion: '',
-      pacienteId: '',
+  it('should report multiple errors simultaneously', () => {
+    const result = validateCreateEvent({
+      date: '',
+      type: '' as any,
+      description: '',
+      patientId: '',
     });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores.length).toBeGreaterThanOrEqual(4);
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('debe aceptar reembolso flags opcionales', () => {
-    const resultado = validarCrearEvento({
-      ...inputValido,
-      reembolsoIsapre: true,
-      reembolsoSeguro: false,
+  it('should accept optional reimbursement flags', () => {
+    const result = validateCreateEvent({
+      ...validInput,
+      isapreReimbursed: true,
+      insuranceReimbursed: false,
     });
-    expect(resultado.valido).toBe(true);
+    expect(result.valid).toBe(true);
   });
 });
 
-describe('validarActualizarEvento', () => {
-  it('debe validar correctamente un input vacío (sin cambios)', () => {
-    const resultado = validarActualizarEvento({});
-    expect(resultado.valido).toBe(true);
-    expect(resultado.errores).toHaveLength(0);
+describe('validateUpdateEvent', () => {
+  it('should validate an empty input (no changes)', () => {
+    const result = validateUpdateEvent({});
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('debe validar una fecha válida parcial', () => {
-    const resultado = validarActualizarEvento({ fecha: '2024-08-20' });
-    expect(resultado.valido).toBe(true);
+  it('should validate a valid partial date', () => {
+    const result = validateUpdateEvent({ date: '2024-08-20' });
+    expect(result.valid).toBe(true);
   });
 
-  it('debe rechazar fecha vacía en actualización', () => {
-    const resultado = validarActualizarEvento({ fecha: '' });
-    expect(resultado.valido).toBe(false);
-    expect(resultado.errores).toContainEqual(
-      expect.objectContaining({ campo: 'fecha' })
+  it('should reject empty date in update', () => {
+    const result = validateUpdateEvent({ date: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'date' })
     );
   });
 
-  it('debe rechazar tipo inválido en actualización', () => {
-    const resultado = validarActualizarEvento({ tipo: 'Inventado' as any });
-    expect(resultado.valido).toBe(false);
+  it('should reject invalid type in update', () => {
+    const result = validateUpdateEvent({ type: 'Inventado' as any });
+    expect(result.valid).toBe(false);
   });
 
-  it('debe rechazar descripción vacía en actualización', () => {
-    const resultado = validarActualizarEvento({ descripcion: '   ' });
-    expect(resultado.valido).toBe(false);
+  it('should reject empty description in update', () => {
+    const result = validateUpdateEvent({ description: '   ' });
+    expect(result.valid).toBe(false);
   });
 
-  it('debe aceptar actualización de solo reembolso', () => {
-    const resultado = validarActualizarEvento({ reembolsoIsapre: true });
-    expect(resultado.valido).toBe(true);
+  it('should accept update of reimbursement only', () => {
+    const result = validateUpdateEvent({ isapreReimbursed: true });
+    expect(result.valid).toBe(true);
   });
 });
