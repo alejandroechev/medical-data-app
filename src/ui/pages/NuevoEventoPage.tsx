@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { EventForm } from '../components/EventForm';
 import type { CreateMedicalEventInput } from '../../domain/models/medical-event';
-import { crearEvento } from '../../infra/supabase/medical-event-store';
+import { crearEvento } from '../../infra/store-provider';
 
 interface NuevoEventoPageProps {
   onCreated: () => void;

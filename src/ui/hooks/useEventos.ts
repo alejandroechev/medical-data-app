@@ -7,7 +7,7 @@ import {
   obtenerEventoPorId,
   actualizarEvento,
   eliminarEvento,
-} from '../../infra/supabase/medical-event-store';
+} from '../../infra/store-provider';
 
 export function useEventos(filtros?: MedicalEventFilters) {
   const [eventos, setEventos] = useState<MedicalEvent[]>([]);

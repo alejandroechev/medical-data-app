@@ -76,4 +76,78 @@ test.describe('Registro Médico Familiar — E2E', () => {
     await expect(page.getByLabel('Reembolsado por ISAPRE')).toBeVisible();
     await expect(page.getByLabel('Reembolsado por Seguro Complementario')).toBeVisible();
   });
+
+  // --- Full data flow E2E tests (uses in-memory stubs when Supabase not configured) ---
+
+  test('flujo completo: crear evento → ver en inicio → ver detalle', async ({ page }) => {
+    await page.goto('/');
+
+    // Inicio vacío
+    await expect(page.getByText('Sin eventos médicos')).toBeVisible();
+
+    // Crear evento
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Tipo de evento').selectOption('Urgencia');
+    await page.getByLabel('Paciente').selectOption({ label: 'Alejandro (Padre)' });
+    await page.getByLabel('Descripción').fill('Dolor abdominal severo');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+
+    // Éxito y redirección a inicio
+    await expect(page.getByText('✓ Evento creado exitosamente')).toBeVisible();
+    await page.waitForTimeout(1500); // esperar redirección
+    await expect(page.locator('header')).toContainText('Registro Médico Familiar');
+
+    // Evento visible en inicio
+    await expect(page.getByText('Dolor abdominal severo')).toBeVisible();
+    await expect(page.getByText('Urgencia')).toBeVisible();
+
+    // Click en el evento → detalle
+    await page.getByText('Dolor abdominal severo').click();
+    await expect(page.locator('header')).toContainText('Detalle del Evento');
+    await expect(page.getByText('Dolor abdominal severo')).toBeVisible();
+    await expect(page.getByText('Urgencia')).toBeVisible();
+    await expect(page.getByText('Alejandro')).toBeVisible();
+    await expect(page.getByText('No reembolsada').first()).toBeVisible();
+  });
+
+  test('flujo completo: crear evento con reembolso ISAPRE', async ({ page }) => {
+    await page.goto('/');
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Tipo de evento').selectOption('Consulta Dental');
+    await page.getByLabel('Descripción').fill('Limpieza dental semestral');
+    await page.getByLabel('Reembolsado por ISAPRE').check();
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+
+    await expect(page.getByText('✓ Evento creado exitosamente')).toBeVisible();
+    await page.waitForTimeout(1500);
+
+    // Verificar badge de ISAPRE en la card
+    await expect(page.getByText('ISAPRE ✓')).toBeVisible();
+  });
+
+  test('historial: filtrar eventos por tipo', async ({ page }) => {
+    await page.goto('/');
+
+    // Crear dos eventos de tipos diferentes
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Tipo de evento').selectOption('Examen');
+    await page.getByLabel('Descripción').fill('Examen de sangre');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Tipo de evento').selectOption('Consulta Médica');
+    await page.getByLabel('Descripción').fill('Control general');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Ir a historial y filtrar por Examen
+    await page.getByLabel('Historial').click();
+    await page.getByLabel('Tipo').selectOption('Examen');
+
+    // Solo debe verse el examen
+    await expect(page.getByText('Examen de sangre')).toBeVisible();
+    await expect(page.getByText('1 evento encontrado')).toBeVisible();
+  });
 });
+

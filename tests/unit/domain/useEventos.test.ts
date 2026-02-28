@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useEventos, useEvento } from '../../../src/ui/hooks/useEventos';
 
-vi.mock('../../../src/infra/supabase/medical-event-store', () => ({
+vi.mock('../../../src/infra/store-provider', () => ({
   listarEventos: vi.fn(),
   crearEvento: vi.fn(),
   obtenerEventoPorId: vi.fn(),
@@ -16,7 +16,7 @@ import {
   obtenerEventoPorId,
   actualizarEvento,
   eliminarEvento,
-} from '../../../src/infra/supabase/medical-event-store';
+} from '../../../src/infra/store-provider';
 
 const mockListar = vi.mocked(listarEventos);
 const mockCrear = vi.mocked(crearEvento);

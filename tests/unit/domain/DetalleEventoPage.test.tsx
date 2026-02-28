@@ -2,22 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DetalleEventoPage } from '../../../src/ui/pages/DetalleEventoPage';
 
-vi.mock('../../../src/infra/supabase/medical-event-store', () => ({
+vi.mock('../../../src/infra/store-provider', () => ({
   obtenerEventoPorId: vi.fn(),
   crearEvento: vi.fn(),
   listarEventos: vi.fn(),
   actualizarEvento: vi.fn(),
   eliminarEvento: vi.fn(),
-}));
-
-vi.mock('../../../src/infra/supabase/event-photo-store', () => ({
   listarFotosPorEvento: vi.fn(),
   vincularFoto: vi.fn(),
   desvincularFoto: vi.fn(),
 }));
 
-import { obtenerEventoPorId } from '../../../src/infra/supabase/medical-event-store';
-import { listarFotosPorEvento } from '../../../src/infra/supabase/event-photo-store';
+import { obtenerEventoPorId, listarFotosPorEvento } from '../../../src/infra/store-provider';
 
 const mockObtener = vi.mocked(obtenerEventoPorId);
 const mockListarFotos = vi.mocked(listarFotosPorEvento);

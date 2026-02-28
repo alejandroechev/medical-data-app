@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NuevoEventoPage } from '../../../src/ui/pages/NuevoEventoPage';
 
-vi.mock('../../../src/infra/supabase/medical-event-store', () => ({
+vi.mock('../../../src/infra/store-provider', () => ({
   crearEvento: vi.fn(),
   listarEventos: vi.fn(),
   obtenerEventoPorId: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock('../../../src/infra/supabase/medical-event-store', () => ({
   eliminarEvento: vi.fn(),
 }));
 
-import { crearEvento } from '../../../src/infra/supabase/medical-event-store';
+import { crearEvento } from '../../../src/infra/store-provider';
 
 const mockCrear = vi.mocked(crearEvento);
 

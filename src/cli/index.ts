@@ -7,12 +7,10 @@ import {
   listarEventos,
   actualizarEvento,
   eliminarEvento,
-} from '../infra/supabase/medical-event-store.js';
-import {
   vincularFoto,
   listarFotosPorEvento,
   desvincularFoto,
-} from '../infra/supabase/event-photo-store.js';
+} from '../infra/store-provider.js';
 import { validarCrearEvento, validarActualizarEvento } from '../domain/validators/medical-event-validator.js';
 import { validarVincularFoto } from '../domain/validators/event-photo-validator.js';
 import type { EventType } from '../domain/models/medical-event.js';

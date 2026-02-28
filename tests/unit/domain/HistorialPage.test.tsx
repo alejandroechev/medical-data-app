@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { HistorialPage } from '../../../src/ui/pages/HistorialPage';
 
-vi.mock('../../../src/infra/supabase/medical-event-store', () => ({
+vi.mock('../../../src/infra/store-provider', () => ({
   listarEventos: vi.fn(),
   crearEvento: vi.fn(),
   obtenerEventoPorId: vi.fn(),
@@ -10,7 +10,7 @@ vi.mock('../../../src/infra/supabase/medical-event-store', () => ({
   eliminarEvento: vi.fn(),
 }));
 
-import { listarEventos } from '../../../src/infra/supabase/medical-event-store';
+import { listarEventos } from '../../../src/infra/store-provider';
 
 const mockListar = vi.mocked(listarEventos);
 

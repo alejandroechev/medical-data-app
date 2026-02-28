@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { obtenerEventoPorId } from '../../infra/supabase/medical-event-store';
-import { listarFotosPorEvento } from '../../infra/supabase/event-photo-store';
+import { obtenerEventoPorId, listarFotosPorEvento } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto } from '../../domain/models/event-photo';
