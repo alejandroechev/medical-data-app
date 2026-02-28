@@ -149,5 +149,34 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Examen de sangre')).toBeVisible();
     await expect(page.getByText('1 evento encontrado')).toBeVisible();
   });
+
+  test('full flow: link and unlink a photo to an event', async ({ page }) => {
+    await page.goto('/');
+
+    // Create an event first
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Descripción').fill('Examen con foto adjunta');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Navigate to event detail
+    await page.getByText('Examen con foto adjunta').click();
+    await expect(page.locator('header')).toContainText('Detalle del Evento');
+
+    // Link a photo
+    await page.getByRole('button', { name: /vincular foto/i }).click();
+    await page.getByLabel('URL de Google Photos').fill('https://photos.google.com/photo/test123');
+    await page.getByLabel(/descripción/i).fill('Resultado de examen');
+    await page.getByRole('button', { name: /guardar/i }).click();
+
+    // Photo should appear
+    await expect(page.getByText('Resultado de examen')).toBeVisible();
+    await expect(page.getByText('Documentos (1)')).toBeVisible();
+
+    // Unlink the photo
+    await page.getByLabel(/desvincular/i).click();
+    await expect(page.getByText('Documentos (0)')).toBeVisible();
+    await expect(page.getByText('Sin documentos vinculados')).toBeVisible();
+  });
 });
 

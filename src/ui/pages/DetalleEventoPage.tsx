@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { getEventById, listPhotosByEvent } from '../../infra/store-provider';
+import { useEffect, useState, useCallback } from 'react';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
+import { PhotoLinker } from '../components/PhotoLinker';
 import type { MedicalEvent } from '../../domain/models/medical-event';
-import type { EventPhoto } from '../../domain/models/event-photo';
+import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 
 interface DetalleEventoPageProps {
   eventoId: string;
@@ -23,6 +24,11 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const reloadPhotos = useCallback(async () => {
+    const ph = await listPhotosByEvent(eventoId);
+    setFotos(ph);
+  }, [eventoId]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -41,6 +47,16 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
     }
     load();
   }, [eventoId]);
+
+  const handleLinkPhoto = async (input: LinkPhotoInput) => {
+    await linkPhoto(input);
+    await reloadPhotos();
+  };
+
+  const handleUnlinkPhoto = async (photoId: string) => {
+    await unlinkPhoto(photoId);
+    await reloadPhotos();
+  };
 
   if (loading) {
     return (
@@ -107,23 +123,33 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
             Sin documentos vinculados
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 mb-3">
             {fotos.map((foto) => (
-              <a
+              <div
                 key={foto.id}
-                href={foto.googlePhotosUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <span className="text-lg">📷</span>
-                <span className="text-sm text-blue-600 underline truncate">
+                <a
+                  href={foto.googlePhotosUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-sm text-blue-600 underline truncate"
+                >
                   {foto.description ?? foto.googlePhotosId}
-                </span>
-              </a>
+                </a>
+                <button
+                  onClick={() => handleUnlinkPhoto(foto.id)}
+                  className="text-xs text-red-400 hover:text-red-600 px-2 py-1"
+                  aria-label={`Desvincular ${foto.description ?? foto.googlePhotosId}`}
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
         )}
+        <PhotoLinker eventId={eventoId} onPhotoLinked={handleLinkPhoto} />
       </div>
     </div>
   );
