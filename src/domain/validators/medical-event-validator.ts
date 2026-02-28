@@ -1,4 +1,5 @@
-import { CreateMedicalEventInput, EVENT_TYPES, EventType, UpdateMedicalEventInput } from '../models/medical-event.js';
+import { EVENT_TYPES } from '../models/medical-event.js';
+import type { CreateMedicalEventInput, EventType, UpdateMedicalEventInput } from '../models/medical-event.js';
 
 export interface ValidationError {
   campo: string;

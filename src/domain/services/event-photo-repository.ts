@@ -1,4 +1,4 @@
-import { EventPhoto, LinkPhotoInput } from '../models/event-photo.js';
+import type { EventPhoto, LinkPhotoInput } from '../models/event-photo.js';
 
 export interface EventPhotoRepository {
   vincular(input: LinkPhotoInput): Promise<EventPhoto>;

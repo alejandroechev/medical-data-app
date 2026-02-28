@@ -1,12 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
+declare const process: { env: Record<string, string | undefined> } | undefined;
+
 function getEnvVar(name: string): string {
   // Vite environment (browser)
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     return (import.meta.env as Record<string, string>)[name] ?? '';
   }
   // Node.js environment (CLI)
-  return process.env[name] ?? '';
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[name] ?? '';
+  }
+  return '';
 }
 
 const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');

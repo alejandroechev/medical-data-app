@@ -1,5 +1,5 @@
-import { LinkPhotoInput } from '../models/event-photo.js';
-import { ValidationError, ValidationResult } from './medical-event-validator.js';
+import type { LinkPhotoInput } from '../models/event-photo.js';
+import type { ValidationError, ValidationResult } from './medical-event-validator.js';
 
 export function validarVincularFoto(input: LinkPhotoInput): ValidationResult {
   const errores: ValidationError[] = [];

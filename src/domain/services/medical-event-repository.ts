@@ -1,4 +1,4 @@
-import { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../models/medical-event.js';
+import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../models/medical-event.js';
 
 export interface MedicalEventFilters {
   pacienteId?: string;

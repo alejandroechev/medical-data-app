@@ -1,4 +1,4 @@
-import { FamilyMember } from '../models/family-member.js';
+import type { FamilyMember } from '../models/family-member.js';
 
 export interface FamilyMemberRepository {
   listar(): Promise<FamilyMember[]>;

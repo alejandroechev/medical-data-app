@@ -1,35 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useNavigation } from './ui/hooks/useNavigation';
+import { Header } from './ui/components/Header';
+import { BottomNav } from './ui/components/BottomNav';
+import { InicioPage } from './ui/pages/InicioPage';
+import { NuevoEventoPage } from './ui/pages/NuevoEventoPage';
+import { DetalleEventoPage } from './ui/pages/DetalleEventoPage';
+import { HistorialPage } from './ui/pages/HistorialPage';
+
+const PAGE_TITLES: Record<string, string> = {
+  'inicio': 'Registro Médico Familiar',
+  'nuevo-evento': 'Nuevo Evento',
+  'detalle-evento': 'Detalle del Evento',
+  'historial': 'Historial',
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { currentPage, params, navigateTo, goBack } = useNavigation();
+  const showBack = currentPage !== 'inicio';
+  const title = PAGE_TITLES[currentPage] ?? 'Registro Médico';
+
+  const handleEventClick = (id: string) => {
+    navigateTo('detalle-evento', { eventoId: id });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-h-screen bg-gray-50">
+      <Header titulo={title} onBack={showBack ? goBack : undefined} />
+
+      <main className="max-w-lg mx-auto pb-20">
+        {currentPage === 'inicio' && (
+          <InicioPage onEventClick={handleEventClick} />
+        )}
+        {currentPage === 'nuevo-evento' && (
+          <NuevoEventoPage onCreated={() => navigateTo('inicio')} />
+        )}
+        {currentPage === 'detalle-evento' && params.eventoId && (
+          <DetalleEventoPage eventoId={params.eventoId} />
+        )}
+        {currentPage === 'historial' && (
+          <HistorialPage onEventClick={handleEventClick} />
+        )}
+      </main>
+
+      <BottomNav currentPage={currentPage} onNavigate={navigateTo} />
+    </div>
+  );
 }
 
-export default App
+export default App;
