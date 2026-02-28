@@ -64,6 +64,11 @@ npx tsc -b
 
 <important>If any validation step fails, fix the underlying issue. NEVER delete pre-existing tests or scenarios unless the user explicitly asks you to.</important>
 
+### Documentation
+- **README** Update readme file with any relevant public change to the app
+- **System Diagram** Keep always up to date a mermaid system level diagram of the app architecture in docs/system-diagram.md
+- **ADR** For every major design and architecture decision add an Architecture Decision Record in docs/adrs
+
 ### Commit Checklist
 
 Before running `git commit`, mentally verify:
@@ -77,9 +82,3 @@ Before running `git commit`, mentally verify:
 - [ ] README updated (if public-facing change)?
 - [ ] System diagram updated (if architecture changed)?
 - [ ] ADR written (if major design decision)?
-
-### Documentation
-- **README** Update readme file with any relevant public change to the app
-- **System Diagram** Keep always up to date a mermaid system level diagram of the app architecture in docs/system-diagram.md
-- **ADR** For every major design and architecture decision add an Architecture Decision Record in docs/adrs
-
