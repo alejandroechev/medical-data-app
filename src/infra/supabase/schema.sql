@@ -8,6 +8,14 @@ CREATE TABLE IF NOT EXISTS family_members (
   parentesco TEXT NOT NULL
 );
 
+-- Seed: family members
+INSERT INTO family_members (nombre, parentesco) VALUES
+  ('Alejandro', 'Padre'),
+  ('Daniela', 'Madre'),
+  ('Antonio', 'Hijo'),
+  ('Gaspar', 'Hijo')
+ON CONFLICT DO NOTHING;
+
 -- Tabla: eventos médicos
 CREATE TABLE IF NOT EXISTS medical_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
