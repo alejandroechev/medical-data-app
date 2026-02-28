@@ -1,12 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+function getEnvVar(name: string): string {
+  // Vite environment (browser)
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return (import.meta.env as Record<string, string>)[name] ?? '';
+  }
+  // Node.js environment (CLI)
+  return process.env[name] ?? '';
+}
+
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Faltan variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY'
+  console.warn(
+    'Advertencia: Variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY no configuradas. Algunas funciones no estarán disponibles.'
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
