@@ -14,6 +14,7 @@ An app to keep records of personal medical events from me and my family
 - **PWA** For mobile apps, build them as Progressive WebApps
 - **Domain Logic Separation** Separate domain logic from CLI/UI/WebAPI
 - **CLI** Always implement a CLI with feature parity to WebAPI/UI layer. This is a tool for you as an agent to validate your work
+- **In-Memory Stubs for External Integrations** For every external service integration (databases, APIs, third-party services), implement an in-memory stub that conforms to the same interface. Use a provider/factory that auto-selects the real implementation when credentials are configured, and falls back to the in-memory stub when they are not. This ensures E2E tests, CLI validation, and local development work fully offline without external dependencies.
 
 ### Git Workflow
 - **Work directly on master** — solo developer, no branch overhead
