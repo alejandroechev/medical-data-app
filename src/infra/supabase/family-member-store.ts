@@ -4,9 +4,9 @@ import type { FamilyMember } from '../../domain/models/family-member.js';
 // Update this list with your family members
 const SEED_MEMBERS: FamilyMember[] = [
   { id: '1', name: 'Alejandro', relationship: 'Padre' },
-  { id: '2', name: 'Pareja', relationship: 'Madre' },
-  { id: '3', name: 'Hijo 1', relationship: 'Hijo/a' },
-  { id: '4', name: 'Hijo 2', relationship: 'Hijo/a' },
+  { id: '2', name: 'Daniela', relationship: 'Madre' },
+  { id: '3', name: 'Antonio', relationship: 'Hijo' },
+  { id: '4', name: 'Gaspar', relationship: 'Hijo' },
 ];
 
 export function getFamilyMembers(): FamilyMember[] {
