@@ -22,19 +22,61 @@ An app to keep records of personal medical events from me and my family
 - **Tag milestones**: `git tag v0.1.0-mvp` when deploying or reaching a checkpoint
 - **Branch only for risky experiments** you might discard — delete after merge or abandon
 
-### Coding
-- **TDD** ALWAYS Work using TDD with red/green flow ALWAYS
-- **E2E Tests** Include for every feature E2E tests. Use Playwright for WebApps E2E flows.
-- **CLI Scenario Tests** Create descriptive scenarios for every feature that work as instruction for an AI agent to run them using the CLI
+### Coding — TDD Workflow (strict, per-function)
 
-### Validation
-After completing any feature:
-- **Coverage Check** Run ALL unit tests, validate coverage is over 90%
-- **E2E Tests** Run ALL e2e tests
-- **CLI Scenario testing** Test ALL CLI scenarios
-- **Visual validation** If its a UI impacting feature: do a visual validation using Playwright MCP, take screenshots as you tests and review the screenshots to verify visually all e2e flows and the new feature. Store this screenshots in the git ignored screenshots/ folder <important>If Playwright MCP is not available stop and let the user know</important>
+<important>For EVERY function, component, or module you implement, follow this exact sequence. Do NOT skip steps or batch them.</important>
 
-<important>If any of the validations step fail, fix the underlying issue. NEVER delete pre-existing tests or scenarios unless specified</important>
+1. **RED** — Write a failing test FIRST. Run it. Confirm it fails. Show the failure output.
+2. **GREEN** — Write the MINIMUM implementation code to make the test pass. Run the test. Confirm it passes.
+3. **REFACTOR** — Clean up if needed. Run the test again to confirm it still passes.
+4. Repeat for the next behavior/function.
+
+<important>NEVER write implementation code without a pre-existing failing test. If you catch yourself writing code first, STOP, delete it, and write the test first.</important>
+
+### Coding — E2E and CLI Tests (per-feature, not batched)
+
+For every user-facing feature, before considering it complete:
+- **E2E Test** — Write a Playwright E2E test that exercises the feature end-to-end. Run it. Confirm it passes.
+- **CLI Scenario** — Write a CLI scenario AND execute it using the CLI. Confirm the output matches expectations.
+
+### Validation — Pre-Commit Gate
+
+<important>You CANNOT commit until ALL of the following pass. This is a gate, not a suggestion. Run these exact commands before every `git commit`:</important>
+
+```bash
+# 1. All unit tests pass with coverage above 90%
+npx vitest run --coverage
+# STOP if coverage < 90%. Add tests until coverage ≥ 90%.
+
+# 2. All E2E tests pass
+npx playwright test
+# STOP if any E2E test fails. Fix the issue.
+
+# 3. TypeScript compiles cleanly
+npx tsc -b
+# STOP if there are type errors. Fix them.
+
+# 4. Visual validation (UI features only)
+# Take screenshots using Playwright MCP of every screen affected by the change.
+# Review each screenshot visually. Store in screenshots/ folder.
+# If Playwright MCP is not available, STOP and tell the user.
+```
+
+<important>If any validation step fails, fix the underlying issue. NEVER delete pre-existing tests or scenarios unless the user explicitly asks you to.</important>
+
+### Commit Checklist
+
+Before running `git commit`, mentally verify:
+- [ ] Every new function/component was built with TDD (red → green → refactor)?
+- [ ] E2E tests exist for every new user-facing feature?
+- [ ] CLI scenarios exist and have been executed for every new feature?
+- [ ] `npx vitest run --coverage` shows ≥ 90% statement coverage?
+- [ ] `npx playwright test` — all E2E tests pass?
+- [ ] `npx tsc -b` — zero type errors?
+- [ ] Visual screenshots taken and reviewed (if UI feature)?
+- [ ] README updated (if public-facing change)?
+- [ ] System diagram updated (if architecture changed)?
+- [ ] ADR written (if major design decision)?
 
 ### Documentation
 - **README** Update readme file with any relevant public change to the app
