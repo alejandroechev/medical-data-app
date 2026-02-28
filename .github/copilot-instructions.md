@@ -8,6 +8,9 @@ An app to keep records of personal medical events from me and my family
 
 <important>Mandatory Development Loop (non-negotiable)</important>
 
+### Pre-Development
+- **Read ADRs** Before starting any development work, read all Architecture Decision Records in `docs/adrs/` to understand existing design decisions and constraints. Do not contradict or duplicate existing ADRs without explicit user approval.
+
 ### Architecture
 - **Typescript** Use Typescript as default language, unless told otherwise
 - **Tauri** For desktop apps use Tauri framework
