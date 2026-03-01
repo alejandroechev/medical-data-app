@@ -1,12 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
+import { EventActions } from '../components/EventActions';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 
 interface DetalleEventoPageProps {
   eventoId: string;
+  onDeleted?: () => void;
 }
 
 const TYPE_ICONS: Record<string, string> = {
@@ -18,7 +20,7 @@ const TYPE_ICONS: Record<string, string> = {
   'Otro': '📋',
 };
 
-export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
+export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProps) {
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,21 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
   const handleUnlinkPhoto = async (photoId: string) => {
     await unlinkPhoto(photoId);
     await reloadPhotos();
+  };
+
+  const handleDelete = async () => {
+    await deleteEvent(eventoId);
+    onDeleted?.();
+  };
+
+  const handleToggleIsapre = async (value: boolean) => {
+    const updated = await updateEvent(eventoId, { isapreReimbursed: value });
+    setEvento(updated);
+  };
+
+  const handleToggleInsurance = async (value: boolean) => {
+    const updated = await updateEvent(eventoId, { insuranceReimbursed: value });
+    setEvento(updated);
   };
 
   if (loading) {
@@ -99,19 +116,16 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
           <span className="text-sm text-gray-500">Paciente</span>
           <span className="text-sm font-medium">{paciente?.name ?? 'Desconocido'}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-500">ISAPRE</span>
-          <span className={`text-sm font-medium ${evento.isapreReimbursed ? 'text-green-600' : 'text-gray-400'}`}>
-            {evento.isapreReimbursed ? 'Reembolsada ✓' : 'No reembolsada'}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-500">Seguro Complementario</span>
-          <span className={`text-sm font-medium ${evento.insuranceReimbursed ? 'text-green-600' : 'text-gray-400'}`}>
-            {evento.insuranceReimbursed ? 'Reembolsada ✓' : 'No reembolsada'}
-          </span>
-        </div>
       </div>
+
+      {/* Reembolsos & Delete */}
+      <EventActions
+        isapreReimbursed={evento.isapreReimbursed}
+        insuranceReimbursed={evento.insuranceReimbursed}
+        onDelete={handleDelete}
+        onToggleIsapre={handleToggleIsapre}
+        onToggleInsurance={handleToggleInsurance}
+      />
 
       {/* Photos */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">

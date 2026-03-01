@@ -107,7 +107,8 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Dolor abdominal severo')).toBeVisible();
     await expect(page.getByText('Urgencia')).toBeVisible();
     await expect(page.getByText('Alejandro')).toBeVisible();
-    await expect(page.getByText('No reembolsada').first()).toBeVisible();
+    await expect(page.getByLabel('ISAPRE')).not.toBeChecked();
+    await expect(page.getByLabel('Seguro Complementario')).not.toBeChecked();
   });
 
   test('full flow: create event with ISAPRE reimbursement', async ({ page }) => {
@@ -177,6 +178,57 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByLabel(/desvincular/i).click();
     await expect(page.getByText('Documentos (0)')).toBeVisible();
     await expect(page.getByText('Sin documentos vinculados')).toBeVisible();
+  });
+
+  test('full flow: delete event with confirmation', async ({ page }) => {
+    await page.goto('/');
+
+    // Create event
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Descripción').fill('Evento a eliminar');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Go to detail
+    await page.getByText('Evento a eliminar').click();
+    await expect(page.locator('header')).toContainText('Detalle del Evento');
+
+    // Click delete → confirm dialog appears
+    await page.getByRole('button', { name: /eliminar evento/i }).click();
+    await expect(page.getByText(/¿estás seguro/i)).toBeVisible();
+
+    // Confirm delete
+    await page.getByRole('button', { name: /sí, eliminar/i }).click();
+
+    // Back to home, event gone
+    await expect(page.locator('header')).toContainText('Registro Médico Familiar');
+    await expect(page.getByText('Evento a eliminar')).not.toBeVisible();
+  });
+
+  test('full flow: toggle reembolso on event detail', async ({ page }) => {
+    await page.goto('/');
+
+    // Create event
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Descripción').fill('Consulta para reembolso');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Go to detail
+    await page.getByText('Consulta para reembolso').click();
+
+    // ISAPRE should be unchecked
+    const isapreCheckbox = page.getByLabel('ISAPRE');
+    await expect(isapreCheckbox).not.toBeChecked();
+
+    // Toggle ISAPRE on
+    await isapreCheckbox.check();
+    await expect(isapreCheckbox).toBeChecked();
+
+    // Go back and re-enter to verify persistence
+    await page.getByLabel('Volver').click();
+    await page.getByText('Consulta para reembolso').click();
+    await expect(page.getByLabel('ISAPRE')).toBeChecked();
   });
 });
 

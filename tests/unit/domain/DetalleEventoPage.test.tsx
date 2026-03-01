@@ -48,8 +48,8 @@ describe('DetalleEventoPage', () => {
     expect(await screen.findByText('Urgencia')).toBeInTheDocument();
     expect(screen.getByText('Dolor abdominal severo')).toBeInTheDocument();
     expect(screen.getByText('2024-06-15')).toBeInTheDocument();
-    expect(screen.getByText('Reembolsada ✓')).toBeInTheDocument();
-    expect(screen.getByText('No reembolsada')).toBeInTheDocument();
+    expect(screen.getByLabelText('ISAPRE')).toBeChecked();
+    expect(screen.getByLabelText('Seguro Complementario')).not.toBeChecked();
     expect(screen.getByText('Alejandro')).toBeInTheDocument();
   });
 
