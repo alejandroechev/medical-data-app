@@ -19,15 +19,15 @@ graph TB
     end
 
     subgraph Infra["🔌 Infrastructure"]
-        SupaClient["Supabase Client"]
-        GoogleAPI["Google Photos API"]
-        InMemory["In-Memory Stubs"]
         StoreProvider["Store Provider"]
+        SupaClient["Supabase Client"]
+        PhotoStorage["Photo Upload Service"]
+        InMemory["In-Memory Stubs"]
     end
 
     subgraph External["☁️ External Services"]
-        Supabase["Supabase<br/>(PostgreSQL + REST API)"]
-        GooglePhotos["Google Photos"]
+        SupabaseDB["Supabase<br/>(PostgreSQL + REST API)"]
+        SupabaseStorage["Supabase Storage<br/>(event-photos bucket)"]
     end
 
     UI --> Hooks
@@ -37,9 +37,10 @@ graph TB
     Services --> Models
     Services --> StoreProvider
     StoreProvider --> SupaClient
+    StoreProvider --> PhotoStorage
     StoreProvider --> InMemory
-    SupaClient --> Supabase
-    GoogleAPI --> GooglePhotos
+    SupaClient --> SupabaseDB
+    PhotoStorage --> SupabaseStorage
     SW -.-> UI
 ```
 
@@ -47,6 +48,6 @@ graph TB
 
 - **Pure Domain**: No framework dependencies. Models, validators, and repository interfaces are pure TypeScript.
 - **CLI Parity**: All CLI commands access the same domain logic as the UI.
-- **Photos by Reference**: Only Google Photos URLs/IDs are stored, never the actual images.
+- **Photo Storage**: Photos are uploaded directly to Supabase Storage. Permanent public URLs are stored in the database.
 - **No Authentication**: Private family-use app with no access control.
 - **Store Provider**: Auto-selects the real implementation when credentials are configured, falls back to in-memory stubs otherwise.
