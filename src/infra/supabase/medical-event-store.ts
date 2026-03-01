@@ -96,6 +96,12 @@ export async function listEvents(
   if (filters?.to) {
     query = query.lte('fecha', filters.to);
   }
+  if (filters?.isapreReimbursed !== undefined) {
+    query = query.eq('reembolso_isapre', filters.isapreReimbursed);
+  }
+  if (filters?.insuranceReimbursed !== undefined) {
+    query = query.eq('reembolso_seguro', filters.insuranceReimbursed);
+  }
 
   const { data, error } = await query;
   if (error) throw new Error(`Error al listar eventos: ${error.message}`);

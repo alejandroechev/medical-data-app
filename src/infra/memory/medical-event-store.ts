@@ -46,6 +46,12 @@ export class InMemoryMedicalEventStore {
     if (filters?.to) {
       results = results.filter((e) => e.date <= filters.to!);
     }
+    if (filters?.isapreReimbursed !== undefined) {
+      results = results.filter((e) => e.isapreReimbursed === filters.isapreReimbursed);
+    }
+    if (filters?.insuranceReimbursed !== undefined) {
+      results = results.filter((e) => e.insuranceReimbursed === filters.insuranceReimbursed);
+    }
 
     return results.sort((a, b) => b.date.localeCompare(a.date)).map((e) => ({ ...e }));
   }

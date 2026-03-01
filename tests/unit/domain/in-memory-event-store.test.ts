@@ -95,4 +95,22 @@ describe('InMemoryMedicalEventStore', () => {
     const found = await store.getById(created.id);
     expect(found).toBeNull();
   });
+
+  it('should filter by isapreReimbursed', async () => {
+    await store.create({ date: '2024-01-01', type: 'Examen', description: 'A', patientId: '1', isapreReimbursed: true });
+    await store.create({ date: '2024-02-01', type: 'Examen', description: 'B', patientId: '1', isapreReimbursed: false });
+
+    const filtered = await store.list({ isapreReimbursed: true });
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].isapreReimbursed).toBe(true);
+  });
+
+  it('should filter by insuranceReimbursed', async () => {
+    await store.create({ date: '2024-01-01', type: 'Examen', description: 'A', patientId: '1', insuranceReimbursed: true });
+    await store.create({ date: '2024-02-01', type: 'Examen', description: 'B', patientId: '1', insuranceReimbursed: false });
+
+    const filtered = await store.list({ insuranceReimbursed: true });
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].insuranceReimbursed).toBe(true);
+  });
 });

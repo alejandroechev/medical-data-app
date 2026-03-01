@@ -15,6 +15,7 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
   const [type, setType] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [reembolso, setReembolso] = useState('');
 
   const filters: MedicalEventFilters = useMemo(
     () => ({
@@ -22,8 +23,10 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
       type: type || undefined,
       from: from || undefined,
       to: to || undefined,
+      isapreReimbursed: reembolso === 'isapre' || reembolso === 'ambos' ? true : undefined,
+      insuranceReimbursed: reembolso === 'seguro' || reembolso === 'ambos' ? true : undefined,
     }),
-    [patientId, type, from, to]
+    [patientId, type, from, to, reembolso]
   );
 
   const { events, loading, error } = useEvents(filters);
@@ -85,6 +88,21 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
               onChange={(e) => setTo(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
             />
+          </div>
+
+          <div className="col-span-2">
+            <label htmlFor="filtro-reembolso" className="block text-xs text-gray-500 mb-1">Reembolso</label>
+            <select
+              id="filtro-reembolso"
+              value={reembolso}
+              onChange={(e) => setReembolso(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="isapre">ISAPRE reembolsada</option>
+              <option value="seguro">Seguro reembolsado</option>
+              <option value="ambos">Ambos reembolsados</option>
+            </select>
           </div>
         </div>
       </div>

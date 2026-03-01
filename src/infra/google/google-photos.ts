@@ -1,7 +1,8 @@
-// Google Photos API integration
-// Uses Google Picker API to browse and select photos from user's library
+// Requires "Google Photos Picker API" enabled in Google Cloud Console
+// OAuth scope: photospicker.mediaitems.readonly
+// Add this scope in Google Cloud Console → APIs & Services → OAuth consent screen → Data Access
 
-const GOOGLE_PHOTOS_SCOPE = 'https://www.googleapis.com/auth/photoslibrary.readonly';
+const GOOGLE_PHOTOS_SCOPE = 'https://www.googleapis.com/auth/photospicker.mediaitems.readonly';
 
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let accessToken: string | null = null;
@@ -9,10 +10,23 @@ let accessToken: string | null = null;
 export interface GooglePhotoItem {
   id: string;
   baseUrl: string;
-  productUrl: string;
-  filename: string;
   mimeType: string;
-  description?: string;
+  mediaFile: {
+    filename: string;
+  };
+  /** @deprecated Picker API doesn't provide productUrl; defaults to baseUrl */
+  productUrl: string;
+  /** Convenience alias for mediaFile.filename */
+  filename: string;
+}
+
+export interface PickerSession {
+  sessionId: string;
+  pickerUri: string;
+}
+
+export interface PickerSessionStatus {
+  mediaItemsSet: boolean;
 }
 
 export function isGoogleConfigured(): boolean {
@@ -50,55 +64,39 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
-export async function listGooglePhotos(
-  pageToken?: string,
-  pageSize = 25
-): Promise<{ items: GooglePhotoItem[]; nextPageToken?: string }> {
+export async function createPickerSession(): Promise<PickerSession> {
   if (!accessToken) {
     throw new Error('No autenticado con Google. Llame a initGoogleAuth() primero.');
   }
 
-  const body: Record<string, unknown> = { pageSize };
-  if (pageToken) body.pageToken = pageToken;
-
   const response = await fetch(
-    'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+    'https://photospicker.googleapis.com/v1/sessions',
     {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
     }
   );
 
   if (!response.ok) {
-    throw new Error(`Error al listar fotos: ${response.status} ${response.statusText}`);
+    throw new Error(`Error al crear sesión del picker: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
-  const items: GooglePhotoItem[] = (data.mediaItems ?? []).map(
-    (item: Record<string, string>) => ({
-      id: item.id,
-      baseUrl: item.baseUrl,
-      productUrl: item.productUrl,
-      filename: item.filename,
-      mimeType: item.mimeType,
-      description: item.description,
-    })
-  );
-
-  return { items, nextPageToken: data.nextPageToken };
+  return { sessionId: data.id, pickerUri: data.pickerUri };
 }
 
-export async function getGooglePhoto(mediaItemId: string): Promise<GooglePhotoItem> {
+export async function pollPickerSession(
+  sessionId: string
+): Promise<PickerSessionStatus> {
   if (!accessToken) {
     throw new Error('No autenticado con Google. Llame a initGoogleAuth() primero.');
   }
 
   const response = await fetch(
-    `https://photoslibrary.googleapis.com/v1/mediaItems/${mediaItemId}`,
+    `https://photospicker.googleapis.com/v1/sessions/${sessionId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -107,18 +105,47 @@ export async function getGooglePhoto(mediaItemId: string): Promise<GooglePhotoIt
   );
 
   if (!response.ok) {
-    throw new Error(`Error al obtener foto: ${response.status} ${response.statusText}`);
+    throw new Error(`Error al consultar sesión: ${response.status} ${response.statusText}`);
   }
 
-  const item = await response.json();
-  return {
-    id: item.id,
-    baseUrl: item.baseUrl,
-    productUrl: item.productUrl,
-    filename: item.filename,
-    mimeType: item.mimeType,
-    description: item.description,
-  };
+  const data = await response.json();
+  return { mediaItemsSet: Boolean(data.mediaItemsSet) };
+}
+
+export async function listPickedMediaItems(
+  sessionId: string
+): Promise<GooglePhotoItem[]> {
+  if (!accessToken) {
+    throw new Error('No autenticado con Google. Llame a initGoogleAuth() primero.');
+  }
+
+  const response = await fetch(
+    `https://photospicker.googleapis.com/v1/mediaItems?sessionId=${encodeURIComponent(sessionId)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error al listar fotos seleccionadas: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return (data.mediaItems ?? []).map(
+    (item: Record<string, unknown>) => {
+      const filename = (item.mediaFile as Record<string, string>)?.filename ?? '';
+      return {
+        id: item.id as string,
+        baseUrl: item.baseUrl as string,
+        mimeType: item.mimeType as string,
+        mediaFile: { filename },
+        productUrl: item.baseUrl as string,
+        filename,
+      };
+    }
+  );
 }
 
 // Type declaration for Google Identity Services

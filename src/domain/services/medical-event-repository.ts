@@ -5,6 +5,8 @@ export interface MedicalEventFilters {
   type?: string;
   from?: string; // ISO date
   to?: string; // ISO date
+  isapreReimbursed?: boolean;
+  insuranceReimbursed?: boolean;
 }
 
 export interface MedicalEventRepository {

@@ -167,7 +167,7 @@ test.describe('Medical Family Registry — E2E', () => {
     // Link a photo
     await page.getByRole('button', { name: /vincular foto/i }).click();
     await page.getByLabel('URL de Google Photos').fill('https://photos.google.com/photo/test123');
-    await page.getByLabel(/descripción/i).fill('Resultado de examen');
+    await page.getByLabel('Descripción (opcional)').fill('Resultado de examen');
     await page.getByRole('button', { name: /guardar/i }).click();
 
     // Photo should appear
@@ -229,6 +229,35 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByLabel('Volver').click();
     await page.getByText('Consulta para reembolso').click();
     await expect(page.getByLabel('ISAPRE')).toBeChecked();
+  });
+
+  test('full flow: edit event description', async ({ page }) => {
+    await page.goto('/');
+
+    // Create event
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Descripción').fill('Descripción original');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Go to detail
+    await page.getByText('Descripción original').click();
+    await expect(page.getByText('Descripción original')).toBeVisible();
+
+    // Edit description
+    await page.getByRole('button', { name: /editar/i }).click();
+    const textarea = page.getByRole('textbox');
+    await textarea.clear();
+    await textarea.fill('Descripción actualizada');
+    await page.getByRole('button', { name: /guardar/i }).click();
+
+    // Verify updated text is shown
+    await expect(page.getByText('Descripción actualizada')).toBeVisible();
+
+    // Go back and re-enter to verify persistence
+    await page.getByLabel('Volver').click();
+    await page.getByText('Descripción actualizada').click();
+    await expect(page.getByText('Descripción actualizada')).toBeVisible();
   });
 });
 

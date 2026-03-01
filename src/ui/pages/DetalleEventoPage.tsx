@@ -3,6 +3,7 @@ import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, d
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
+import { EditableDescription } from '../components/EditableDescription';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 
@@ -75,6 +76,11 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     setEvento(updated);
   };
 
+  const handleUpdateDescription = async (newDescription: string) => {
+    const updated = await updateEvent(eventoId, { description: newDescription });
+    setEvento(updated);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -107,7 +113,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
             <p className="text-sm text-gray-500">{evento.date}</p>
           </div>
         </div>
-        <p className="text-gray-700">{evento.description}</p>
+        <EditableDescription value={evento.description} onSave={handleUpdateDescription} />
       </div>
 
       {/* Details */}

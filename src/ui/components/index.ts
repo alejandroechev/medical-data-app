@@ -5,3 +5,4 @@ export { EventForm } from './EventForm';
 export { PhotoLinker } from './PhotoLinker';
 export { GooglePhotoPicker } from './GooglePhotoPicker';
 export { EventActions } from './EventActions';
+export { EditableDescription } from './EditableDescription';
