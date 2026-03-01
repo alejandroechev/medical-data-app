@@ -41,11 +41,23 @@ CREATE TABLE IF NOT EXISTS event_photos (
   creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Table: event audio recordings
+CREATE TABLE IF NOT EXISTS event_recordings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID NOT NULL REFERENCES medical_events(id) ON DELETE CASCADE,
+  recording_url TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  duration_seconds INTEGER,
+  description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Índices para consultas frecuentes
 CREATE INDEX IF NOT EXISTS idx_events_paciente ON medical_events(paciente_id);
 CREATE INDEX IF NOT EXISTS idx_events_fecha ON medical_events(fecha DESC);
 CREATE INDEX IF NOT EXISTS idx_events_tipo ON medical_events(tipo);
 CREATE INDEX IF NOT EXISTS idx_photos_evento ON event_photos(evento_id);
+CREATE INDEX IF NOT EXISTS idx_recordings_event ON event_recordings(event_id);
 
 -- Trigger para actualizar actualizado_en automáticamente
 CREATE OR REPLACE FUNCTION update_actualizado_en()
@@ -75,3 +87,9 @@ CREATE POLICY "Acceso público eliminación medical_events" ON medical_events FO
 CREATE POLICY "Acceso público lectura event_photos" ON event_photos FOR SELECT USING (true);
 CREATE POLICY "Acceso público inserción event_photos" ON event_photos FOR INSERT WITH CHECK (true);
 CREATE POLICY "Acceso público eliminación event_photos" ON event_photos FOR DELETE USING (true);
+
+-- RLS for event_recordings
+ALTER TABLE event_recordings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read event_recordings" ON event_recordings FOR SELECT USING (true);
+CREATE POLICY "Public insert event_recordings" ON event_recordings FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public delete event_recordings" ON event_recordings FOR DELETE USING (true);

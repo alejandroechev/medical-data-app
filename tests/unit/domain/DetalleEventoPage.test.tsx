@@ -11,6 +11,10 @@ vi.mock('../../../src/infra/store-provider', () => ({
   listPhotosByEvent: vi.fn(),
   linkPhoto: vi.fn(),
   unlinkPhoto: vi.fn(),
+  uploadPhoto: vi.fn(),
+  createRecording: vi.fn(),
+  listRecordingsByEvent: vi.fn().mockResolvedValue([]),
+  deleteRecording: vi.fn(),
 }));
 
 import { getEventById, listPhotosByEvent } from '../../../src/infra/store-provider';

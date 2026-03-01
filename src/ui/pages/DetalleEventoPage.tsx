@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
 import { EditableDescription } from '../components/EditableDescription';
+import { AudioRecorder } from '../components/AudioRecorder';
+import { RecordingsList } from '../components/RecordingsList';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
+import type { EventRecording } from '../../domain/models/event-recording';
 
 interface DetalleEventoPageProps {
   eventoId: string;
@@ -24,6 +27,7 @@ const TYPE_ICONS: Record<string, string> = {
 export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProps) {
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
+  const [recordings, setRecordings] = useState<EventRecording[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,16 +36,23 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     setFotos(ph);
   }, [eventoId]);
 
+  const reloadRecordings = useCallback(async () => {
+    const recs = await listRecordingsByEvent(eventoId);
+    setRecordings(recs);
+  }, [eventoId]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const [ev, ph] = await Promise.all([
+        const [ev, ph, recs] = await Promise.all([
           getEventById(eventoId),
           listPhotosByEvent(eventoId),
+          listRecordingsByEvent(eventoId),
         ]);
         setEvento(ev);
         setFotos(ph);
+        setRecordings(recs);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -79,6 +90,23 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const handleUpdateDescription = async (newDescription: string) => {
     const updated = await updateEvent(eventoId, { description: newDescription });
     setEvento(updated);
+  };
+
+  const handleRecordingComplete = async (blob: Blob, durationSeconds: number) => {
+    const file = new File([blob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
+    const result = await uploadPhoto(eventoId, file);
+    await createRecording({
+      eventId: eventoId,
+      recordingUrl: result.url,
+      fileName: result.fileName,
+      durationSeconds,
+    });
+    await reloadRecordings();
+  };
+
+  const handleDeleteRecording = async (id: string) => {
+    await deleteRecording(id);
+    await reloadRecordings();
   };
 
   if (loading) {
@@ -192,6 +220,17 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           </div>
         )}
         <PhotoLinker eventId={eventoId} onPhotoLinked={handleLinkPhoto} />
+      </div>
+
+      {/* Recordings */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">
+          Grabaciones ({recordings.length})
+        </h3>
+        <RecordingsList recordings={recordings} onDelete={handleDeleteRecording} />
+        <div className="mt-3">
+          <AudioRecorder onRecordingComplete={handleRecordingComplete} />
+        </div>
       </div>
     </div>
   );

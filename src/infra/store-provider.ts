@@ -6,11 +6,14 @@ import { supabase } from './supabase/client.js';
 import * as supabaseEventStore from './supabase/medical-event-store.js';
 import * as supabasePhotoStore from './supabase/event-photo-store.js';
 import * as supabasePhotoStorage from './supabase/photo-storage.js';
+import * as supabaseRecordingStore from './supabase/recording-store.js';
 import { InMemoryMedicalEventStore } from './memory/medical-event-store.js';
 import { InMemoryEventPhotoStore } from './memory/event-photo-store.js';
 import { InMemoryPhotoUploader } from './memory/photo-uploader.js';
+import { InMemoryRecordingStore } from './memory/recording-store.js';
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../domain/models/medical-event.js';
 import type { EventPhoto, LinkPhotoInput } from '../domain/models/event-photo.js';
+import type { EventRecording, CreateRecordingInput } from '../domain/models/event-recording.js';
 import type { MedicalEventFilters } from '../domain/services/medical-event-repository.js';
 import type { UploadResult } from '../domain/services/photo-uploader.js';
 
@@ -20,6 +23,7 @@ const useSupabase = supabase !== null;
 const memoryEventStore = new InMemoryMedicalEventStore();
 const memoryPhotoStore = new InMemoryEventPhotoStore();
 const memoryPhotoUploader = new InMemoryPhotoUploader();
+const memoryRecordingStore = new InMemoryRecordingStore();
 
 export function isUsingSupabase(): boolean {
   return useSupabase;
@@ -69,4 +73,18 @@ export async function uploadPhoto(eventId: string, file: File): Promise<UploadRe
 
 export async function deleteStoredPhoto(url: string): Promise<void> {
   return useSupabase ? supabasePhotoStorage.deletePhoto(url) : memoryPhotoUploader.delete(url);
+}
+
+// --- Recordings ---
+
+export async function createRecording(input: CreateRecordingInput): Promise<EventRecording> {
+  return useSupabase ? supabaseRecordingStore.createRecording(input) : memoryRecordingStore.create(input);
+}
+
+export async function listRecordingsByEvent(eventId: string): Promise<EventRecording[]> {
+  return useSupabase ? supabaseRecordingStore.listRecordingsByEvent(eventId) : memoryRecordingStore.listByEvent(eventId);
+}
+
+export async function deleteRecording(id: string): Promise<void> {
+  return useSupabase ? supabaseRecordingStore.deleteRecording(id) : memoryRecordingStore.delete(id);
 }
