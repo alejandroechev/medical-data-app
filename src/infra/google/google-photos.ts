@@ -133,20 +133,23 @@ export async function listPickedMediaItems(
   }
 
   const data = await response.json();
+  // Debug: log raw response to understand Picker API structure
+  console.log('Picker API mediaItems response:', JSON.stringify(data, null, 2));
   return (data.mediaItems ?? []).map(
     (item: Record<string, unknown>) => {
       const mediaFile = item.mediaFile as Record<string, string> | undefined;
       const filename = mediaFile?.filename ?? '';
       const baseUrl = (item.baseUrl as string) || mediaFile?.baseUrl || '';
       const itemId = item.id as string;
-      // Build a viewable Google Photos URL from the media item ID
-      const productUrl = `https://photos.google.com/photo/${itemId}`;
+      // Use baseUrl for viewing (lh3.googleusercontent.com temporary URL)
+      // There is no stable public URL format for Google Photos by media item ID
+      const viewUrl = baseUrl || `https://photos.google.com`;
       return {
         id: itemId,
         baseUrl,
         mimeType: (item.mimeType as string) || mediaFile?.mimeType || '',
         mediaFile: { filename },
-        productUrl,
+        productUrl: viewUrl,
         filename,
       };
     }
