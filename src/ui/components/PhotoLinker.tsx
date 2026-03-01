@@ -19,16 +19,18 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
   const [loading, setLoading] = useState(false);
   const googleAvailable = isGoogleConfigured();
 
-  const handleGoogleSelect = async (photo: GooglePhotoItem) => {
+  const handleGoogleSelect = async (photos: GooglePhotoItem[]) => {
     setLoading(true);
     setError(null);
     try {
-      await onPhotoLinked({
-        eventId,
-        googlePhotosUrl: photo.productUrl,
-        googlePhotosId: photo.id,
-        description: photo.filename,
-      });
+      for (const photo of photos) {
+        await onPhotoLinked({
+          eventId,
+          googlePhotosUrl: photo.productUrl || photo.baseUrl || 'https://photos.google.com',
+          googlePhotosId: photo.id,
+          description: photo.filename,
+        });
+      }
       setMode('closed');
     } catch (err) {
       setError((err as Error).message);

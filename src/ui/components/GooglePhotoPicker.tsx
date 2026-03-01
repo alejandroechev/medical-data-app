@@ -10,7 +10,7 @@ import {
 import type { GooglePhotoItem } from '../../infra/google/google-photos';
 
 interface GooglePhotoPickerProps {
-  onSelect: (photo: GooglePhotoItem) => void;
+  onSelect: (photos: GooglePhotoItem[]) => void;
   onCancel: () => void;
 }
 
@@ -50,6 +50,10 @@ export function GooglePhotoPicker({ onSelect, onCancel }: GooglePhotoPickerProps
             const items = await listPickedMediaItems(session.sessionId);
             setPickedPhotos(items);
             setState('loaded');
+            // Auto-link all selected photos
+            if (items.length > 0) {
+              onSelect(items);
+            }
           }
         } catch (err) {
           stopPolling();
@@ -124,7 +128,9 @@ export function GooglePhotoPicker({ onSelect, onCancel }: GooglePhotoPickerProps
   return (
     <div className="space-y-3 bg-gray-50 rounded-lg p-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-gray-700">Fotos seleccionadas</h4>
+        <h4 className="text-sm font-medium text-gray-700">
+          {pickedPhotos.length} foto{pickedPhotos.length !== 1 ? 's' : ''} vinculada{pickedPhotos.length !== 1 ? 's' : ''}
+        </h4>
         <button
           onClick={onCancel}
           className="text-xs text-gray-500 hover:text-gray-700"
@@ -145,20 +151,11 @@ export function GooglePhotoPicker({ onSelect, onCancel }: GooglePhotoPickerProps
 
       <ul className="space-y-2 max-h-64 overflow-y-auto">
         {pickedPhotos.map((photo) => (
-          <li key={photo.id}>
-            <button
-              onClick={() => onSelect(photo)}
-              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
-            >
-              <img
-                src={`${photo.baseUrl}=w48-h48-c`}
-                alt={photo.mediaFile.filename}
-                className="w-10 h-10 rounded object-cover flex-shrink-0"
-              />
-              <span className="text-sm text-gray-700 truncate">
-                {photo.mediaFile.filename}
-              </span>
-            </button>
+          <li key={photo.id} className="flex items-center gap-3 p-2 rounded-lg bg-white">
+            <span className="text-lg">✅</span>
+            <span className="text-sm text-gray-700 truncate">
+              {photo.filename}
+            </span>
           </li>
         ))}
       </ul>
