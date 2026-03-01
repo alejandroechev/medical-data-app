@@ -23,8 +23,8 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
       type: type || undefined,
       from: from || undefined,
       to: to || undefined,
-      isapreReimbursed: reembolso === 'isapre' || reembolso === 'ambos' ? true : undefined,
-      insuranceReimbursed: reembolso === 'seguro' || reembolso === 'ambos' ? true : undefined,
+      isapreReimbursed: reembolso === 'isapre' || reembolso === 'ambos' ? true : reembolso === 'ninguno' ? false : undefined,
+      insuranceReimbursed: reembolso === 'seguro' || reembolso === 'ambos' ? true : reembolso === 'ninguno' ? false : undefined,
     }),
     [patientId, type, from, to, reembolso]
   );
@@ -102,6 +102,7 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
               <option value="isapre">ISAPRE reembolsada</option>
               <option value="seguro">Seguro reembolsado</option>
               <option value="ambos">Ambos reembolsados</option>
+              <option value="ninguno">Sin reembolsos</option>
             </select>
           </div>
         </div>
