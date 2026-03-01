@@ -144,29 +144,48 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           </p>
         ) : (
           <div className="space-y-2 mb-3">
-            {fotos.map((foto) => (
-              <div
-                key={foto.id}
-                className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-lg">📷</span>
-                <a
-                  href={foto.googlePhotosUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 text-sm text-blue-600 underline truncate"
+            {fotos.map((foto) => {
+              const isImage = foto.googlePhotosUrl.startsWith('http') && !foto.googlePhotosUrl.startsWith('memory://');
+              return (
+                <div
+                  key={foto.id}
+                  className="rounded-lg border border-gray-100 overflow-hidden"
                 >
-                  {foto.description ?? foto.googlePhotosId}
-                </a>
-                <button
-                  onClick={() => handleUnlinkPhoto(foto.id)}
-                  className="text-xs text-red-400 hover:text-red-600 px-2 py-1"
-                  aria-label={`Desvincular ${foto.description ?? foto.googlePhotosId}`}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+                  {isImage && (
+                    <a
+                      href={foto.googlePhotosUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={foto.googlePhotosUrl}
+                        alt={foto.description ?? foto.googlePhotosId}
+                        className="w-full h-40 object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+                  )}
+                  <div className="flex items-center gap-2 p-2">
+                    {!isImage && <span className="text-lg">📷</span>}
+                    <a
+                      href={foto.googlePhotosUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 text-sm text-blue-600 underline truncate"
+                    >
+                      {foto.description ?? foto.googlePhotosId}
+                    </a>
+                    <button
+                      onClick={() => handleUnlinkPhoto(foto.id)}
+                      className="text-xs text-red-400 hover:text-red-600 px-2 py-1"
+                      aria-label={`Desvincular ${foto.description ?? foto.googlePhotosId}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
         <PhotoLinker eventId={eventoId} onPhotoLinked={handleLinkPhoto} />

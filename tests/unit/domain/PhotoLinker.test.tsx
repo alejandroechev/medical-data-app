@@ -3,12 +3,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PhotoLinker } from '../../../src/ui/components/PhotoLinker';
 
-// Mock Google Photos as unconfigured for these tests (manual mode)
-vi.mock('../../../src/infra/google/google-photos', () => ({
-  isGoogleConfigured: () => false,
-  initGoogleAuth: vi.fn(),
-  listGooglePhotos: vi.fn(),
-  getAccessToken: () => null,
+// Mock store-provider upload
+vi.mock('../../../src/infra/store-provider', () => ({
+  uploadPhoto: vi.fn().mockResolvedValue({ url: 'https://test.supabase.co/photo.jpg', fileName: 'photo.jpg' }),
 }));
 
 describe('PhotoLinker', () => {
@@ -23,12 +20,13 @@ describe('PhotoLinker', () => {
     expect(screen.getByRole('button', { name: /vincular foto/i })).toBeInTheDocument();
   });
 
-  it('should show the form when button is clicked', async () => {
+  it('should show the form when Pegar URL is clicked', async () => {
     const user = userEvent.setup();
     render(<PhotoLinker eventId="ev-1" onPhotoLinked={mockOnLink} />);
 
     await user.click(screen.getByRole('button', { name: /vincular foto/i }));
-    expect(screen.getByLabelText('URL de Google Photos')).toBeInTheDocument();
+    await user.click(screen.getByText('Pegar URL'));
+    expect(screen.getByLabelText(/url de la foto/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/descripción/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /guardar/i })).toBeInTheDocument();
   });
@@ -38,8 +36,9 @@ describe('PhotoLinker', () => {
     render(<PhotoLinker eventId="ev-1" onPhotoLinked={mockOnLink} />);
 
     await user.click(screen.getByRole('button', { name: /vincular foto/i }));
+    await user.click(screen.getByText('Pegar URL'));
     await user.click(screen.getByRole('button', { name: /guardar/i }));
-    expect(screen.getByText(/la url de google photos es obligatoria/i)).toBeInTheDocument();
+    expect(screen.getByText(/la url es obligatoria/i)).toBeInTheDocument();
   });
 
   it('should call onPhotoLinked with correct data when form is valid', async () => {
@@ -47,13 +46,14 @@ describe('PhotoLinker', () => {
     render(<PhotoLinker eventId="ev-1" onPhotoLinked={mockOnLink} />);
 
     await user.click(screen.getByRole('button', { name: /vincular foto/i }));
-    await user.type(screen.getByLabelText('URL de Google Photos'), 'https://photos.google.com/photo/abc123');
+    await user.click(screen.getByText('Pegar URL'));
+    await user.type(screen.getByLabelText(/url de la foto/i), 'https://example.com/photo/abc123');
     await user.type(screen.getByLabelText(/descripción/i), 'Receta médica');
     await user.click(screen.getByRole('button', { name: /guardar/i }));
 
     expect(mockOnLink).toHaveBeenCalledWith({
       eventId: 'ev-1',
-      googlePhotosUrl: 'https://photos.google.com/photo/abc123',
+      googlePhotosUrl: 'https://example.com/photo/abc123',
       googlePhotosId: expect.any(String),
       description: 'Receta médica',
     });
@@ -64,11 +64,12 @@ describe('PhotoLinker', () => {
     render(<PhotoLinker eventId="ev-1" onPhotoLinked={mockOnLink} />);
 
     await user.click(screen.getByRole('button', { name: /vincular foto/i }));
-    await user.type(screen.getByLabelText('URL de Google Photos'), 'https://photos.google.com/photo/abc');
+    await user.click(screen.getByText('Pegar URL'));
+    await user.type(screen.getByLabelText(/url de la foto/i), 'https://example.com/photo/abc');
     await user.click(screen.getByRole('button', { name: /guardar/i }));
 
     await vi.waitFor(() => {
-      expect(screen.queryByLabelText('URL de Google Photos')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/url de la foto/i)).not.toBeInTheDocument();
     });
   });
 
@@ -77,10 +78,11 @@ describe('PhotoLinker', () => {
     render(<PhotoLinker eventId="ev-1" onPhotoLinked={mockOnLink} />);
 
     await user.click(screen.getByRole('button', { name: /vincular foto/i }));
-    expect(screen.getByLabelText('URL de Google Photos')).toBeInTheDocument();
+    await user.click(screen.getByText('Pegar URL'));
+    expect(screen.getByLabelText(/url de la foto/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /cancelar/i }));
-    expect(screen.queryByLabelText('URL de Google Photos')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/url de la foto/i)).not.toBeInTheDocument();
   });
 
   it('should show error if onPhotoLinked throws', async () => {
@@ -89,7 +91,8 @@ describe('PhotoLinker', () => {
     render(<PhotoLinker eventId="ev-1" onPhotoLinked={failingLink} />);
 
     await user.click(screen.getByRole('button', { name: /vincular foto/i }));
-    await user.type(screen.getByLabelText('URL de Google Photos'), 'https://photos.google.com/photo/abc');
+    await user.click(screen.getByText('Pegar URL'));
+    await user.type(screen.getByLabelText(/url de la foto/i), 'https://example.com/photo/abc');
     await user.click(screen.getByRole('button', { name: /guardar/i }));
 
     expect(await screen.findByText('Error de conexión')).toBeInTheDocument();

@@ -164,9 +164,10 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByText('Examen con foto adjunta').click();
     await expect(page.locator('header')).toContainText('Detalle del Evento');
 
-    // Link a photo
+    // Link a photo via URL paste
     await page.getByRole('button', { name: /vincular foto/i }).click();
-    await page.getByLabel('URL de Google Photos').fill('https://photos.google.com/photo/test123');
+    await page.getByText('Pegar URL').click();
+    await page.getByLabel(/url de la foto/i).fill('https://example.com/photo/test123');
     await page.getByLabel('Descripción (opcional)').fill('Resultado de examen');
     await page.getByRole('button', { name: /guardar/i }).click();
 

@@ -1,10 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { LinkPhotoInput } from '../../domain/models/event-photo';
-import { isGoogleConfigured } from '../../infra/google/google-photos';
-import type { GooglePhotoItem } from '../../infra/google/google-photos';
-import { GooglePhotoPicker } from './GooglePhotoPicker';
+import { uploadPhoto } from '../../infra/store-provider';
 
-type Mode = 'closed' | 'choose' | 'google' | 'manual';
+type Mode = 'closed' | 'choose' | 'manual';
 
 interface PhotoLinkerProps {
   eventId: string;
@@ -17,18 +15,27 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const googleAvailable = isGoogleConfigured();
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleGoogleSelect = async (photos: GooglePhotoItem[]) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
     setLoading(true);
     setError(null);
+    setUploadProgress('Subiendo...');
+
     try {
-      for (const photo of photos) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setUploadProgress(`Subiendo ${i + 1} de ${files.length}...`);
+        const result = await uploadPhoto(eventId, file);
         await onPhotoLinked({
           eventId,
-          googlePhotosUrl: photo.productUrl || photo.baseUrl || 'https://photos.google.com',
-          googlePhotosId: photo.id,
-          description: photo.filename,
+          googlePhotosUrl: result.url,
+          googlePhotosId: result.fileName,
+          description: result.fileName,
         });
       }
       setMode('closed');
@@ -36,6 +43,8 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
+      setUploadProgress(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -44,7 +53,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
     setError(null);
 
     if (!url.trim()) {
-      setError('La URL de Google Photos es obligatoria');
+      setError('La URL es obligatoria');
       return;
     }
 
@@ -71,7 +80,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
   if (mode === 'closed') {
     return (
       <button
-        onClick={() => setMode(googleAvailable ? 'choose' : 'manual')}
+        onClick={() => setMode('choose')}
         className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors"
       >
         📷 Vincular foto
@@ -79,23 +88,40 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
     );
   }
 
-  // Mode selector: Google Photos or manual URL
   if (mode === 'choose') {
     return (
       <div className="space-y-2 bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-500 text-center">¿Cómo quieres agregar la foto?</p>
-        <button
-          onClick={() => setMode('google')}
-          className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors text-left"
-        >
-          <span className="text-xl">🔍</span>
-          <div>
-            <p className="text-sm font-medium text-gray-800">Buscar en Google Photos</p>
-            <p className="text-xs text-gray-500">Selecciona de tu biblioteca</p>
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>
+        )}
+        {uploadProgress && (
+          <div className="flex items-center gap-2 p-2">
+            <span className="inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-gray-600">{uploadProgress}</span>
           </div>
-        </button>
+        )}
+        <p className="text-xs text-gray-500 text-center">¿Cómo quieres agregar la foto?</p>
+        <label
+          className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors cursor-pointer"
+        >
+          <span className="text-xl">📷</span>
+          <div>
+            <p className="text-sm font-medium text-gray-800">Tomar foto o seleccionar</p>
+            <p className="text-xs text-gray-500">Cámara o galería del dispositivo</p>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileSelect}
+            disabled={loading}
+            className="hidden"
+          />
+        </label>
         <button
           onClick={() => setMode('manual')}
+          disabled={loading}
           className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors text-left"
         >
           <span className="text-xl">🔗</span>
@@ -106,21 +132,12 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
         </button>
         <button
           onClick={() => setMode('closed')}
+          disabled={loading}
           className="w-full py-1 text-xs text-gray-400 hover:text-gray-600"
         >
           Cancelar
         </button>
       </div>
-    );
-  }
-
-  // Google Photos picker
-  if (mode === 'google') {
-    return (
-      <GooglePhotoPicker
-        onSelect={handleGoogleSelect}
-        onCancel={() => setMode('closed')}
-      />
     );
   }
 
@@ -133,14 +150,14 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
 
       <div>
         <label htmlFor="photo-url" className="block text-xs text-gray-500 mb-1">
-          URL de Google Photos
+          URL de la foto
         </label>
         <input
           id="photo-url"
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://photos.google.com/photo/..."
+          placeholder="https://..."
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>

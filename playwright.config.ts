@@ -27,8 +27,6 @@ export default defineConfig({
       // Force in-memory stubs for E2E tests (no external dependencies)
       VITE_SUPABASE_URL: '',
       VITE_SUPABASE_ANON_KEY: '',
-      VITE_GOOGLE_CLIENT_ID: '',
-      VITE_GOOGLE_API_KEY: '',
     },
   },
 });

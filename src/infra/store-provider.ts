@@ -5,17 +5,21 @@
 import { supabase } from './supabase/client.js';
 import * as supabaseEventStore from './supabase/medical-event-store.js';
 import * as supabasePhotoStore from './supabase/event-photo-store.js';
+import * as supabasePhotoStorage from './supabase/photo-storage.js';
 import { InMemoryMedicalEventStore } from './memory/medical-event-store.js';
 import { InMemoryEventPhotoStore } from './memory/event-photo-store.js';
+import { InMemoryPhotoUploader } from './memory/photo-uploader.js';
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../domain/models/medical-event.js';
 import type { EventPhoto, LinkPhotoInput } from '../domain/models/event-photo.js';
 import type { MedicalEventFilters } from '../domain/services/medical-event-repository.js';
+import type { UploadResult } from '../domain/services/photo-uploader.js';
 
 const useSupabase = supabase !== null;
 
 // Singleton in-memory stores (shared across the app when Supabase is unavailable)
 const memoryEventStore = new InMemoryMedicalEventStore();
 const memoryPhotoStore = new InMemoryEventPhotoStore();
+const memoryPhotoUploader = new InMemoryPhotoUploader();
 
 export function isUsingSupabase(): boolean {
   return useSupabase;
@@ -55,4 +59,14 @@ export async function listPhotosByEvent(eventId: string): Promise<EventPhoto[]> 
 
 export async function unlinkPhoto(id: string): Promise<void> {
   return useSupabase ? supabasePhotoStore.unlinkPhoto(id) : memoryPhotoStore.unlink(id);
+}
+
+// --- Photo Storage ---
+
+export async function uploadPhoto(eventId: string, file: File): Promise<UploadResult> {
+  return useSupabase ? supabasePhotoStorage.uploadPhoto(eventId, file) : memoryPhotoUploader.upload(eventId, file);
+}
+
+export async function deleteStoredPhoto(url: string): Promise<void> {
+  return useSupabase ? supabasePhotoStorage.deletePhoto(url) : memoryPhotoUploader.delete(url);
 }
