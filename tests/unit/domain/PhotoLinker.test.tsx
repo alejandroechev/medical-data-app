@@ -3,6 +3,14 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PhotoLinker } from '../../../src/ui/components/PhotoLinker';
 
+// Mock Google Photos as unconfigured for these tests (manual mode)
+vi.mock('../../../src/infra/google/google-photos', () => ({
+  isGoogleConfigured: () => false,
+  initGoogleAuth: vi.fn(),
+  listGooglePhotos: vi.fn(),
+  getAccessToken: () => null,
+}));
+
 describe('PhotoLinker', () => {
   let mockOnLink: ReturnType<typeof vi.fn>;
 

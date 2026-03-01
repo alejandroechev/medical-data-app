@@ -1,5 +1,10 @@
 import { useState } from 'react';
 import type { LinkPhotoInput } from '../../domain/models/event-photo';
+import { isGoogleConfigured } from '../../infra/google/google-photos';
+import type { GooglePhotoItem } from '../../infra/google/google-photos';
+import { GooglePhotoPicker } from './GooglePhotoPicker';
+
+type Mode = 'closed' | 'choose' | 'google' | 'manual';
 
 interface PhotoLinkerProps {
   eventId: string;
@@ -7,13 +12,32 @@ interface PhotoLinkerProps {
 }
 
 export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
-  const [showForm, setShowForm] = useState(false);
+  const [mode, setMode] = useState<Mode>('closed');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const googleAvailable = isGoogleConfigured();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleGoogleSelect = async (photo: GooglePhotoItem) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await onPhotoLinked({
+        eventId,
+        googlePhotosUrl: photo.productUrl,
+        googlePhotosId: photo.id,
+        description: photo.filename,
+      });
+      setMode('closed');
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -22,7 +46,6 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
       return;
     }
 
-    // Extract an ID from the URL or use the URL itself
     const photoId = url.split('/').pop() || url;
 
     setLoading(true);
@@ -35,7 +58,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
       });
       setUrl('');
       setDescription('');
-      setShowForm(false);
+      setMode('closed');
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -43,10 +66,10 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
     }
   };
 
-  if (!showForm) {
+  if (mode === 'closed') {
     return (
       <button
-        onClick={() => setShowForm(true)}
+        onClick={() => setMode(googleAvailable ? 'choose' : 'manual')}
         className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors"
       >
         📷 Vincular foto
@@ -54,8 +77,54 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
     );
   }
 
+  // Mode selector: Google Photos or manual URL
+  if (mode === 'choose') {
+    return (
+      <div className="space-y-2 bg-gray-50 rounded-lg p-3">
+        <p className="text-xs text-gray-500 text-center">¿Cómo quieres agregar la foto?</p>
+        <button
+          onClick={() => setMode('google')}
+          className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors text-left"
+        >
+          <span className="text-xl">🔍</span>
+          <div>
+            <p className="text-sm font-medium text-gray-800">Buscar en Google Photos</p>
+            <p className="text-xs text-gray-500">Selecciona de tu biblioteca</p>
+          </div>
+        </button>
+        <button
+          onClick={() => setMode('manual')}
+          className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors text-left"
+        >
+          <span className="text-xl">🔗</span>
+          <div>
+            <p className="text-sm font-medium text-gray-800">Pegar URL</p>
+            <p className="text-xs text-gray-500">Ingresa un enlace manualmente</p>
+          </div>
+        </button>
+        <button
+          onClick={() => setMode('closed')}
+          className="w-full py-1 text-xs text-gray-400 hover:text-gray-600"
+        >
+          Cancelar
+        </button>
+      </div>
+    );
+  }
+
+  // Google Photos picker
+  if (mode === 'google') {
+    return (
+      <GooglePhotoPicker
+        onSelect={handleGoogleSelect}
+        onCancel={() => setMode('closed')}
+      />
+    );
+  }
+
+  // Manual URL form
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 bg-gray-50 rounded-lg p-3">
+    <form onSubmit={handleManualSubmit} className="space-y-3 bg-gray-50 rounded-lg p-3">
       {error && (
         <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>
       )}
@@ -98,7 +167,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
         </button>
         <button
           type="button"
-          onClick={() => { setShowForm(false); setError(null); }}
+          onClick={() => { setMode('closed'); setError(null); }}
           className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
         >
           Cancelar
