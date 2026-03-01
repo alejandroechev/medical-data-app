@@ -135,13 +135,18 @@ export async function listPickedMediaItems(
   const data = await response.json();
   return (data.mediaItems ?? []).map(
     (item: Record<string, unknown>) => {
-      const filename = (item.mediaFile as Record<string, string>)?.filename ?? '';
+      const mediaFile = item.mediaFile as Record<string, string> | undefined;
+      const filename = mediaFile?.filename ?? '';
+      const baseUrl = (item.baseUrl as string) || mediaFile?.baseUrl || '';
+      const itemId = item.id as string;
+      // Build a viewable Google Photos URL from the media item ID
+      const productUrl = `https://photos.google.com/photo/${itemId}`;
       return {
-        id: item.id as string,
-        baseUrl: item.baseUrl as string,
-        mimeType: item.mimeType as string,
+        id: itemId,
+        baseUrl,
+        mimeType: (item.mimeType as string) || mediaFile?.mimeType || '',
         mediaFile: { filename },
-        productUrl: item.baseUrl as string,
+        productUrl,
         filename,
       };
     }
