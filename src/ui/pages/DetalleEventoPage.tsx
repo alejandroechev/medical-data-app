@@ -145,7 +145,10 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
         ) : (
           <div className="space-y-2 mb-3">
             {fotos.map((foto) => {
-              const isImage = foto.googlePhotosUrl.startsWith('http') && !foto.googlePhotosUrl.startsWith('memory://');
+              const url = foto.googlePhotosUrl;
+              const isPdf = url.toLowerCase().endsWith('.pdf') || foto.googlePhotosId.toLowerCase().endsWith('.pdf');
+              const isImage = !isPdf && url.startsWith('http') && !url.startsWith('memory://');
+              const icon = isPdf ? '📄' : '📷';
               return (
                 <div
                   key={foto.id}
@@ -153,12 +156,12 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
                 >
                   {isImage && (
                     <a
-                      href={foto.googlePhotosUrl}
+                      href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <img
-                        src={foto.googlePhotosUrl}
+                        src={url}
                         alt={foto.description ?? foto.googlePhotosId}
                         className="w-full h-40 object-cover"
                         loading="lazy"
@@ -166,9 +169,9 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
                     </a>
                   )}
                   <div className="flex items-center gap-2 p-2">
-                    {!isImage && <span className="text-lg">📷</span>}
+                    <span className="text-lg">{icon}</span>
                     <a
-                      href={foto.googlePhotosUrl}
+                      href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 text-sm text-blue-600 underline truncate"

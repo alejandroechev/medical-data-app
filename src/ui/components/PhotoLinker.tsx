@@ -104,15 +104,15 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
         <label
           className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors cursor-pointer"
         >
-          <span className="text-xl">📷</span>
+          <span className="text-xl">📎</span>
           <div>
-            <p className="text-sm font-medium text-gray-800">Tomar foto o seleccionar</p>
-            <p className="text-xs text-gray-500">Cámara o galería del dispositivo</p>
+            <p className="text-sm font-medium text-gray-800">Foto o documento</p>
+            <p className="text-xs text-gray-500">Cámara, galería o archivo PDF</p>
           </div>
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
             multiple
             onChange={handleFileSelect}
             disabled={loading}
