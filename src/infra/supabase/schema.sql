@@ -59,6 +59,25 @@ CREATE INDEX IF NOT EXISTS idx_events_tipo ON medical_events(tipo);
 CREATE INDEX IF NOT EXISTS idx_photos_evento ON event_photos(evento_id);
 CREATE INDEX IF NOT EXISTS idx_recordings_event ON event_recordings(event_id);
 
+-- Tabla: profesionales
+CREATE TABLE IF NOT EXISTS professionals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  specialty TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Tabla: ubicaciones
+CREATE TABLE IF NOT EXISTS locations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Foreign keys for professional and location on medical_events
+ALTER TABLE medical_events ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id);
+ALTER TABLE medical_events ADD COLUMN IF NOT EXISTS location_id UUID REFERENCES locations(id);
+
 -- Trigger para actualizar actualizado_en automáticamente
 CREATE OR REPLACE FUNCTION update_actualizado_en()
 RETURNS TRIGGER AS $$
@@ -93,3 +112,17 @@ ALTER TABLE event_recordings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read event_recordings" ON event_recordings FOR SELECT USING (true);
 CREATE POLICY "Public insert event_recordings" ON event_recordings FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public delete event_recordings" ON event_recordings FOR DELETE USING (true);
+
+-- RLS for professionals
+ALTER TABLE professionals ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read professionals" ON professionals FOR SELECT USING (true);
+CREATE POLICY "Public insert professionals" ON professionals FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public update professionals" ON professionals FOR UPDATE USING (true);
+CREATE POLICY "Public delete professionals" ON professionals FOR DELETE USING (true);
+
+-- RLS for locations
+ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read locations" ON locations FOR SELECT USING (true);
+CREATE POLICY "Public insert locations" ON locations FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public update locations" ON locations FOR UPDATE USING (true);
+CREATE POLICY "Public delete locations" ON locations FOR DELETE USING (true);

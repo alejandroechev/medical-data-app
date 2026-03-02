@@ -17,6 +17,8 @@ export class InMemoryMedicalEventStore {
       type: input.type,
       description: input.description,
       patientId: input.patientId,
+      professionalId: input.professionalId,
+      locationId: input.locationId,
       isapreReimbursed: input.isapreReimbursed ?? false,
       insuranceReimbursed: input.insuranceReimbursed ?? false,
       createdAt: now,
@@ -52,6 +54,12 @@ export class InMemoryMedicalEventStore {
     if (filters?.insuranceReimbursed !== undefined) {
       results = results.filter((e) => e.insuranceReimbursed === filters.insuranceReimbursed);
     }
+    if (filters?.professionalId) {
+      results = results.filter((e) => e.professionalId === filters.professionalId);
+    }
+    if (filters?.locationId) {
+      results = results.filter((e) => e.locationId === filters.locationId);
+    }
 
     return results.sort((a, b) => b.date.localeCompare(a.date)).map((e) => ({ ...e }));
   }
@@ -66,6 +74,8 @@ export class InMemoryMedicalEventStore {
       ...(input.type !== undefined && { type: input.type }),
       ...(input.description !== undefined && { description: input.description }),
       ...(input.patientId !== undefined && { patientId: input.patientId }),
+      ...(input.professionalId !== undefined && { professionalId: input.professionalId ?? undefined }),
+      ...(input.locationId !== undefined && { locationId: input.locationId ?? undefined }),
       ...(input.isapreReimbursed !== undefined && { isapreReimbursed: input.isapreReimbursed }),
       ...(input.insuranceReimbursed !== undefined && { insuranceReimbursed: input.insuranceReimbursed }),
       updatedAt: new Date().toISOString(),

@@ -17,6 +17,8 @@ interface DbMedicalEvent {
   tipo: string;
   descripcion: string;
   paciente_id: string;
+  professional_id: string | null;
+  location_id: string | null;
   reembolso_isapre: boolean;
   reembolso_seguro: boolean;
   creado_en: string;
@@ -30,6 +32,8 @@ function mapFromDb(row: DbMedicalEvent): MedicalEvent {
     type: row.tipo as MedicalEvent['type'],
     description: row.descripcion,
     patientId: row.paciente_id,
+    ...(row.professional_id !== null && { professionalId: row.professional_id }),
+    ...(row.location_id !== null && { locationId: row.location_id }),
     isapreReimbursed: row.reembolso_isapre,
     insuranceReimbursed: row.reembolso_seguro,
     createdAt: row.creado_en,
@@ -48,6 +52,8 @@ export async function createEvent(
       tipo: input.type,
       descripcion: input.description,
       paciente_id: input.patientId,
+      professional_id: input.professionalId ?? null,
+      location_id: input.locationId ?? null,
       reembolso_isapre: input.isapreReimbursed ?? false,
       reembolso_seguro: input.insuranceReimbursed ?? false,
     })
@@ -102,6 +108,12 @@ export async function listEvents(
   if (filters?.insuranceReimbursed !== undefined) {
     query = query.eq('reembolso_seguro', filters.insuranceReimbursed);
   }
+  if (filters?.professionalId) {
+    query = query.eq('professional_id', filters.professionalId);
+  }
+  if (filters?.locationId) {
+    query = query.eq('location_id', filters.locationId);
+  }
 
   const { data, error } = await query;
   if (error) throw new Error(`Error al listar eventos: ${error.message}`);
@@ -118,6 +130,10 @@ export async function updateEvent(
   if (input.type !== undefined) updateData.tipo = input.type;
   if (input.description !== undefined) updateData.descripcion = input.description;
   if (input.patientId !== undefined) updateData.paciente_id = input.patientId;
+  if (input.professionalId !== undefined)
+    updateData.professional_id = input.professionalId;
+  if (input.locationId !== undefined)
+    updateData.location_id = input.locationId;
   if (input.isapreReimbursed !== undefined)
     updateData.reembolso_isapre = input.isapreReimbursed;
   if (input.insuranceReimbursed !== undefined)

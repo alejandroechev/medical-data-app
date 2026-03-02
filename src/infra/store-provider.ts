@@ -7,13 +7,16 @@ import * as supabaseEventStore from './supabase/medical-event-store.js';
 import * as supabasePhotoStore from './supabase/event-photo-store.js';
 import * as supabasePhotoStorage from './supabase/photo-storage.js';
 import * as supabaseRecordingStore from './supabase/recording-store.js';
+import * as supabaseProfLocStore from './supabase/professional-location-store.js';
 import { InMemoryMedicalEventStore } from './memory/medical-event-store.js';
 import { InMemoryEventPhotoStore } from './memory/event-photo-store.js';
 import { InMemoryPhotoUploader } from './memory/photo-uploader.js';
 import { InMemoryRecordingStore } from './memory/recording-store.js';
+import { InMemoryProfessionalStore, InMemoryLocationStore } from './memory/professional-location-store.js';
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../domain/models/medical-event.js';
 import type { EventPhoto, LinkPhotoInput } from '../domain/models/event-photo.js';
 import type { EventRecording, CreateRecordingInput } from '../domain/models/event-recording.js';
+import type { Professional, Location } from '../domain/models/professional-location.js';
 import type { MedicalEventFilters } from '../domain/services/medical-event-repository.js';
 import type { UploadResult } from '../domain/services/photo-uploader.js';
 
@@ -24,6 +27,8 @@ const memoryEventStore = new InMemoryMedicalEventStore();
 const memoryPhotoStore = new InMemoryEventPhotoStore();
 const memoryPhotoUploader = new InMemoryPhotoUploader();
 const memoryRecordingStore = new InMemoryRecordingStore();
+const memoryProfessionalStore = new InMemoryProfessionalStore();
+const memoryLocationStore = new InMemoryLocationStore();
 
 export function isUsingSupabase(): boolean {
   return useSupabase;
@@ -87,4 +92,32 @@ export async function listRecordingsByEvent(eventId: string): Promise<EventRecor
 
 export async function deleteRecording(id: string): Promise<void> {
   return useSupabase ? supabaseRecordingStore.deleteRecording(id) : memoryRecordingStore.delete(id);
+}
+
+// --- Professionals ---
+
+export async function createProfessional(name: string, specialty?: string): Promise<Professional> {
+  return useSupabase ? supabaseProfLocStore.createProfessional(name, specialty) : memoryProfessionalStore.create(name, specialty);
+}
+
+export async function listProfessionals(): Promise<Professional[]> {
+  return useSupabase ? supabaseProfLocStore.listProfessionals() : memoryProfessionalStore.list();
+}
+
+export async function getProfessionalById(id: string): Promise<Professional | undefined> {
+  return useSupabase ? supabaseProfLocStore.getProfessionalById(id) : memoryProfessionalStore.getById(id);
+}
+
+// --- Locations ---
+
+export async function createLocation(name: string): Promise<Location> {
+  return useSupabase ? supabaseProfLocStore.createLocation(name) : memoryLocationStore.create(name);
+}
+
+export async function listLocations(): Promise<Location[]> {
+  return useSupabase ? supabaseProfLocStore.listLocations() : memoryLocationStore.list();
+}
+
+export async function getLocationById(id: string): Promise<Location | undefined> {
+  return useSupabase ? supabaseProfLocStore.getLocationById(id) : memoryLocationStore.getById(id);
 }
