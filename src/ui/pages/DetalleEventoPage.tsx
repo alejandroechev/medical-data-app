@@ -104,6 +104,19 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     await reloadRecordings();
   };
 
+  const handleCheckpointSaved = async (blob: Blob, durationSeconds: number) => {
+    const file = new File([blob], `checkpoint-${Date.now()}.webm`, { type: 'audio/webm' });
+    const result = await uploadPhoto(eventoId, file);
+    await createRecording({
+      eventId: eventoId,
+      recordingUrl: result.url,
+      fileName: result.fileName,
+      durationSeconds,
+      description: `Checkpoint (${Math.floor(durationSeconds / 60)} min)`,
+    });
+    await reloadRecordings();
+  };
+
   const handleDeleteRecording = async (id: string) => {
     await deleteRecording(id);
     await reloadRecordings();
@@ -229,7 +242,10 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
         </h3>
         <RecordingsList recordings={recordings} onDelete={handleDeleteRecording} />
         <div className="mt-3">
-          <AudioRecorder onRecordingComplete={handleRecordingComplete} />
+          <AudioRecorder
+            onRecordingComplete={handleRecordingComplete}
+            onCheckpointSaved={handleCheckpointSaved}
+          />
         </div>
       </div>
     </div>
