@@ -175,8 +175,9 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Resultado de examen')).toBeVisible();
     await expect(page.getByText('Documentos (1)')).toBeVisible();
 
-    // Unlink the photo
+    // Unlink the photo (with confirmation)
     await page.getByLabel(/desvincular/i).click();
+    await page.getByRole('button', { name: 'Sí' }).click();
     await expect(page.getByText('Documentos (0)')).toBeVisible();
     await expect(page.getByText('Sin documentos vinculados')).toBeVisible();
   });

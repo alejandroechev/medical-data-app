@@ -7,6 +7,7 @@ import { EditableDescription } from '../components/EditableDescription';
 import { AudioRecorder } from '../components/AudioRecorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { CreatableSelect } from '../components/CreatableSelect';
+import { ConfirmDeleteButton } from '../components/ConfirmDeleteButton';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
@@ -265,13 +266,10 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
                     >
                       {foto.description ?? foto.googlePhotosId}
                     </a>
-                    <button
-                      onClick={() => handleUnlinkPhoto(foto.id)}
-                      className="text-xs text-red-400 hover:text-red-600 px-2 py-1"
-                      aria-label={`Desvincular ${foto.description ?? foto.googlePhotosId}`}
-                    >
-                      ✕
-                    </button>
+                    <ConfirmDeleteButton
+                      onConfirm={() => handleUnlinkPhoto(foto.id)}
+                      label={`Desvincular ${foto.description ?? foto.googlePhotosId}`}
+                    />
                   </div>
                 </div>
               );

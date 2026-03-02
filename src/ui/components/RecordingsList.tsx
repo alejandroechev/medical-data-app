@@ -1,4 +1,5 @@
 import type { EventRecording } from '../../domain/models/event-recording';
+import { ConfirmDeleteButton } from './ConfirmDeleteButton';
 
 interface RecordingsListProps {
   recordings: EventRecording[];
@@ -40,13 +41,10 @@ export function RecordingsList({ recordings, onDelete }: RecordingsListProps) {
                 </span>
               )}
             </div>
-            <button
-              onClick={() => onDelete(rec.id)}
-              className="text-xs text-red-400 hover:text-red-600 px-2 py-1"
-              aria-label={`Eliminar ${rec.description ?? rec.fileName}`}
-            >
-              ✕
-            </button>
+            <ConfirmDeleteButton
+              onConfirm={() => onDelete(rec.id)}
+              label={`Eliminar ${rec.description ?? rec.fileName}`}
+            />
           </div>
           <audio
             src={rec.recordingUrl}
