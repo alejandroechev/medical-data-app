@@ -1,0 +1,53 @@
+name: Weekly DB Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Sunday 3:00 AM UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    name: Export DB to backups branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run backup script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/backup-db.ts
+
+      - name: Initialize backups branch if needed
+        run: |
+          git fetch origin backups 2>/dev/null || true
+          if git rev-parse --verify origin/backups >/dev/null 2>&1; then
+            git checkout backups
+            cp -r backups/* . 2>/dev/null || true
+          else
+            git checkout --orphan backups
+            git rm -rf . 2>/dev/null || true
+          fi
+
+      - name: Copy backup files
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          mkdir -p "$DATE"
+          cp -r backups/$DATE/* "$DATE"/ 2>/dev/null || true
+
+      - name: Commit and push backup
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "backup: DB export $DATE" || echo "No changes to commit"
+          git push origin backups || git push --set-upstream origin backups
