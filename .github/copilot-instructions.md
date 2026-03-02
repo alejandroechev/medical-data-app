@@ -94,3 +94,10 @@ Before running `git commit`, mentally verify:
 - **If any CI step fails, deployment is skipped.** No manual rollback needed — the previous production deployment stays live.
 - **Production URL:** https://medical-data-app.vercel.app
 - **Never deploy manually** with `vercel deploy`. Always push to `master` and let CI/CD handle it.
+
+### Backup
+- **Weekly DB backup** runs every Sunday 3:00 AM UTC via GitHub Actions (`.github/workflows/backup.yml`).
+- Exports all DB tables as JSON to an orphan `backups` branch (not on main).
+- Can be triggered manually from GitHub Actions → "Weekly DB Backup" → "Run workflow".
+- Files in Supabase Storage are NOT backed up — only metadata (URLs in DB export). Files persist in Supabase Storage.
+- Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` GitHub secrets.
