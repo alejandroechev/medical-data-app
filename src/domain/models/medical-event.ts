@@ -11,14 +11,16 @@ export type EventType = (typeof EVENT_TYPES)[number];
 
 export interface MedicalEvent {
   id: string;
-  date: string; // ISO date string YYYY-MM-DD
+  date: string;
   type: EventType;
   description: string;
   patientId: string;
+  professionalId?: string;
+  locationId?: string;
   isapreReimbursed: boolean;
   insuranceReimbursed: boolean;
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateMedicalEventInput {
@@ -26,6 +28,8 @@ export interface CreateMedicalEventInput {
   type: EventType;
   description: string;
   patientId: string;
+  professionalId?: string;
+  locationId?: string;
   isapreReimbursed?: boolean;
   insuranceReimbursed?: boolean;
 }
@@ -35,6 +39,8 @@ export interface UpdateMedicalEventInput {
   type?: EventType;
   description?: string;
   patientId?: string;
+  professionalId?: string | null;
+  locationId?: string | null;
   isapreReimbursed?: boolean;
   insuranceReimbursed?: boolean;
 }

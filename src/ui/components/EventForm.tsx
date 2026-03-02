@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { CreateMedicalEventInput, EventType } from '../../domain/models/medical-event';
+import type { Professional, Location } from '../../domain/models/professional-location';
 import { EVENT_TYPES } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
+import { listProfessionals, createProfessional, listLocations, createLocation } from '../../infra/store-provider';
 import { validateCreateEvent } from '../../domain/validators/medical-event-validator';
+import { CreatableSelect } from './CreatableSelect';
 
 interface EventFormProps {
   onSubmit: (input: CreateMedicalEventInput) => Promise<void>;
@@ -17,9 +20,18 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const [type, setType] = useState<EventType>('Consulta Médica');
   const [description, setDescription] = useState('');
   const [patientId, setPatientId] = useState(members[0]?.id ?? '');
+  const [professionalId, setProfessionalId] = useState('');
+  const [locationId, setLocationId] = useState('');
   const [isapreReimbursed, setIsapreReimbursed] = useState(false);
   const [insuranceReimbursed, setInsuranceReimbursed] = useState(false);
   const [errores, setErrores] = useState<string[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+
+  useEffect(() => {
+    listProfessionals().then(setProfessionals);
+    listLocations().then(setLocations);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +42,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       type,
       description,
       patientId,
+      professionalId: professionalId || undefined,
+      locationId: locationId || undefined,
       isapreReimbursed,
       insuranceReimbursed,
     };
@@ -105,6 +119,34 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
           ))}
         </select>
       </div>
+
+      <CreatableSelect
+        label="Profesional"
+        id="profesional"
+        value={professionalId}
+        options={professionals.map((p) => ({ id: p.id, label: p.specialty ? `${p.name} (${p.specialty})` : p.name }))}
+        onChange={setProfessionalId}
+        onCreate={async (name) => {
+          const p = await createProfessional(name);
+          setProfessionals((prev) => [...prev, p].sort((a, b) => a.name.localeCompare(b.name)));
+          return p.id;
+        }}
+        placeholder="Sin profesional"
+      />
+
+      <CreatableSelect
+        label="Lugar"
+        id="lugar"
+        value={locationId}
+        options={locations.map((l) => ({ id: l.id, label: l.name }))}
+        onChange={setLocationId}
+        onCreate={async (name) => {
+          const l = await createLocation(name);
+          setLocations((prev) => [...prev, l].sort((a, b) => a.name.localeCompare(b.name)));
+          return l.id;
+        }}
+        placeholder="Sin lugar"
+      />
 
       <div>
         <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">

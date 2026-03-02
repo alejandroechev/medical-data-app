@@ -1,14 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
 import { EditableDescription } from '../components/EditableDescription';
 import { AudioRecorder } from '../components/AudioRecorder';
 import { RecordingsList } from '../components/RecordingsList';
+import { CreatableSelect } from '../components/CreatableSelect';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
+import type { Professional, Location } from '../../domain/models/professional-location';
 
 interface DetalleEventoPageProps {
   eventoId: string;
@@ -28,6 +30,8 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
   const [recordings, setRecordings] = useState<EventRecording[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,14 +49,18 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     async function load() {
       setLoading(true);
       try {
-        const [ev, ph, recs] = await Promise.all([
+        const [ev, ph, recs, profs, locs] = await Promise.all([
           getEventById(eventoId),
           listPhotosByEvent(eventoId),
           listRecordingsByEvent(eventoId),
+          listProfessionals(),
+          listLocations(),
         ]);
         setEvento(ev);
         setFotos(ph);
         setRecordings(recs);
+        setProfessionals(profs);
+        setLocations(locs);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -163,6 +171,44 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           <span className="text-sm text-gray-500">Paciente</span>
           <span className="text-sm font-medium">{paciente?.name ?? 'Desconocido'}</span>
         </div>
+
+        <CreatableSelect
+          label="Profesional"
+          id="detail-profesional"
+          value={evento.professionalId ?? ''}
+          options={professionals.map((p) => ({ id: p.id, label: p.specialty ? `${p.name} (${p.specialty})` : p.name }))}
+          onChange={async (id) => {
+            const updated = await updateEvent(eventoId, { professionalId: id || null });
+            setEvento(updated);
+          }}
+          onCreate={async (name) => {
+            const p = await createProfessional(name);
+            setProfessionals((prev) => [...prev, p].sort((a, b) => a.name.localeCompare(b.name)));
+            const updated = await updateEvent(eventoId, { professionalId: p.id });
+            setEvento(updated);
+            return p.id;
+          }}
+          placeholder="Sin profesional"
+        />
+
+        <CreatableSelect
+          label="Lugar"
+          id="detail-lugar"
+          value={evento.locationId ?? ''}
+          options={locations.map((l) => ({ id: l.id, label: l.name }))}
+          onChange={async (id) => {
+            const updated = await updateEvent(eventoId, { locationId: id || null });
+            setEvento(updated);
+          }}
+          onCreate={async (name) => {
+            const l = await createLocation(name);
+            setLocations((prev) => [...prev, l].sort((a, b) => a.name.localeCompare(b.name)));
+            const updated = await updateEvent(eventoId, { locationId: l.id });
+            setEvento(updated);
+            return l.id;
+          }}
+          placeholder="Sin lugar"
+        />
       </div>
 
       {/* Reembolsos & Delete */}

@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useEvents } from '../hooks/useEventos';
 import { EventCard } from '../components/EventCard';
 import { EVENT_TYPES } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
+import { listProfessionals, listLocations } from '../../infra/store-provider';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository';
+import type { Professional, Location } from '../../domain/models/professional-location';
 
 interface HistorialPageProps {
   onEventClick: (id: string) => void;
@@ -16,6 +18,15 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [reembolso, setReembolso] = useState('');
+  const [professionalId, setProfessionalId] = useState('');
+  const [locationId, setLocationId] = useState('');
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+
+  useEffect(() => {
+    listProfessionals().then(setProfessionals);
+    listLocations().then(setLocations);
+  }, []);
 
   const filters: MedicalEventFilters = useMemo(
     () => ({
@@ -25,8 +36,10 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
       to: to || undefined,
       isapreReimbursed: reembolso === 'isapre' || reembolso === 'ambos' ? true : reembolso === 'ninguno' ? false : undefined,
       insuranceReimbursed: reembolso === 'seguro' || reembolso === 'ambos' ? true : reembolso === 'ninguno' ? false : undefined,
+      professionalId: professionalId || undefined,
+      locationId: locationId || undefined,
     }),
-    [patientId, type, from, to, reembolso]
+    [patientId, type, from, to, reembolso, professionalId, locationId]
   );
 
   const { events, loading, error } = useEvents(filters);
@@ -103,6 +116,36 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
               <option value="seguro">Seguro reembolsado</option>
               <option value="ambos">Ambos reembolsados</option>
               <option value="ninguno">Sin reembolsos</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="filtro-profesional" className="block text-xs text-gray-500 mb-1">Profesional</label>
+            <select
+              id="filtro-profesional"
+              value={professionalId}
+              onChange={(e) => setProfessionalId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
+            >
+              <option value="">Todos</option>
+              {professionals.map((p) => (
+                <option key={p.id} value={p.id}>{p.specialty ? `${p.name} (${p.specialty})` : p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="filtro-lugar" className="block text-xs text-gray-500 mb-1">Lugar</label>
+            <select
+              id="filtro-lugar"
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
+            >
+              <option value="">Todos</option>
+              {locations.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
             </select>
           </div>
         </div>

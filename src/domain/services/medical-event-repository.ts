@@ -3,10 +3,12 @@ import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } f
 export interface MedicalEventFilters {
   patientId?: string;
   type?: string;
-  from?: string; // ISO date
-  to?: string; // ISO date
+  from?: string;
+  to?: string;
   isapreReimbursed?: boolean;
   insuranceReimbursed?: boolean;
+  professionalId?: string;
+  locationId?: string;
 }
 
 export interface MedicalEventRepository {

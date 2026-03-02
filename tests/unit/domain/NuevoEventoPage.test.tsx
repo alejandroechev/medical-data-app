@@ -9,6 +9,10 @@ vi.mock('../../../src/infra/store-provider', () => ({
   getEventById: vi.fn(),
   updateEvent: vi.fn(),
   deleteEvent: vi.fn(),
+  listProfessionals: vi.fn().mockResolvedValue([]),
+  createProfessional: vi.fn(),
+  listLocations: vi.fn().mockResolvedValue([]),
+  createLocation: vi.fn(),
 }));
 
 import { createEvent } from '../../../src/infra/store-provider';
