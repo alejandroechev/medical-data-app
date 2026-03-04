@@ -2,8 +2,14 @@ name: Weekly DB Backup
 
 on:
   schedule:
-    - cron: '0 3 * * 0' # Sunday 3:00 AM UTC
+    - cron: '0 3 * * 0' # Sunday 3:00 AM UTC — DB backup
+    - cron: '0 4 1 * *' # 1st of month 4:00 AM UTC — DB + file backup
   workflow_dispatch: # Allow manual trigger
+    inputs:
+      include_files:
+        description: 'Include file backup (Supabase Storage)'
+        type: boolean
+        default: false
 
 jobs:
   backup:
@@ -22,13 +28,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run backup script
+      - name: Run DB backup script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npx tsx scripts/backup-db.ts
 
-      - name: Save backup files
+      - name: Run file backup (monthly or manual)
+        if: github.event.schedule == '0 4 1 * *' || github.event.inputs.include_files == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/backup-files.ts
+
+      - name: Save backup data
         run: |
           DATE=$(date +%Y-%m-%d)
           mkdir -p /tmp/backup-data
