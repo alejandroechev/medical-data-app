@@ -26,28 +26,30 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npx tsx scripts/backup-db.ts
 
-      - name: Initialize backups branch if needed
+      - name: Save backup files
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          mkdir -p /tmp/backup-data
+          cp -r backups/$DATE /tmp/backup-data/
+
+      - name: Switch to backups branch
         run: |
           git fetch origin backups 2>/dev/null || true
           if git rev-parse --verify origin/backups >/dev/null 2>&1; then
             git checkout backups
-            cp -r backups/* . 2>/dev/null || true
           else
             git checkout --orphan backups
-            git rm -rf . 2>/dev/null || true
+            git reset --hard
+            git clean -fd
           fi
 
-      - name: Copy backup files
+      - name: Copy backup files and commit
         run: |
           DATE=$(date +%Y-%m-%d)
           mkdir -p "$DATE"
-          cp -r backups/$DATE/* "$DATE"/ 2>/dev/null || true
-
-      - name: Commit and push backup
-        run: |
-          DATE=$(date +%Y-%m-%d)
+          cp -r /tmp/backup-data/$DATE/* "$DATE"/
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add "$DATE"
           git commit -m "backup: DB export $DATE" || echo "No changes to commit"
           git push origin backups || git push --set-upstream origin backups
