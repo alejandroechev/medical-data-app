@@ -1,0 +1,18 @@
+[
+  {
+    "id": "43ae5ab0-adb3-446d-9a54-92d942af808a",
+    "evento_id": "eecee364-ebf4-4497-aac3-9fa91384e911",
+    "google_photos_url": "https://xkjecexaigqoxrafgkcm.supabase.co/storage/v1/object/public/event-photos/eecee364-ebf4-4497-aac3-9fa91384e911/f96a0669-dbf6-4178-bd17-be2244ffff20.jpg",
+    "google_photos_id": "80707.jpg",
+    "descripcion": "80707.jpg",
+    "creado_en": "2026-03-01T19:48:07.601915+00:00"
+  },
+  {
+    "id": "e7c2594b-0bc4-458f-a1fc-71bcc38d5749",
+    "evento_id": "eecee364-ebf4-4497-aac3-9fa91384e911",
+    "google_photos_url": "https://xkjecexaigqoxrafgkcm.supabase.co/storage/v1/object/public/event-photos/eecee364-ebf4-4497-aac3-9fa91384e911/46060a5c-5dae-445a-9ec1-1bff2d9ca5b0.jpg",
+    "google_photos_id": "20260302_092350.jpg",
+    "descripcion": "20260302_092350.jpg",
+    "creado_en": "2026-03-02T12:24:02.982516+00:00"
+  }
+]

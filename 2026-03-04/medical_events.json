@@ -1,0 +1,41 @@
+[
+  {
+    "id": "eecee364-ebf4-4497-aac3-9fa91384e911",
+    "fecha": "2026-02-25",
+    "tipo": "Consulta Médica",
+    "descripcion": "Dermatologa, chequeo anual de lunares. Nitrógeno líquido en lunar salido",
+    "paciente_id": "861ac938-aad9-4172-b21a-b7be9ff10676",
+    "reembolso_isapre": true,
+    "reembolso_seguro": true,
+    "creado_en": "2026-03-01T16:59:39.444904+00:00",
+    "actualizado_en": "2026-03-02T12:23:32.642344+00:00",
+    "professional_id": "0b1e53af-9e8a-4df6-ba44-b7d16a8f901a",
+    "location_id": "c5050f42-69a2-46ec-b8ab-0c4ab180a8a4"
+  },
+  {
+    "id": "aef78f69-9dc3-4135-b511-f034a909031c",
+    "fecha": "2026-03-02",
+    "tipo": "Consulta Médica",
+    "descripcion": "Broncopulmonar Osorno",
+    "paciente_id": "2c26a593-c699-41e9-8c57-5056349ef861",
+    "reembolso_isapre": false,
+    "reembolso_seguro": false,
+    "creado_en": "2026-03-02T00:25:17.766265+00:00",
+    "actualizado_en": "2026-03-02T12:24:36.926915+00:00",
+    "professional_id": null,
+    "location_id": "efe5027c-1fea-4d8e-9c66-cbcb64ac9dda"
+  },
+  {
+    "id": "ff4bcd6a-4ee1-4f0f-8614-ab9ced58270b",
+    "fecha": "2026-03-02",
+    "tipo": "Consulta Médica",
+    "descripcion": "Broncopulmonar Osorno",
+    "paciente_id": "c8af6b39-c4ae-451c-87cc-9e68ab02b3f7",
+    "reembolso_isapre": false,
+    "reembolso_seguro": false,
+    "creado_en": "2026-03-02T00:18:29.155164+00:00",
+    "actualizado_en": "2026-03-02T12:24:42.392322+00:00",
+    "professional_id": null,
+    "location_id": "efe5027c-1fea-4d8e-9c66-cbcb64ac9dda"
+  }
+]
