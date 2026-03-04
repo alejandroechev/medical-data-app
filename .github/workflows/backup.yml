@@ -49,8 +49,10 @@ jobs:
 
       - name: Switch to backups branch
         run: |
+          rm -rf backups
           git fetch origin backups 2>/dev/null || true
           if git rev-parse --verify origin/backups >/dev/null 2>&1; then
+            git checkout -- . 2>/dev/null || true
             git checkout backups
           else
             git checkout --orphan backups
