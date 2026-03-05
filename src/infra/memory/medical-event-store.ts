@@ -19,8 +19,8 @@ export class InMemoryMedicalEventStore {
       patientId: input.patientId,
       professionalId: input.professionalId,
       locationId: input.locationId,
-      isapreReimbursed: input.isapreReimbursed ?? false,
-      insuranceReimbursed: input.insuranceReimbursed ?? false,
+      isapreReimbursementStatus: input.isapreReimbursementStatus ?? 'none',
+      insuranceReimbursementStatus: input.insuranceReimbursementStatus ?? 'none',
       createdAt: now,
       updatedAt: now,
     };
@@ -48,11 +48,11 @@ export class InMemoryMedicalEventStore {
     if (filters?.to) {
       results = results.filter((e) => e.date <= filters.to!);
     }
-    if (filters?.isapreReimbursed !== undefined) {
-      results = results.filter((e) => e.isapreReimbursed === filters.isapreReimbursed);
+    if (filters?.isapreReimbursementStatus !== undefined) {
+      results = results.filter((e) => e.isapreReimbursementStatus === filters.isapreReimbursementStatus);
     }
-    if (filters?.insuranceReimbursed !== undefined) {
-      results = results.filter((e) => e.insuranceReimbursed === filters.insuranceReimbursed);
+    if (filters?.insuranceReimbursementStatus !== undefined) {
+      results = results.filter((e) => e.insuranceReimbursementStatus === filters.insuranceReimbursementStatus);
     }
     if (filters?.professionalId) {
       results = results.filter((e) => e.professionalId === filters.professionalId);
@@ -76,8 +76,8 @@ export class InMemoryMedicalEventStore {
       ...(input.patientId !== undefined && { patientId: input.patientId }),
       ...(input.professionalId !== undefined && { professionalId: input.professionalId ?? undefined }),
       ...(input.locationId !== undefined && { locationId: input.locationId ?? undefined }),
-      ...(input.isapreReimbursed !== undefined && { isapreReimbursed: input.isapreReimbursed }),
-      ...(input.insuranceReimbursed !== undefined && { insuranceReimbursed: input.insuranceReimbursed }),
+      ...(input.isapreReimbursementStatus !== undefined && { isapreReimbursementStatus: input.isapreReimbursementStatus }),
+      ...(input.insuranceReimbursementStatus !== undefined && { insuranceReimbursementStatus: input.insuranceReimbursementStatus }),
       updatedAt: new Date().toISOString(),
     };
     this.events.set(id, updated);

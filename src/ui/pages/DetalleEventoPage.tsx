@@ -4,11 +4,12 @@ import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
 import { EditableDescription } from '../components/EditableDescription';
+import { EditableDate } from '../components/EditableDate';
 import { AudioRecorder } from '../components/AudioRecorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { CreatableSelect } from '../components/CreatableSelect';
 import { ConfirmDeleteButton } from '../components/ConfirmDeleteButton';
-import type { MedicalEvent } from '../../domain/models/medical-event';
+import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
 import type { Professional, Location } from '../../domain/models/professional-location';
@@ -86,18 +87,23 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     onDeleted?.();
   };
 
-  const handleToggleIsapre = async (value: boolean) => {
-    const updated = await updateEvent(eventoId, { isapreReimbursed: value });
+  const handleToggleIsapre = async (status: ReimbursementStatus) => {
+    const updated = await updateEvent(eventoId, { isapreReimbursementStatus: status });
     setEvento(updated);
   };
 
-  const handleToggleInsurance = async (value: boolean) => {
-    const updated = await updateEvent(eventoId, { insuranceReimbursed: value });
+  const handleToggleInsurance = async (status: ReimbursementStatus) => {
+    const updated = await updateEvent(eventoId, { insuranceReimbursementStatus: status });
     setEvento(updated);
   };
 
   const handleUpdateDescription = async (newDescription: string) => {
     const updated = await updateEvent(eventoId, { description: newDescription });
+    setEvento(updated);
+  };
+
+  const handleUpdateDate = async (newDate: string) => {
+    const updated = await updateEvent(eventoId, { date: newDate });
     setEvento(updated);
   };
 
@@ -160,7 +166,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           <span className="text-3xl">{icon}</span>
           <div>
             <h2 className="text-lg font-semibold text-gray-800">{evento.type}</h2>
-            <p className="text-sm text-gray-500">{evento.date}</p>
+            <EditableDate value={evento.date} onSave={handleUpdateDate} />
           </div>
         </div>
         <EditableDescription value={evento.description} onSave={handleUpdateDescription} />
@@ -214,11 +220,11 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
 
       {/* Reembolsos & Delete */}
       <EventActions
-        isapreReimbursed={evento.isapreReimbursed}
-        insuranceReimbursed={evento.insuranceReimbursed}
+        isapreReimbursementStatus={evento.isapreReimbursementStatus}
+        insuranceReimbursementStatus={evento.insuranceReimbursementStatus}
         onDelete={handleDelete}
-        onToggleIsapre={handleToggleIsapre}
-        onToggleInsurance={handleToggleInsurance}
+        onChangeIsapreStatus={handleToggleIsapre}
+        onChangeInsuranceStatus={handleToggleInsurance}
       />
 
       {/* Photos */}

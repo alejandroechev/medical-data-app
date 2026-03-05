@@ -1,12 +1,12 @@
-import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../models/medical-event.js';
+import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput, ReimbursementStatus } from '../models/medical-event.js';
 
 export interface MedicalEventFilters {
   patientId?: string;
   type?: string;
   from?: string;
   to?: string;
-  isapreReimbursed?: boolean;
-  insuranceReimbursed?: boolean;
+  isapreReimbursementStatus?: ReimbursementStatus;
+  insuranceReimbursementStatus?: ReimbursementStatus;
   professionalId?: string;
   locationId?: string;
 }

@@ -16,8 +16,6 @@ describe('EventForm', () => {
     expect(screen.getByLabelText('Tipo de evento')).toBeInTheDocument();
     expect(screen.getByLabelText('Paciente')).toBeInTheDocument();
     expect(screen.getByLabelText('Descripción')).toBeInTheDocument();
-    expect(screen.getByLabelText('Reembolsado por ISAPRE')).toBeInTheDocument();
-    expect(screen.getByLabelText('Reembolsado por Seguro Complementario')).toBeInTheDocument();
   });
 
   it('should render the save button', () => {
@@ -47,24 +45,21 @@ describe('EventForm', () => {
       expect.objectContaining({
         description: 'Control anual',
         type: 'Consulta Médica',
-        isapreReimbursed: false,
-        insuranceReimbursed: false,
       })
     );
   });
 
-  it('should allow checking reimbursement checkboxes', async () => {
+  it('should not include reimbursement fields in form submission', async () => {
     const user = userEvent.setup();
     render(<EventForm onSubmit={mockSubmit} />);
 
     await user.type(screen.getByLabelText('Descripción'), 'Test');
-    await user.click(screen.getByLabelText('Reembolsado por ISAPRE'));
     await user.click(screen.getByRole('button', { name: 'Guardar Evento' }));
 
     expect(mockSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isapreReimbursed: true,
-        insuranceReimbursed: false,
+      expect.not.objectContaining({
+        isapreReimbursementStatus: expect.anything(),
+        insuranceReimbursementStatus: expect.anything(),
       })
     );
   });

@@ -45,8 +45,8 @@ describe('DetalleEventoPage', () => {
       type: 'Urgencia',
       description: 'Dolor abdominal severo',
       patientId: '1',
-      isapreReimbursed: true,
-      insuranceReimbursed: false,
+      isapreReimbursementStatus: 'approved',
+      insuranceReimbursementStatus: 'none',
       createdAt: '2024-06-15T10:00:00Z',
       updatedAt: '2024-06-15T10:00:00Z',
     });
@@ -56,8 +56,6 @@ describe('DetalleEventoPage', () => {
     expect(await screen.findByText('Urgencia')).toBeInTheDocument();
     expect(screen.getByText('Dolor abdominal severo')).toBeInTheDocument();
     expect(screen.getByText('2024-06-15')).toBeInTheDocument();
-    expect(screen.getByLabelText('ISAPRE')).toBeChecked();
-    expect(screen.getByLabelText('Seguro Complementario')).not.toBeChecked();
     expect(screen.getByText('Alejandro')).toBeInTheDocument();
   });
 
@@ -68,8 +66,8 @@ describe('DetalleEventoPage', () => {
       type: 'Examen',
       description: 'Examen de sangre',
       patientId: '1',
-      isapreReimbursed: false,
-      insuranceReimbursed: false,
+      isapreReimbursementStatus: 'none',
+      insuranceReimbursementStatus: 'none',
       createdAt: '2024-06-15T10:00:00Z',
       updatedAt: '2024-06-15T10:00:00Z',
     });

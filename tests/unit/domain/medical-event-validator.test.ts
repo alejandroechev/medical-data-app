@@ -86,13 +86,24 @@ describe('validateCreateEvent', () => {
     expect(result.errors.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('should accept optional reimbursement flags', () => {
+  it('should accept optional reimbursement status', () => {
     const result = validateCreateEvent({
       ...validInput,
-      isapreReimbursed: true,
-      insuranceReimbursed: false,
+      isapreReimbursementStatus: 'requested',
+      insuranceReimbursementStatus: 'none',
     });
     expect(result.valid).toBe(true);
+  });
+
+  it('should reject invalid reimbursement status', () => {
+    const result = validateCreateEvent({
+      ...validInput,
+      isapreReimbursementStatus: 'invalid' as any,
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'isapreReimbursementStatus' })
+    );
   });
 });
 
@@ -126,8 +137,16 @@ describe('validateUpdateEvent', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('should accept update of reimbursement only', () => {
-    const result = validateUpdateEvent({ isapreReimbursed: true });
+  it('should accept update of reimbursement status only', () => {
+    const result = validateUpdateEvent({ isapreReimbursementStatus: 'approved' });
     expect(result.valid).toBe(true);
+  });
+
+  it('should reject invalid reimbursement status in update', () => {
+    const result = validateUpdateEvent({ insuranceReimbursementStatus: 'bogus' as any });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'insuranceReimbursementStatus' })
+    );
   });
 });

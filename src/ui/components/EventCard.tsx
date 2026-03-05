@@ -1,4 +1,4 @@
-import type { MedicalEvent } from '../../domain/models/medical-event';
+import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 
 interface EventCardProps {
@@ -13,6 +13,20 @@ const TYPE_ICONS: Record<string, string> = {
   'Cirugía': '🏥',
   'Examen': '🔬',
   'Otro': '📋',
+};
+
+const BADGE_STYLES: Record<ReimbursementStatus, string> = {
+  none: '',
+  requested: 'bg-yellow-100 text-yellow-700',
+  approved: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
+};
+
+const BADGE_LABELS: Record<ReimbursementStatus, string> = {
+  none: '',
+  requested: '⏳',
+  approved: '✓',
+  rejected: '✗',
 };
 
 export function EventCard({ evento, onClick }: EventCardProps) {
@@ -38,14 +52,14 @@ export function EventCard({ evento, onClick }: EventCardProps) {
             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
               {paciente?.name ?? 'Desconocido'}
             </span>
-            {evento.isapreReimbursed && (
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                ISAPRE ✓
+            {evento.isapreReimbursementStatus !== 'none' && (
+              <span className={`text-xs px-2 py-0.5 rounded-full ${BADGE_STYLES[evento.isapreReimbursementStatus]}`}>
+                ISAPRE {BADGE_LABELS[evento.isapreReimbursementStatus]}
               </span>
             )}
-            {evento.insuranceReimbursed && (
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                Seguro ✓
+            {evento.insuranceReimbursementStatus !== 'none' && (
+              <span className={`text-xs px-2 py-0.5 rounded-full ${BADGE_STYLES[evento.insuranceReimbursementStatus]}`}>
+                Seguro {BADGE_LABELS[evento.insuranceReimbursementStatus]}
               </span>
             )}
           </div>

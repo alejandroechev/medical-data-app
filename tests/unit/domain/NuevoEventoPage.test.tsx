@@ -39,8 +39,8 @@ describe('NuevoEventoPage', () => {
       type: 'Consulta Médica',
       description: 'Test',
       patientId: '1',
-      isapreReimbursed: false,
-      insuranceReimbursed: false,
+      isapreReimbursementStatus: 'none',
+      insuranceReimbursementStatus: 'none',
       createdAt: '2024-06-15T10:00:00Z',
       updatedAt: '2024-06-15T10:00:00Z',
     });

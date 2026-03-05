@@ -30,8 +30,8 @@ const mockEvent = {
   type: 'Consulta Médica' as const,
   description: 'Control',
   patientId: '1',
-  isapreReimbursed: false,
-  insuranceReimbursed: false,
+  isapreReimbursementStatus: 'none' as const,
+  insuranceReimbursementStatus: 'none' as const,
   createdAt: '2024-06-15T10:00:00Z',
   updatedAt: '2024-06-15T10:00:00Z',
 };
@@ -81,16 +81,16 @@ describe('useEvents', () => {
 
   it('should update event and reload', async () => {
     mockList.mockResolvedValue([mockEvent]);
-    const updated = { ...mockEvent, isapreReimbursed: true };
+    const updated = { ...mockEvent, isapreReimbursementStatus: 'approved' as const };
     mockUpdate.mockResolvedValue(updated);
 
     const { result } = renderHook(() => useEvents());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     mockList.mockResolvedValue([updated]);
-    await result.current.update('1', { isapreReimbursed: true });
+    await result.current.update('1', { isapreReimbursementStatus: 'approved' });
 
-    expect(mockUpdate).toHaveBeenCalledWith('1', { isapreReimbursed: true });
+    expect(mockUpdate).toHaveBeenCalledWith('1', { isapreReimbursementStatus: 'approved' });
   });
 
   it('should remove event and reload', async () => {

@@ -10,8 +10,8 @@ const mockEvento: MedicalEvent = {
   type: 'Consulta Médica',
   description: 'Control anual con médico general',
   patientId: '1', // Alejandro in seed data
-  isapreReimbursed: true,
-  insuranceReimbursed: false,
+  isapreReimbursementStatus: 'approved',
+  insuranceReimbursementStatus: 'none',
   createdAt: '2024-06-15T10:00:00Z',
   updatedAt: '2024-06-15T10:00:00Z',
 };
@@ -37,14 +37,14 @@ describe('EventCard', () => {
     expect(screen.getByText('Alejandro')).toBeInTheDocument();
   });
 
-  it('should show ISAPRE badge when reimbursed', () => {
+  it('should show ISAPRE badge when approved', () => {
     render(<EventCard evento={mockEvento} onClick={() => {}} />);
     expect(screen.getByText('ISAPRE ✓')).toBeInTheDocument();
   });
 
-  it('should not show insurance badge when not reimbursed', () => {
+  it('should not show insurance badge when status is none', () => {
     render(<EventCard evento={mockEvento} onClick={() => {}} />);
-    expect(screen.queryByText('Seguro ✓')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Seguro/)).not.toBeInTheDocument();
   });
 
   it('should call onClick with event ID when clicked', async () => {

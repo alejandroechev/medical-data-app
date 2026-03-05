@@ -1,19 +1,84 @@
 import { useState } from 'react';
+import type { ReimbursementStatus } from '../../domain/models/medical-event';
+import { REEMBOLSO_LINKS } from '../../domain/models/medical-event';
 
 interface EventActionsProps {
-  isapreReimbursed: boolean;
-  insuranceReimbursed: boolean;
+  isapreReimbursementStatus: ReimbursementStatus;
+  insuranceReimbursementStatus: ReimbursementStatus;
   onDelete: () => Promise<void>;
-  onToggleIsapre: (value: boolean) => Promise<void>;
-  onToggleInsurance: (value: boolean) => Promise<void>;
+  onChangeIsapreStatus: (status: ReimbursementStatus) => Promise<void>;
+  onChangeInsuranceStatus: (status: ReimbursementStatus) => Promise<void>;
+}
+
+const STATUS_LABELS: Record<ReimbursementStatus, string> = {
+  none: 'Sin solicitar',
+  requested: 'Solicitado',
+  approved: 'Aprobado',
+  rejected: 'Rechazado',
+};
+
+const STATUS_COLORS: Record<ReimbursementStatus, string> = {
+  none: 'bg-gray-100 text-gray-600',
+  requested: 'bg-yellow-100 text-yellow-700',
+  approved: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
+};
+
+function ReimbursementStatusControl({
+  label,
+  status,
+  onChange,
+  portalUrl,
+}: {
+  label: string;
+  status: ReimbursementStatus;
+  onChange: (status: ReimbursementStatus) => Promise<void>;
+  portalUrl: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-600">{label}</span>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[status]}`}>
+          {STATUS_LABELS[status]}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {(['none', 'requested', 'approved', 'rejected'] as ReimbursementStatus[]).map((s) => (
+          <button
+            key={s}
+            onClick={() => onChange(s)}
+            disabled={s === status}
+            aria-label={`${label} ${STATUS_LABELS[s]}`}
+            className={`text-xs px-2 py-1 rounded-lg border transition-colors ${
+              s === status
+                ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium cursor-default'
+                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            {STATUS_LABELS[s]}
+          </button>
+        ))}
+      </div>
+      <a
+        href={portalUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
+        aria-label={`Portal ${label}`}
+      >
+        🔗 Ir al portal
+      </a>
+    </div>
+  );
 }
 
 export function EventActions({
-  isapreReimbursed,
-  insuranceReimbursed,
+  isapreReimbursementStatus,
+  insuranceReimbursementStatus,
   onDelete,
-  onToggleIsapre,
-  onToggleInsurance,
+  onChangeIsapreStatus,
+  onChangeInsuranceStatus,
 }: EventActionsProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -32,27 +97,21 @@ export function EventActions({
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-4">
       <h3 className="text-sm font-medium text-gray-700">Reembolsos</h3>
 
-      <label className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">ISAPRE</span>
-        <input
-          type="checkbox"
-          checked={isapreReimbursed}
-          onChange={(e) => onToggleIsapre(e.target.checked)}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
-          aria-label="ISAPRE"
-        />
-      </label>
+      <ReimbursementStatusControl
+        label="ISAPRE"
+        status={isapreReimbursementStatus}
+        onChange={onChangeIsapreStatus}
+        portalUrl={REEMBOLSO_LINKS.isapre}
+      />
 
-      <label className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">Seguro Complementario</span>
-        <input
-          type="checkbox"
-          checked={insuranceReimbursed}
-          onChange={(e) => onToggleInsurance(e.target.checked)}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
-          aria-label="Seguro Complementario"
-        />
-      </label>
+      <hr className="border-gray-100" />
+
+      <ReimbursementStatusControl
+        label="Seguro Complementario"
+        status={insuranceReimbursementStatus}
+        onChange={onChangeInsuranceStatus}
+        portalUrl={REEMBOLSO_LINKS.insurance}
+      />
 
       <hr className="border-gray-100" />
 

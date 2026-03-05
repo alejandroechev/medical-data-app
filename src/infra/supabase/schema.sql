@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS medical_events (
   )),
   descripcion TEXT NOT NULL,
   paciente_id UUID NOT NULL REFERENCES family_members(id),
-  reembolso_isapre BOOLEAN NOT NULL DEFAULT FALSE,
-  reembolso_seguro BOOLEAN NOT NULL DEFAULT FALSE,
+  reembolso_isapre_status TEXT NOT NULL DEFAULT 'none' CHECK (reembolso_isapre_status IN ('none', 'requested', 'approved', 'rejected')),
+  reembolso_seguro_status TEXT NOT NULL DEFAULT 'none' CHECK (reembolso_seguro_status IN ('none', 'requested', 'approved', 'rejected')),
   creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

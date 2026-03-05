@@ -3,6 +3,7 @@ import type {
   MedicalEvent,
   CreateMedicalEventInput,
   UpdateMedicalEventInput,
+  ReimbursementStatus,
 } from '../../domain/models/medical-event.js';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository.js';
 
@@ -19,8 +20,8 @@ interface DbMedicalEvent {
   paciente_id: string;
   professional_id: string | null;
   location_id: string | null;
-  reembolso_isapre: boolean;
-  reembolso_seguro: boolean;
+  reembolso_isapre_status: string;
+  reembolso_seguro_status: string;
   creado_en: string;
   actualizado_en: string;
 }
@@ -34,8 +35,8 @@ function mapFromDb(row: DbMedicalEvent): MedicalEvent {
     patientId: row.paciente_id,
     ...(row.professional_id !== null && { professionalId: row.professional_id }),
     ...(row.location_id !== null && { locationId: row.location_id }),
-    isapreReimbursed: row.reembolso_isapre,
-    insuranceReimbursed: row.reembolso_seguro,
+    isapreReimbursementStatus: (row.reembolso_isapre_status ?? 'none') as ReimbursementStatus,
+    insuranceReimbursementStatus: (row.reembolso_seguro_status ?? 'none') as ReimbursementStatus,
     createdAt: row.creado_en,
     updatedAt: row.actualizado_en,
   };
@@ -54,8 +55,8 @@ export async function createEvent(
       paciente_id: input.patientId,
       professional_id: input.professionalId ?? null,
       location_id: input.locationId ?? null,
-      reembolso_isapre: input.isapreReimbursed ?? false,
-      reembolso_seguro: input.insuranceReimbursed ?? false,
+      reembolso_isapre_status: input.isapreReimbursementStatus ?? 'none',
+      reembolso_seguro_status: input.insuranceReimbursementStatus ?? 'none',
     })
     .select()
     .single();
@@ -102,11 +103,11 @@ export async function listEvents(
   if (filters?.to) {
     query = query.lte('fecha', filters.to);
   }
-  if (filters?.isapreReimbursed !== undefined) {
-    query = query.eq('reembolso_isapre', filters.isapreReimbursed);
+  if (filters?.isapreReimbursementStatus !== undefined) {
+    query = query.eq('reembolso_isapre_status', filters.isapreReimbursementStatus);
   }
-  if (filters?.insuranceReimbursed !== undefined) {
-    query = query.eq('reembolso_seguro', filters.insuranceReimbursed);
+  if (filters?.insuranceReimbursementStatus !== undefined) {
+    query = query.eq('reembolso_seguro_status', filters.insuranceReimbursementStatus);
   }
   if (filters?.professionalId) {
     query = query.eq('professional_id', filters.professionalId);
@@ -134,10 +135,10 @@ export async function updateEvent(
     updateData.professional_id = input.professionalId;
   if (input.locationId !== undefined)
     updateData.location_id = input.locationId;
-  if (input.isapreReimbursed !== undefined)
-    updateData.reembolso_isapre = input.isapreReimbursed;
-  if (input.insuranceReimbursed !== undefined)
-    updateData.reembolso_seguro = input.insuranceReimbursed;
+  if (input.isapreReimbursementStatus !== undefined)
+    updateData.reembolso_isapre_status = input.isapreReimbursementStatus;
+  if (input.insuranceReimbursementStatus !== undefined)
+    updateData.reembolso_seguro_status = input.insuranceReimbursementStatus;
 
   const { data, error } = await db
     .from('medical_events')

@@ -20,8 +20,8 @@ describe('InMemoryMedicalEventStore', () => {
     expect(event.type).toBe('Consulta Médica');
     expect(event.description).toBe('Control anual');
     expect(event.patientId).toBe('1');
-    expect(event.isapreReimbursed).toBe(false);
-    expect(event.insuranceReimbursed).toBe(false);
+    expect(event.isapreReimbursementStatus).toBe('none');
+    expect(event.insuranceReimbursementStatus).toBe('none');
   });
 
   it('should get an event by ID', async () => {
@@ -82,10 +82,10 @@ describe('InMemoryMedicalEventStore', () => {
 
   it('should update an event', async () => {
     const created = await store.create({ date: '2024-01-01', type: 'Examen', description: 'Original', patientId: '1' });
-    const updated = await store.update(created.id, { description: 'Modificado', isapreReimbursed: true });
+    const updated = await store.update(created.id, { description: 'Modificado', isapreReimbursementStatus: 'approved' });
 
     expect(updated.description).toBe('Modificado');
-    expect(updated.isapreReimbursed).toBe(true);
+    expect(updated.isapreReimbursementStatus).toBe('approved');
     expect(updated.date).toBe('2024-01-01'); // unchanged fields preserved
   });
 
@@ -96,21 +96,21 @@ describe('InMemoryMedicalEventStore', () => {
     expect(found).toBeNull();
   });
 
-  it('should filter by isapreReimbursed', async () => {
-    await store.create({ date: '2024-01-01', type: 'Examen', description: 'A', patientId: '1', isapreReimbursed: true });
-    await store.create({ date: '2024-02-01', type: 'Examen', description: 'B', patientId: '1', isapreReimbursed: false });
+  it('should filter by isapreReimbursementStatus', async () => {
+    await store.create({ date: '2024-01-01', type: 'Examen', description: 'A', patientId: '1', isapreReimbursementStatus: 'approved' });
+    await store.create({ date: '2024-02-01', type: 'Examen', description: 'B', patientId: '1', isapreReimbursementStatus: 'none' });
 
-    const filtered = await store.list({ isapreReimbursed: true });
+    const filtered = await store.list({ isapreReimbursementStatus: 'approved' });
     expect(filtered).toHaveLength(1);
-    expect(filtered[0].isapreReimbursed).toBe(true);
+    expect(filtered[0].isapreReimbursementStatus).toBe('approved');
   });
 
-  it('should filter by insuranceReimbursed', async () => {
-    await store.create({ date: '2024-01-01', type: 'Examen', description: 'A', patientId: '1', insuranceReimbursed: true });
-    await store.create({ date: '2024-02-01', type: 'Examen', description: 'B', patientId: '1', insuranceReimbursed: false });
+  it('should filter by insuranceReimbursementStatus', async () => {
+    await store.create({ date: '2024-01-01', type: 'Examen', description: 'A', patientId: '1', insuranceReimbursementStatus: 'requested' });
+    await store.create({ date: '2024-02-01', type: 'Examen', description: 'B', patientId: '1', insuranceReimbursementStatus: 'none' });
 
-    const filtered = await store.list({ insuranceReimbursed: true });
+    const filtered = await store.list({ insuranceReimbursementStatus: 'requested' });
     expect(filtered).toHaveLength(1);
-    expect(filtered[0].insuranceReimbursed).toBe(true);
+    expect(filtered[0].insuranceReimbursementStatus).toBe('requested');
   });
 });

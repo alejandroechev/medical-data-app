@@ -13,7 +13,7 @@ import {
 } from '../infra/store-provider.js';
 import { validateCreateEvent, validateUpdateEvent } from '../domain/validators/medical-event-validator.js';
 import { validateLinkPhoto } from '../domain/validators/event-photo-validator.js';
-import type { EventType } from '../domain/models/medical-event.js';
+import type { EventType, ReimbursementStatus } from '../domain/models/medical-event.js';
 
 const program = new Command();
 
@@ -43,8 +43,8 @@ evento
   .requiredOption('--paciente <nombre>', 'Nombre del paciente')
   .requiredOption('--fecha <fecha>', 'Fecha (YYYY-MM-DD)')
   .requiredOption('--descripcion <texto>', 'Descripción del evento')
-  .option('--reembolso-isapre', 'Reembolsado por ISAPRE', false)
-  .option('--reembolso-seguro', 'Reembolsado por Seguro Complementario', false)
+  .option('--reembolso-isapre <estado>', 'Estado reembolso ISAPRE (none|requested|approved|rejected)', 'none')
+  .option('--reembolso-seguro <estado>', 'Estado reembolso Seguro (none|requested|approved|rejected)', 'none')
   .action(async (opts) => {
     const member = getFamilyMemberByName(opts.paciente);
     if (!member) {
@@ -58,8 +58,8 @@ evento
       type: opts.tipo as EventType,
       description: opts.descripcion,
       patientId: member.id,
-      isapreReimbursed: opts.reembolsoIsapre,
-      insuranceReimbursed: opts.reembolsoSeguro,
+      isapreReimbursementStatus: (opts.reembolsoIsapre ?? 'none') as ReimbursementStatus,
+      insuranceReimbursementStatus: (opts.reembolsoSeguro ?? 'none') as ReimbursementStatus,
     };
 
     const validation = validateCreateEvent(input);
@@ -117,8 +117,8 @@ evento
         Tipo: e.type,
         Paciente: members.find((m) => m.id === e.patientId)?.name ?? e.patientId,
         Descripción: e.description.substring(0, 40),
-        ISAPRE: e.isapreReimbursed ? 'Sí' : 'No',
-        Seguro: e.insuranceReimbursed ? 'Sí' : 'No',
+        ISAPRE: e.isapreReimbursementStatus,
+        Seguro: e.insuranceReimbursementStatus,
       }));
       console.table(table);
     } catch (err) {
@@ -147,8 +147,8 @@ evento
       console.log(`  Tipo:        ${event.type}`);
       console.log(`  Paciente:    ${paciente?.name ?? event.patientId}`);
       console.log(`  Descripción: ${event.description}`);
-      console.log(`  ISAPRE:      ${event.isapreReimbursed ? 'Sí' : 'No'}`);
-      console.log(`  Seguro:      ${event.insuranceReimbursed ? 'Sí' : 'No'}`);
+      console.log(`  ISAPRE:      ${event.isapreReimbursementStatus}`);
+      console.log(`  Seguro:      ${event.insuranceReimbursementStatus}`);
 
       const fotos = await listPhotosByEvent(id);
       if (fotos.length > 0) {
@@ -170,8 +170,8 @@ evento
   .option('--tipo <tipo>', 'Nuevo tipo')
   .option('--descripcion <texto>', 'Nueva descripción')
   .option('--paciente <nombre>', 'Nuevo paciente')
-  .option('--reembolso-isapre <si|no>', 'Reembolsado por ISAPRE')
-  .option('--reembolso-seguro <si|no>', 'Reembolsado por Seguro')
+  .option('--reembolso-isapre <estado>', 'Estado reembolso ISAPRE (none|requested|approved|rejected)')
+  .option('--reembolso-seguro <estado>', 'Estado reembolso Seguro (none|requested|approved|rejected)')
   .action(async (id: string, opts) => {
     try {
       const input: Record<string, unknown> = {};
@@ -187,10 +187,10 @@ evento
         input.patientId = member.id;
       }
       if (opts.reembolsoIsapre !== undefined) {
-        input.isapreReimbursed = opts.reembolsoIsapre === 'si';
+        input.isapreReimbursementStatus = opts.reembolsoIsapre;
       }
       if (opts.reembolsoSeguro !== undefined) {
-        input.insuranceReimbursed = opts.reembolsoSeguro === 'si';
+        input.insuranceReimbursementStatus = opts.reembolsoSeguro;
       }
 
       const validation = validateUpdateEvent(input);

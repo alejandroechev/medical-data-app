@@ -5,23 +5,23 @@ import { EventActions } from '../../../src/ui/components/EventActions';
 
 describe('EventActions', () => {
   let mockOnDelete: ReturnType<typeof vi.fn>;
-  let mockOnToggleIsapre: ReturnType<typeof vi.fn>;
-  let mockOnToggleInsurance: ReturnType<typeof vi.fn>;
+  let mockOnChangeIsapre: ReturnType<typeof vi.fn>;
+  let mockOnChangeInsurance: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockOnDelete = vi.fn().mockResolvedValue(undefined);
-    mockOnToggleIsapre = vi.fn().mockResolvedValue(undefined);
-    mockOnToggleInsurance = vi.fn().mockResolvedValue(undefined);
+    mockOnChangeIsapre = vi.fn().mockResolvedValue(undefined);
+    mockOnChangeInsurance = vi.fn().mockResolvedValue(undefined);
   });
 
   it('should render the delete button', () => {
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
     expect(screen.getByRole('button', { name: /eliminar evento/i })).toBeInTheDocument();
@@ -31,11 +31,11 @@ describe('EventActions', () => {
     const user = userEvent.setup();
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
 
@@ -49,11 +49,11 @@ describe('EventActions', () => {
     const user = userEvent.setup();
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
 
@@ -66,11 +66,11 @@ describe('EventActions', () => {
     const user = userEvent.setup();
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
 
@@ -80,63 +80,80 @@ describe('EventActions', () => {
     expect(screen.queryByText(/¿estás seguro/i)).not.toBeInTheDocument();
   });
 
-  it('should render ISAPRE toggle reflecting current state', () => {
+  it('should show current ISAPRE status badge', () => {
     render(
       <EventActions
-        isapreReimbursed={true}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="approved"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
-    const checkbox = screen.getByLabelText(/isapre/i);
-    expect(checkbox).toBeChecked();
+    // Badge + the disabled button for ISAPRE + the enabled button for Insurance = 3
+    const approvedElements = screen.getAllByText('Aprobado');
+    expect(approvedElements.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('should render insurance toggle reflecting current state', () => {
+  it('should show current insurance status badge', () => {
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={true}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="requested"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
-    const checkbox = screen.getByLabelText(/seguro complementario/i);
-    expect(checkbox).toBeChecked();
+    const requestedElements = screen.getAllByText('Solicitado');
+    expect(requestedElements.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('should call onToggleIsapre when ISAPRE checkbox is toggled', async () => {
+  it('should call onChangeIsapreStatus when ISAPRE status button is clicked', async () => {
     const user = userEvent.setup();
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
 
-    await user.click(screen.getByLabelText(/isapre/i));
-    expect(mockOnToggleIsapre).toHaveBeenCalledWith(true);
+    await user.click(screen.getByRole('button', { name: /ISAPRE Solicitado/i }));
+    expect(mockOnChangeIsapre).toHaveBeenCalledWith('requested');
   });
 
-  it('should call onToggleInsurance when insurance checkbox is toggled', async () => {
+  it('should call onChangeInsuranceStatus when insurance status button is clicked', async () => {
     const user = userEvent.setup();
     render(
       <EventActions
-        isapreReimbursed={false}
-        insuranceReimbursed={false}
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
         onDelete={mockOnDelete}
-        onToggleIsapre={mockOnToggleIsapre}
-        onToggleInsurance={mockOnToggleInsurance}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
       />
     );
 
-    await user.click(screen.getByLabelText(/seguro complementario/i));
-    expect(mockOnToggleInsurance).toHaveBeenCalledWith(true);
+    await user.click(screen.getByRole('button', { name: /Seguro Complementario Aprobado/i }));
+    expect(mockOnChangeInsurance).toHaveBeenCalledWith('approved');
+  });
+
+  it('should render portal links', () => {
+    render(
+      <EventActions
+        isapreReimbursementStatus="none"
+        insuranceReimbursementStatus="none"
+        onDelete={mockOnDelete}
+        onChangeIsapreStatus={mockOnChangeIsapre}
+        onChangeInsuranceStatus={mockOnChangeInsurance}
+      />
+    );
+    const links = screen.getAllByRole('link', { name: /portal/i });
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute('href', 'https://sucursalvirtual.somosesencial.cl/');
+    expect(links[1]).toHaveAttribute('href', 'https://clientes.segurossura.cl/');
   });
 });

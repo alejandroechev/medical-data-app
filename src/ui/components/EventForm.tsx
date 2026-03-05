@@ -22,8 +22,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const [patientId, setPatientId] = useState(members[0]?.id ?? '');
   const [professionalId, setProfessionalId] = useState('');
   const [locationId, setLocationId] = useState('');
-  const [isapreReimbursed, setIsapreReimbursed] = useState(false);
-  const [insuranceReimbursed, setInsuranceReimbursed] = useState(false);
   const [errores, setErrores] = useState<string[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -44,8 +42,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       patientId,
       professionalId: professionalId || undefined,
       locationId: locationId || undefined,
-      isapreReimbursed,
-      insuranceReimbursed,
     };
 
     const validation = validateCreateEvent(input);
@@ -56,10 +52,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
 
     try {
       await onSubmit(input);
-      // Reset form
       setDescription('');
-      setIsapreReimbursed(false);
-      setInsuranceReimbursed(false);
     } catch (err) {
       setErrores([(err as Error).message]);
     }
@@ -160,28 +153,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
           placeholder="Describe el evento médico..."
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
         />
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-700">Reembolsos</p>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={isapreReimbursed}
-            onChange={(e) => setIsapreReimbursed(e.target.checked)}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">Reembolsado por ISAPRE</span>
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={insuranceReimbursed}
-            onChange={(e) => setInsuranceReimbursed(e.target.checked)}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">Reembolsado por Seguro Complementario</span>
-        </label>
       </div>
 
       <button

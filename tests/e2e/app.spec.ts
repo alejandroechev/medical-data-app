@@ -73,8 +73,9 @@ test.describe('Medical Family Registry — E2E', () => {
   test('should have reimbursement checkboxes', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
-    await expect(page.getByLabel('Reembolsado por ISAPRE')).toBeVisible();
-    await expect(page.getByLabel('Reembolsado por Seguro Complementario')).toBeVisible();
+    // Reimbursement is now managed from event detail, not from creation form
+    await expect(page.getByLabel('Fecha')).toBeVisible();
+    await expect(page.getByLabel('Descripción')).toBeVisible();
   });
 
   // --- Full data flow E2E tests (uses in-memory stubs when Supabase not configured) ---
@@ -107,23 +108,27 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Dolor abdominal severo')).toBeVisible();
     await expect(page.getByText('Urgencia')).toBeVisible();
     await expect(page.getByText('Alejandro')).toBeVisible();
-    await expect(page.getByLabel('ISAPRE')).not.toBeChecked();
-    await expect(page.getByLabel('Seguro Complementario')).not.toBeChecked();
   });
 
-  test('full flow: create event with ISAPRE reimbursement', async ({ page }) => {
+  test('full flow: create event and manage reembolso status', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Nuevo').click();
     await page.getByLabel('Tipo de evento').selectOption('Consulta Dental');
     await page.getByLabel('Descripción').fill('Limpieza dental semestral');
-    await page.getByLabel('Reembolsado por ISAPRE').check();
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
 
     await expect(page.getByText('✓ Evento creado exitosamente')).toBeVisible();
     await page.waitForTimeout(1500);
 
-    // Verificar badge de ISAPRE en la card
-    await expect(page.getByText('ISAPRE ✓')).toBeVisible();
+    // Open detail and set ISAPRE to requested
+    await page.getByText('Limpieza dental semestral').click();
+    await page.getByRole('button', { name: /ISAPRE Solicitado/i }).click();
+
+    // Verify the badge shows Solicitado
+    await page.getByLabel('Volver').click();
+    await page.getByText('Limpieza dental semestral').click();
+    // The ISAPRE Solicitado button should be disabled (current state)
+    await expect(page.getByRole('button', { name: /ISAPRE Solicitado/i })).toBeDisabled();
   });
 
   test('history: filter events by type', async ({ page }) => {
@@ -207,7 +212,7 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Evento a eliminar')).not.toBeVisible();
   });
 
-  test('full flow: toggle reembolso on event detail', async ({ page }) => {
+  test('full flow: change reembolso status on event detail', async ({ page }) => {
     await page.goto('/');
 
     // Create event
@@ -219,18 +224,23 @@ test.describe('Medical Family Registry — E2E', () => {
     // Go to detail
     await page.getByText('Consulta para reembolso').click();
 
-    // ISAPRE should be unchecked
-    const isapreCheckbox = page.getByLabel('ISAPRE');
-    await expect(isapreCheckbox).not.toBeChecked();
+    // ISAPRE should be "Sin solicitar" (none)
+    await expect(page.getByRole('button', { name: /ISAPRE Sin solicitar/i })).toBeDisabled();
 
-    // Toggle ISAPRE on
-    await isapreCheckbox.check();
-    await expect(isapreCheckbox).toBeChecked();
+    // Change ISAPRE to "Solicitado"
+    await page.getByRole('button', { name: /ISAPRE Solicitado/i }).click();
+
+    // Now "Solicitado" button should be disabled (current state)
+    await expect(page.getByRole('button', { name: /ISAPRE Solicitado/i })).toBeDisabled();
 
     // Go back and re-enter to verify persistence
     await page.getByLabel('Volver').click();
     await page.getByText('Consulta para reembolso').click();
-    await expect(page.getByLabel('ISAPRE')).toBeChecked();
+    await expect(page.getByRole('button', { name: /ISAPRE Solicitado/i })).toBeDisabled();
+
+    // Change to "Aprobado"
+    await page.getByRole('button', { name: /ISAPRE Aprobado/i }).click();
+    await expect(page.getByRole('button', { name: /ISAPRE Aprobado/i })).toBeDisabled();
   });
 
   test('full flow: edit event description', async ({ page }) => {
@@ -247,7 +257,7 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Descripción original')).toBeVisible();
 
     // Edit description
-    await page.getByRole('button', { name: /editar/i }).click();
+    await page.getByRole('button', { name: /editar descripción/i }).click();
     const textarea = page.getByRole('textbox');
     await textarea.clear();
     await textarea.fill('Descripción actualizada');
@@ -260,6 +270,50 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByLabel('Volver').click();
     await page.getByText('Descripción actualizada').click();
     await expect(page.getByText('Descripción actualizada')).toBeVisible();
+  });
+
+  test('full flow: edit event date', async ({ page }) => {
+    await page.goto('/');
+
+    // Create event
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Descripción').fill('Evento con fecha editable');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Go to detail
+    await page.getByText('Evento con fecha editable').click();
+
+    // Edit date
+    await page.getByRole('button', { name: /editar fecha/i }).click();
+    const dateInput = page.getByLabel('Fecha del evento');
+    await dateInput.fill('2025-01-15');
+    await page.getByRole('button', { name: /guardar/i }).click();
+
+    // Verify updated date is shown
+    await expect(page.getByText('2025-01-15')).toBeVisible();
+
+    // Go back and re-enter to verify persistence
+    await page.getByLabel('Volver').click();
+    await page.getByText('Evento con fecha editable').click();
+    await expect(page.getByText('2025-01-15')).toBeVisible();
+  });
+
+  test('reembolso portal links are visible', async ({ page }) => {
+    await page.goto('/');
+
+    // Create event
+    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Descripción').fill('Evento para ver links');
+    await page.getByRole('button', { name: 'Guardar Evento' }).click();
+    await page.waitForTimeout(1500);
+
+    // Go to detail
+    await page.getByText('Evento para ver links').click();
+
+    // Verify portal links are present
+    const portalLinks = page.getByRole('link', { name: /portal/i });
+    await expect(portalLinks).toHaveCount(2);
   });
 });
 

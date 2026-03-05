@@ -1,5 +1,5 @@
-import { EVENT_TYPES } from '../models/medical-event.js';
-import type { CreateMedicalEventInput, EventType, UpdateMedicalEventInput } from '../models/medical-event.js';
+import { EVENT_TYPES, REIMBURSEMENT_STATUSES } from '../models/medical-event.js';
+import type { CreateMedicalEventInput, EventType, ReimbursementStatus, UpdateMedicalEventInput } from '../models/medical-event.js';
 
 export interface ValidationError {
   field: string;
@@ -21,6 +21,10 @@ function isValidDate(dateStr: string): boolean {
 
 function isValidEventType(type: string): type is EventType {
   return (EVENT_TYPES as readonly string[]).includes(type);
+}
+
+function isValidReimbursementStatus(status: string): status is ReimbursementStatus {
+  return (REIMBURSEMENT_STATUSES as readonly string[]).includes(status);
 }
 
 export function validateCreateEvent(input: CreateMedicalEventInput): ValidationResult {
@@ -47,6 +51,14 @@ export function validateCreateEvent(input: CreateMedicalEventInput): ValidationR
 
   if (!input.patientId || !input.patientId.trim()) {
     errors.push({ field: 'patientId', message: 'El paciente es obligatorio' });
+  }
+
+  if (input.isapreReimbursementStatus !== undefined && !isValidReimbursementStatus(input.isapreReimbursementStatus)) {
+    errors.push({ field: 'isapreReimbursementStatus', message: `Estado de reembolso ISAPRE inválido. Debe ser uno de: ${REIMBURSEMENT_STATUSES.join(', ')}` });
+  }
+
+  if (input.insuranceReimbursementStatus !== undefined && !isValidReimbursementStatus(input.insuranceReimbursementStatus)) {
+    errors.push({ field: 'insuranceReimbursementStatus', message: `Estado de reembolso seguro inválido. Debe ser uno de: ${REIMBURSEMENT_STATUSES.join(', ')}` });
   }
 
   return { valid: errors.length === 0, errors };
@@ -80,6 +92,14 @@ export function validateUpdateEvent(input: UpdateMedicalEventInput): ValidationR
 
   if (input.patientId !== undefined && !input.patientId.trim()) {
     errors.push({ field: 'patientId', message: 'El paciente no puede estar vacío' });
+  }
+
+  if (input.isapreReimbursementStatus !== undefined && !isValidReimbursementStatus(input.isapreReimbursementStatus)) {
+    errors.push({ field: 'isapreReimbursementStatus', message: `Estado de reembolso ISAPRE inválido. Debe ser uno de: ${REIMBURSEMENT_STATUSES.join(', ')}` });
+  }
+
+  if (input.insuranceReimbursementStatus !== undefined && !isValidReimbursementStatus(input.insuranceReimbursementStatus)) {
+    errors.push({ field: 'insuranceReimbursementStatus', message: `Estado de reembolso seguro inválido. Debe ser uno de: ${REIMBURSEMENT_STATUSES.join(', ')}` });
   }
 
   return { valid: errors.length === 0, errors };

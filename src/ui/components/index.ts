@@ -5,3 +5,4 @@ export { EventForm } from './EventForm';
 export { PhotoLinker } from './PhotoLinker';
 export { EventActions } from './EventActions';
 export { EditableDescription } from './EditableDescription';
+export { EditableDate } from './EditableDate';
