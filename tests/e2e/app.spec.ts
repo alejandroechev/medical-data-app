@@ -60,6 +60,7 @@ test.describe('Medical Family Registry — E2E', () => {
     expect(options).toContain('Urgencia');
     expect(options).toContain('Cirugía');
     expect(options).toContain('Examen');
+    expect(options).toContain('Receta');
     expect(options).toContain('Otro');
   });
 

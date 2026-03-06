@@ -1,5 +1,6 @@
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
+import { getMemberColor } from '../../domain/models/family-member';
 
 interface EventCardProps {
   evento: MedicalEvent;
@@ -12,6 +13,7 @@ const TYPE_ICONS: Record<string, string> = {
   'Urgencia': '🚑',
   'Cirugía': '🏥',
   'Examen': '🔬',
+  'Receta': '💊',
   'Otro': '📋',
 };
 
@@ -32,6 +34,7 @@ const BADGE_LABELS: Record<ReimbursementStatus, string> = {
 export function EventCard({ evento, onClick }: EventCardProps) {
   const paciente = getFamilyMemberById(evento.patientId);
   const icon = TYPE_ICONS[evento.type] ?? '📋';
+  const memberColor = getMemberColor(paciente?.name ?? '');
 
   return (
     <button
@@ -49,9 +52,19 @@ export function EventCard({ evento, onClick }: EventCardProps) {
           </div>
           <p className="text-sm text-gray-800 mt-1 line-clamp-2">{evento.description}</p>
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+            <span className={`text-xs px-2 py-0.5 rounded-full ${memberColor}`}>
               {paciente?.name ?? 'Desconocido'}
             </span>
+            {evento.isPermanent && (
+              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                Permanente
+              </span>
+            )}
+            {evento.nextPickupDate && (
+              <span className="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full">
+                Retiro: {evento.nextPickupDate}
+              </span>
+            )}
             {evento.isapreReimbursementStatus !== 'none' && (
               <span className={`text-xs px-2 py-0.5 rounded-full ${BADGE_STYLES[evento.isapreReimbursementStatus]}`}>
                 ISAPRE {BADGE_LABELS[evento.isapreReimbursementStatus]}

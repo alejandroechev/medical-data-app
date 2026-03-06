@@ -98,7 +98,7 @@ describe('EventForm', () => {
     expect(select).toBeInTheDocument();
 
     const options = select.querySelectorAll('option');
-    expect(options.length).toBe(6);
+    expect(options.length).toBe(7);
   });
 
   it('should render all family members in the select', () => {

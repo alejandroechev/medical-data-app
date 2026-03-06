@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { CreateMedicalEventInput, EventType } from '../../domain/models/medical-event';
+import type { CreateMedicalEventInput, EventType, MedicalEvent } from '../../domain/models/medical-event';
 import type { Professional, Location } from '../../domain/models/professional-location';
 import { EVENT_TYPES } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { listProfessionals, createProfessional, listLocations, createLocation } from '../../infra/store-provider';
+import { listProfessionals, createProfessional, listLocations, createLocation, listEvents } from '../../infra/store-provider';
 import { validateCreateEvent } from '../../domain/validators/medical-event-validator';
 import { CreatableSelect } from './CreatableSelect';
 
@@ -22,14 +22,28 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const [patientId, setPatientId] = useState(members[0]?.id ?? '');
   const [professionalId, setProfessionalId] = useState('');
   const [locationId, setLocationId] = useState('');
+  const [parentEventId, setParentEventId] = useState('');
+  const [isPermanent, setIsPermanent] = useState(false);
+  const [nextPickupDate, setNextPickupDate] = useState('');
   const [errores, setErrores] = useState<string[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [parentEvents, setParentEvents] = useState<MedicalEvent[]>([]);
+
+  const isReceta = type === 'Receta';
 
   useEffect(() => {
     listProfessionals().then(setProfessionals);
     listLocations().then(setLocations);
   }, []);
+
+  useEffect(() => {
+    if (isReceta) {
+      listEvents().then((events) => {
+        setParentEvents(events.filter((e) => e.type !== 'Receta'));
+      });
+    }
+  }, [isReceta]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +56,11 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       patientId,
       professionalId: professionalId || undefined,
       locationId: locationId || undefined,
+      ...(isReceta && {
+        parentEventId: parentEventId || undefined,
+        isPermanent,
+        nextPickupDate: nextPickupDate || undefined,
+      }),
     };
 
     const validation = validateCreateEvent(input);
@@ -53,6 +72,9 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
     try {
       await onSubmit(input);
       setDescription('');
+      setParentEventId('');
+      setIsPermanent(false);
+      setNextPickupDate('');
     } catch (err) {
       setErrores([(err as Error).message]);
     }
@@ -97,6 +119,54 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         </select>
       </div>
 
+      {isReceta && (
+        <>
+          <div>
+            <label htmlFor="evento-padre" className="block text-sm font-medium text-gray-700 mb-1">
+              Evento asociado
+            </label>
+            <select
+              id="evento-padre"
+              value={parentEventId}
+              onChange={(e) => setParentEventId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Seleccionar evento...</option>
+              {parentEvents.map((ev) => (
+                <option key={ev.id} value={ev.id}>
+                  {ev.date} — {ev.type}: {ev.description.substring(0, 40)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isPermanent}
+              onChange={(e) => setIsPermanent(e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Receta permanente</span>
+          </label>
+
+          {isPermanent && (
+            <div>
+              <label htmlFor="fecha-retiro" className="block text-sm font-medium text-gray-700 mb-1">
+                Próximo retiro
+              </label>
+              <input
+                id="fecha-retiro"
+                type="date"
+                value={nextPickupDate}
+                onChange={(e) => setNextPickupDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
+        </>
+      )}
+
       <div>
         <label htmlFor="paciente" className="block text-sm font-medium text-gray-700 mb-1">
           Paciente
@@ -113,19 +183,21 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         </select>
       </div>
 
-      <CreatableSelect
-        label="Profesional"
-        id="profesional"
-        value={professionalId}
-        options={professionals.map((p) => ({ id: p.id, label: p.specialty ? `${p.name} (${p.specialty})` : p.name }))}
-        onChange={setProfessionalId}
-        onCreate={async (name) => {
-          const p = await createProfessional(name);
-          setProfessionals((prev) => [...prev, p].sort((a, b) => a.name.localeCompare(b.name)));
-          return p.id;
-        }}
-        placeholder="Sin profesional"
-      />
+      {!isReceta && (
+        <CreatableSelect
+          label="Profesional"
+          id="profesional"
+          value={professionalId}
+          options={professionals.map((p) => ({ id: p.id, label: p.specialty ? `${p.name} (${p.specialty})` : p.name }))}
+          onChange={setProfessionalId}
+          onCreate={async (name) => {
+            const p = await createProfessional(name);
+            setProfessionals((prev) => [...prev, p].sort((a, b) => a.name.localeCompare(b.name)));
+            return p.id;
+          }}
+          placeholder="Sin profesional"
+        />
+      )}
 
       <CreatableSelect
         label="Lugar"
@@ -150,7 +222,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          placeholder="Describe el evento médico..."
+          placeholder={isReceta ? 'Detalle de los medicamentos...' : 'Describe el evento médico...'}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
         />
       </div>

@@ -8,10 +8,11 @@ describe('MedicalEvent Model', () => {
     expect(EVENT_TYPES).toContain('Urgencia');
     expect(EVENT_TYPES).toContain('Cirugía');
     expect(EVENT_TYPES).toContain('Examen');
+    expect(EVENT_TYPES).toContain('Receta');
     expect(EVENT_TYPES).toContain('Otro');
   });
 
-  it('should have exactly 6 event types', () => {
-    expect(EVENT_TYPES).toHaveLength(6);
+  it('should have exactly 7 event types', () => {
+    expect(EVENT_TYPES).toHaveLength(7);
   });
 });

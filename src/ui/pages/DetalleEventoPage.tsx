@@ -25,11 +25,13 @@ const TYPE_ICONS: Record<string, string> = {
   'Urgencia': '🚑',
   'Cirugía': '🏥',
   'Examen': '🔬',
+  'Receta': '💊',
   'Otro': '📋',
 };
 
 export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProps) {
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
+  const [parentEvento, setParentEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
   const [recordings, setRecordings] = useState<EventRecording[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -63,6 +65,10 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
         setRecordings(recs);
         setProfessionals(profs);
         setLocations(locs);
+        if (ev?.parentEventId) {
+          const parent = await getEventById(ev.parentEventId);
+          setParentEvento(parent);
+        }
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -104,6 +110,19 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
 
   const handleUpdateDate = async (newDate: string) => {
     const updated = await updateEvent(eventoId, { date: newDate });
+    setEvento(updated);
+  };
+
+  const handleTogglePermanent = async (value: boolean) => {
+    const updated = await updateEvent(eventoId, {
+      isPermanent: value,
+      ...(value ? {} : { nextPickupDate: null }),
+    });
+    setEvento(updated);
+  };
+
+  const handleUpdateNextPickupDate = async (newDate: string) => {
+    const updated = await updateEvent(eventoId, { nextPickupDate: newDate || null });
     setEvento(updated);
   };
 
@@ -157,6 +176,8 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
 
   const paciente = getFamilyMemberById(evento.patientId);
   const icon = TYPE_ICONS[evento.type] ?? '📋';
+  const isReceta = evento.type === 'Receta';
+  const derivedProfessionalId = isReceta && parentEvento?.professionalId ? parentEvento.professionalId : evento.professionalId;
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -179,24 +200,44 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           <span className="text-sm font-medium">{paciente?.name ?? 'Desconocido'}</span>
         </div>
 
-        <CreatableSelect
-          label="Profesional"
-          id="detail-profesional"
-          value={evento.professionalId ?? ''}
-          options={professionals.map((p) => ({ id: p.id, label: p.specialty ? `${p.name} (${p.specialty})` : p.name }))}
-          onChange={async (id) => {
-            const updated = await updateEvent(eventoId, { professionalId: id || null });
-            setEvento(updated);
-          }}
-          onCreate={async (name) => {
-            const p = await createProfessional(name);
-            setProfessionals((prev) => [...prev, p].sort((a, b) => a.name.localeCompare(b.name)));
-            const updated = await updateEvent(eventoId, { professionalId: p.id });
-            setEvento(updated);
-            return p.id;
-          }}
-          placeholder="Sin profesional"
-        />
+        {isReceta && parentEvento && (
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-500">Evento asociado</span>
+            <span className="text-sm font-medium text-blue-600">
+              {parentEvento.type}: {parentEvento.description.substring(0, 30)}
+            </span>
+          </div>
+        )}
+
+        {isReceta ? (
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-500">Profesional</span>
+            <span className="text-sm font-medium">
+              {derivedProfessionalId
+                ? professionals.find((p) => p.id === derivedProfessionalId)?.name ?? 'Desconocido'
+                : 'Del evento asociado'}
+            </span>
+          </div>
+        ) : (
+          <CreatableSelect
+            label="Profesional"
+            id="detail-profesional"
+            value={evento.professionalId ?? ''}
+            options={professionals.map((p) => ({ id: p.id, label: p.specialty ? `${p.name} (${p.specialty})` : p.name }))}
+            onChange={async (id) => {
+              const updated = await updateEvent(eventoId, { professionalId: id || null });
+              setEvento(updated);
+            }}
+            onCreate={async (name) => {
+              const p = await createProfessional(name);
+              setProfessionals((prev) => [...prev, p].sort((a, b) => a.name.localeCompare(b.name)));
+              const updated = await updateEvent(eventoId, { professionalId: p.id });
+              setEvento(updated);
+              return p.id;
+            }}
+            placeholder="Sin profesional"
+          />
+        )}
 
         <CreatableSelect
           label="Lugar"
@@ -217,6 +258,39 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           placeholder="Sin lugar"
         />
       </div>
+
+      {/* Receta: Permanente & Next Pickup */}
+      {isReceta && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
+          <h3 className="text-sm font-medium text-gray-700">Receta</h3>
+
+          <label className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Receta permanente</span>
+            <input
+              type="checkbox"
+              checked={evento.isPermanent ?? false}
+              onChange={(e) => handleTogglePermanent(e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
+              aria-label="Receta permanente"
+            />
+          </label>
+
+          {evento.isPermanent && (
+            <div>
+              <label htmlFor="next-pickup" className="block text-xs text-gray-500 mb-1">
+                Próximo retiro
+              </label>
+              <input
+                id="next-pickup"
+                type="date"
+                value={evento.nextPickupDate ?? ''}
+                onChange={(e) => handleUpdateNextPickupDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Reembolsos & Delete */}
       <EventActions

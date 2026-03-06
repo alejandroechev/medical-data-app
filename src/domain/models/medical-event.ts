@@ -4,6 +4,7 @@ export const EVENT_TYPES = [
   'Urgencia',
   'Cirugía',
   'Examen',
+  'Receta',
   'Otro',
 ] as const;
 
@@ -25,6 +26,9 @@ export interface MedicalEvent {
   patientId: string;
   professionalId?: string;
   locationId?: string;
+  parentEventId?: string;
+  isPermanent?: boolean;
+  nextPickupDate?: string;
   isapreReimbursementStatus: ReimbursementStatus;
   insuranceReimbursementStatus: ReimbursementStatus;
   createdAt: string;
@@ -38,6 +42,9 @@ export interface CreateMedicalEventInput {
   patientId: string;
   professionalId?: string;
   locationId?: string;
+  parentEventId?: string;
+  isPermanent?: boolean;
+  nextPickupDate?: string;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
 }
@@ -49,6 +56,9 @@ export interface UpdateMedicalEventInput {
   patientId?: string;
   professionalId?: string | null;
   locationId?: string | null;
+  parentEventId?: string | null;
+  isPermanent?: boolean;
+  nextPickupDate?: string | null;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
 }

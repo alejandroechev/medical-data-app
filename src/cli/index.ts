@@ -45,6 +45,9 @@ evento
   .requiredOption('--descripcion <texto>', 'Descripción del evento')
   .option('--reembolso-isapre <estado>', 'Estado reembolso ISAPRE (none|requested|approved|rejected)', 'none')
   .option('--reembolso-seguro <estado>', 'Estado reembolso Seguro (none|requested|approved|rejected)', 'none')
+  .option('--parent-id <id>', 'ID del evento asociado (para Receta)')
+  .option('--permanente', 'Receta permanente', false)
+  .option('--fecha-retiro <fecha>', 'Fecha próximo retiro (YYYY-MM-DD)')
   .action(async (opts) => {
     const member = getFamilyMemberByName(opts.paciente);
     if (!member) {
@@ -60,6 +63,9 @@ evento
       patientId: member.id,
       isapreReimbursementStatus: (opts.reembolsoIsapre ?? 'none') as ReimbursementStatus,
       insuranceReimbursementStatus: (opts.reembolsoSeguro ?? 'none') as ReimbursementStatus,
+      ...(opts.parentId && { parentEventId: opts.parentId }),
+      ...(opts.permanente && { isPermanent: true }),
+      ...(opts.fechaRetiro && { nextPickupDate: opts.fechaRetiro }),
     };
 
     const validation = validateCreateEvent(input);

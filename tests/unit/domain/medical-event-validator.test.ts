@@ -105,6 +105,50 @@ describe('validateCreateEvent', () => {
       expect.objectContaining({ field: 'isapreReimbursementStatus' })
     );
   });
+
+  it('should require parentEventId for Receta type', () => {
+    const result = validateCreateEvent({
+      ...validInput,
+      type: 'Receta',
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'parentEventId' })
+    );
+  });
+
+  it('should accept Receta with parentEventId', () => {
+    const result = validateCreateEvent({
+      ...validInput,
+      type: 'Receta',
+      parentEventId: 'parent-123',
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it('should reject invalid nextPickupDate format', () => {
+    const result = validateCreateEvent({
+      ...validInput,
+      type: 'Receta',
+      parentEventId: 'parent-123',
+      nextPickupDate: 'not-a-date',
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ field: 'nextPickupDate' })
+    );
+  });
+
+  it('should accept valid nextPickupDate', () => {
+    const result = validateCreateEvent({
+      ...validInput,
+      type: 'Receta',
+      parentEventId: 'parent-123',
+      isPermanent: true,
+      nextPickupDate: '2024-12-15',
+    });
+    expect(result.valid).toBe(true);
+  });
 });
 
 describe('validateUpdateEvent', () => {

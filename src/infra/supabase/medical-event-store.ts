@@ -20,6 +20,9 @@ interface DbMedicalEvent {
   paciente_id: string;
   professional_id: string | null;
   location_id: string | null;
+  parent_event_id: string | null;
+  is_permanent: boolean;
+  next_pickup_date: string | null;
   reembolso_isapre_status: string;
   reembolso_seguro_status: string;
   creado_en: string;
@@ -35,6 +38,9 @@ function mapFromDb(row: DbMedicalEvent): MedicalEvent {
     patientId: row.paciente_id,
     ...(row.professional_id !== null && { professionalId: row.professional_id }),
     ...(row.location_id !== null && { locationId: row.location_id }),
+    ...(row.parent_event_id !== null && { parentEventId: row.parent_event_id }),
+    isPermanent: row.is_permanent ?? false,
+    ...(row.next_pickup_date !== null && { nextPickupDate: row.next_pickup_date }),
     isapreReimbursementStatus: (row.reembolso_isapre_status ?? 'none') as ReimbursementStatus,
     insuranceReimbursementStatus: (row.reembolso_seguro_status ?? 'none') as ReimbursementStatus,
     createdAt: row.creado_en,
@@ -55,6 +61,9 @@ export async function createEvent(
       paciente_id: input.patientId,
       professional_id: input.professionalId ?? null,
       location_id: input.locationId ?? null,
+      parent_event_id: input.parentEventId ?? null,
+      is_permanent: input.isPermanent ?? false,
+      next_pickup_date: input.nextPickupDate ?? null,
       reembolso_isapre_status: input.isapreReimbursementStatus ?? 'none',
       reembolso_seguro_status: input.insuranceReimbursementStatus ?? 'none',
     })
@@ -135,6 +144,12 @@ export async function updateEvent(
     updateData.professional_id = input.professionalId;
   if (input.locationId !== undefined)
     updateData.location_id = input.locationId;
+  if (input.parentEventId !== undefined)
+    updateData.parent_event_id = input.parentEventId;
+  if (input.isPermanent !== undefined)
+    updateData.is_permanent = input.isPermanent;
+  if (input.nextPickupDate !== undefined)
+    updateData.next_pickup_date = input.nextPickupDate;
   if (input.isapreReimbursementStatus !== undefined)
     updateData.reembolso_isapre_status = input.isapreReimbursementStatus;
   if (input.insuranceReimbursementStatus !== undefined)
