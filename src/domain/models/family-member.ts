@@ -7,7 +7,7 @@ export interface FamilyMember {
 export const FAMILY_MEMBERS: FamilyMember[] = [];
 
 export const MEMBER_COLORS: Record<string, string> = {
-  'Alejandro': 'bg-cyan-100 text-cyan-800',
+  'Alejandro': 'bg-blue-100 text-blue-800',
   'Daniela': 'bg-fuchsia-100 text-fuchsia-800',
   'Antonio': 'bg-orange-100 text-orange-800',
   'Gaspar': 'bg-teal-100 text-teal-800',

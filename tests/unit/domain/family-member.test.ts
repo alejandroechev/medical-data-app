@@ -17,7 +17,7 @@ describe('FamilyMember', () => {
   });
 
   it('should return specific color for known members', () => {
-    expect(getMemberColor('Alejandro')).toContain('cyan');
+    expect(getMemberColor('Alejandro')).toContain('blue');
     expect(getMemberColor('Daniela')).toContain('fuchsia');
     expect(getMemberColor('Antonio')).toContain('orange');
     expect(getMemberColor('Gaspar')).toContain('teal');
