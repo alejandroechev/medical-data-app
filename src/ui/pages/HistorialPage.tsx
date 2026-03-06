@@ -1,11 +1,19 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useEvents } from '../hooks/useEventos';
 import { EventCard } from '../components/EventCard';
-import { EVENT_TYPES } from '../../domain/models/medical-event';
+import { EVENT_TYPES, REIMBURSEMENT_STATUSES } from '../../domain/models/medical-event';
+import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
 import { listProfessionals, listLocations } from '../../infra/store-provider';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository';
 import type { Professional, Location } from '../../domain/models/professional-location';
+
+const STATUS_LABELS: Record<ReimbursementStatus, string> = {
+  none: 'Sin solicitar',
+  requested: 'Solicitado',
+  approved: 'Aprobado',
+  rejected: 'Rechazado',
+};
 
 interface HistorialPageProps {
   onEventClick: (id: string) => void;
@@ -17,7 +25,8 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
   const [type, setType] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [reembolso, setReembolso] = useState('');
+  const [isapreStatus, setIsapreStatus] = useState('');
+  const [insuranceStatus, setInsuranceStatus] = useState('');
   const [professionalId, setProfessionalId] = useState('');
   const [locationId, setLocationId] = useState('');
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -34,12 +43,12 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
       type: type || undefined,
       from: from || undefined,
       to: to || undefined,
-      isapreReimbursed: reembolso === 'isapre' || reembolso === 'ambos' ? true : reembolso === 'ninguno' ? false : undefined,
-      insuranceReimbursed: reembolso === 'seguro' || reembolso === 'ambos' ? true : reembolso === 'ninguno' ? false : undefined,
+      isapreReimbursementStatus: (isapreStatus || undefined) as ReimbursementStatus | undefined,
+      insuranceReimbursementStatus: (insuranceStatus || undefined) as ReimbursementStatus | undefined,
       professionalId: professionalId || undefined,
       locationId: locationId || undefined,
     }),
-    [patientId, type, from, to, reembolso, professionalId, locationId]
+    [patientId, type, from, to, isapreStatus, insuranceStatus, professionalId, locationId]
   );
 
   const { events, loading, error } = useEvents(filters);
@@ -103,19 +112,33 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
             />
           </div>
 
-          <div className="col-span-2">
-            <label htmlFor="filtro-reembolso" className="block text-xs text-gray-500 mb-1">Reembolso</label>
+          <div>
+            <label htmlFor="filtro-isapre" className="block text-xs text-gray-500 mb-1">ISAPRE</label>
             <select
-              id="filtro-reembolso"
-              value={reembolso}
-              onChange={(e) => setReembolso(e.target.value)}
+              id="filtro-isapre"
+              value={isapreStatus}
+              onChange={(e) => setIsapreStatus(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
             >
               <option value="">Todos</option>
-              <option value="isapre">ISAPRE reembolsada</option>
-              <option value="seguro">Seguro reembolsado</option>
-              <option value="ambos">Ambos reembolsados</option>
-              <option value="ninguno">Sin reembolsos</option>
+              {REIMBURSEMENT_STATUSES.map((s) => (
+                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="filtro-seguro" className="block text-xs text-gray-500 mb-1">Seguro</label>
+            <select
+              id="filtro-seguro"
+              value={insuranceStatus}
+              onChange={(e) => setInsuranceStatus(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
+            >
+              <option value="">Todos</option>
+              {REIMBURSEMENT_STATUSES.map((s) => (
+                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              ))}
             </select>
           </div>
 

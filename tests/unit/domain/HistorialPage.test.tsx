@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { HistorialPage } from '../../../src/ui/pages/HistorialPage';
 
 vi.mock('../../../src/infra/store-provider', () => ({
@@ -30,6 +31,8 @@ describe('HistorialPage', () => {
     expect(screen.getByLabelText('Tipo')).toBeInTheDocument();
     expect(screen.getByLabelText('Desde')).toBeInTheDocument();
     expect(screen.getByLabelText('Hasta')).toBeInTheDocument();
+    expect(screen.getByLabelText('ISAPRE')).toBeInTheDocument();
+    expect(screen.getByLabelText('Seguro')).toBeInTheDocument();
   });
 
   it('should show message when there are no results', async () => {
@@ -73,5 +76,65 @@ describe('HistorialPage', () => {
 
     expect(pacienteSelect.querySelector('option[value=""]')).toBeTruthy();
     expect(tipoSelect.querySelector('option[value=""]')).toBeTruthy();
+  });
+
+  it('should have reimbursement status options in ISAPRE filter', () => {
+    mockList.mockResolvedValue([]);
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    const isapreSelect = screen.getByLabelText('ISAPRE');
+    const options = Array.from(isapreSelect.querySelectorAll('option')).map(o => o.textContent);
+    expect(options).toContain('Todos');
+    expect(options).toContain('Sin solicitar');
+    expect(options).toContain('Solicitado');
+    expect(options).toContain('Aprobado');
+    expect(options).toContain('Rechazado');
+  });
+
+  it('should have reimbursement status options in Seguro filter', () => {
+    mockList.mockResolvedValue([]);
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    const seguroSelect = screen.getByLabelText('Seguro');
+    const options = Array.from(seguroSelect.querySelectorAll('option')).map(o => o.textContent);
+    expect(options).toContain('Todos');
+    expect(options).toContain('Sin solicitar');
+    expect(options).toContain('Solicitado');
+    expect(options).toContain('Aprobado');
+    expect(options).toContain('Rechazado');
+  });
+
+  it('should pass ISAPRE status filter to listEvents', async () => {
+    mockList.mockResolvedValue([]);
+    const user = userEvent.setup();
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    await screen.findByText(/encontrado/);
+    mockList.mockClear();
+
+    await user.selectOptions(screen.getByLabelText('ISAPRE'), 'approved');
+
+    await vi.waitFor(() => {
+      expect(mockList).toHaveBeenCalledWith(
+        expect.objectContaining({ isapreReimbursementStatus: 'approved' })
+      );
+    });
+  });
+
+  it('should pass Seguro status filter to listEvents', async () => {
+    mockList.mockResolvedValue([]);
+    const user = userEvent.setup();
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    await screen.findByText(/encontrado/);
+    mockList.mockClear();
+
+    await user.selectOptions(screen.getByLabelText('Seguro'), 'requested');
+
+    await vi.waitFor(() => {
+      expect(mockList).toHaveBeenCalledWith(
+        expect.objectContaining({ insuranceReimbursementStatus: 'requested' })
+      );
+    });
   });
 });

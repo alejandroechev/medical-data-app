@@ -31,6 +31,8 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByLabel('Tipo')).toBeVisible();
     await expect(page.getByLabel('Desde')).toBeVisible();
     await expect(page.getByLabel('Hasta')).toBeVisible();
+    await expect(page.getByLabel('ISAPRE')).toBeVisible();
+    await expect(page.getByLabel('Seguro')).toBeVisible();
   });
 
   test('should show validation errors when submitting empty form', async ({ page }) => {
