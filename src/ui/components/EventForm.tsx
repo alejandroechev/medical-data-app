@@ -31,6 +31,8 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const [parentEvents, setParentEvents] = useState<MedicalEvent[]>([]);
 
   const isReceta = type === 'Receta';
+  const selectedParent = parentEvents.find((e) => e.id === parentEventId);
+  const hasParent = isReceta && !!selectedParent;
 
   useEffect(() => {
     listProfessionals().then(setProfessionals);
@@ -45,6 +47,14 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
     }
   }, [isReceta]);
 
+  // When parent event is selected, auto-fill date and patient
+  useEffect(() => {
+    if (selectedParent) {
+      setDate(selectedParent.date);
+      setPatientId(selectedParent.patientId);
+    }
+  }, [selectedParent]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrores([]);
@@ -54,7 +64,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       type,
       description,
       patientId,
-      professionalId: professionalId || undefined,
+      professionalId: hasParent ? undefined : (professionalId || undefined),
       locationId: locationId || undefined,
       ...(isReceta && {
         parentEventId: parentEventId || undefined,
@@ -99,8 +109,12 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          disabled={hasParent}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
         />
+        {hasParent && (
+          <p className="text-xs text-gray-400 mt-1">Fecha del evento asociado</p>
+        )}
       </div>
 
       <div>
@@ -123,7 +137,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
         <>
           <div>
             <label htmlFor="evento-padre" className="block text-sm font-medium text-gray-700 mb-1">
-              Evento asociado
+              Evento asociado (opcional)
             </label>
             <select
               id="evento-padre"
@@ -131,7 +145,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
               onChange={(e) => setParentEventId(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">Seleccionar evento...</option>
+              <option value="">Sin evento asociado</option>
               {parentEvents.map((ev) => (
                 <option key={ev.id} value={ev.id}>
                   {ev.date} — {ev.type}: {ev.description.substring(0, 40)}
@@ -175,15 +189,19 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
           id="paciente"
           value={patientId}
           onChange={(e) => setPatientId(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          disabled={hasParent}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
         >
           {members.map((m) => (
             <option key={m.id} value={m.id}>{m.name} ({m.relationship})</option>
           ))}
         </select>
+        {hasParent && (
+          <p className="text-xs text-gray-400 mt-1">Paciente del evento asociado</p>
+        )}
       </div>
 
-      {!isReceta && (
+      {!hasParent && (
         <CreatableSelect
           label="Profesional"
           id="profesional"

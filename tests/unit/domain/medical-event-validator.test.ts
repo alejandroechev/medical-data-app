@@ -106,15 +106,12 @@ describe('validateCreateEvent', () => {
     );
   });
 
-  it('should require parentEventId for Receta type', () => {
+  it('should accept Receta without parentEventId', () => {
     const result = validateCreateEvent({
       ...validInput,
       type: 'Receta',
     });
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContainEqual(
-      expect.objectContaining({ field: 'parentEventId' })
-    );
+    expect(result.valid).toBe(true);
   });
 
   it('should accept Receta with parentEventId', () => {

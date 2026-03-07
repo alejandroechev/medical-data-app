@@ -177,7 +177,8 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const paciente = getFamilyMemberById(evento.patientId);
   const icon = TYPE_ICONS[evento.type] ?? '📋';
   const isReceta = evento.type === 'Receta';
-  const derivedProfessionalId = isReceta && parentEvento?.professionalId ? parentEvento.professionalId : evento.professionalId;
+  const hasParent = isReceta && !!parentEvento;
+  const derivedProfessionalId = hasParent && parentEvento?.professionalId ? parentEvento.professionalId : evento.professionalId;
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -209,13 +210,13 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           </div>
         )}
 
-        {isReceta ? (
+        {hasParent ? (
           <div className="flex justify-between">
             <span className="text-sm text-gray-500">Profesional</span>
             <span className="text-sm font-medium">
               {derivedProfessionalId
                 ? professionals.find((p) => p.id === derivedProfessionalId)?.name ?? 'Desconocido'
-                : 'Del evento asociado'}
+                : 'Sin profesional'}
             </span>
           </div>
         ) : (

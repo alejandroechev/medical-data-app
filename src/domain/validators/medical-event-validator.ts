@@ -61,10 +61,6 @@ export function validateCreateEvent(input: CreateMedicalEventInput): ValidationR
     errors.push({ field: 'insuranceReimbursementStatus', message: `Estado de reembolso seguro inválido. Debe ser uno de: ${REIMBURSEMENT_STATUSES.join(', ')}` });
   }
 
-  if (input.type === 'Receta' && (!input.parentEventId || !input.parentEventId.trim())) {
-    errors.push({ field: 'parentEventId', message: 'La receta debe estar vinculada a un evento' });
-  }
-
   if (input.nextPickupDate !== undefined && input.nextPickupDate !== null && input.nextPickupDate.trim() !== '' && !isValidDate(input.nextPickupDate)) {
     errors.push({ field: 'nextPickupDate', message: 'La fecha de retiro debe tener formato YYYY-MM-DD válido' });
   }
