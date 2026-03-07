@@ -4,9 +4,10 @@ import { EventCard } from '../components/EventCard';
 import { EVENT_TYPES, REIMBURSEMENT_STATUSES } from '../../domain/models/medical-event';
 import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { listProfessionals, listLocations } from '../../infra/store-provider';
+import { listProfessionals, listLocations, listPrescriptionDrugsByEvent } from '../../infra/store-provider';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository';
 import type { Professional, Location } from '../../domain/models/professional-location';
+import type { PrescriptionDrug } from '../../domain/models/prescription-drug';
 
 const STATUS_LABELS: Record<ReimbursementStatus, string> = {
   none: 'Sin solicitar',
@@ -31,6 +32,9 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
   const [locationId, setLocationId] = useState('');
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [drugSearch, setDrugSearch] = useState('');
+  const [drugMap, setDrugMap] = useState<Map<string, PrescriptionDrug[]>>(new Map());
+  const [drugFilterLoading, setDrugFilterLoading] = useState(false);
 
   useEffect(() => {
     listProfessionals().then(setProfessionals);
@@ -52,6 +56,45 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
   );
 
   const { events, loading, error } = useEvents(filters);
+
+  // Load drugs for Receta events when drug search is active
+  useEffect(() => {
+    if (!drugSearch.trim()) {
+      setDrugMap(new Map());
+      return;
+    }
+    const recetaEvents = events.filter((e) => e.type === 'Receta');
+    if (recetaEvents.length === 0) {
+      setDrugMap(new Map());
+      return;
+    }
+    setDrugFilterLoading(true);
+    Promise.all(
+      recetaEvents.map(async (e) => {
+        const drugs = await listPrescriptionDrugsByEvent(e.id);
+        return [e.id, drugs] as [string, PrescriptionDrug[]];
+      })
+    ).then((entries) => {
+      setDrugMap(new Map(entries));
+      setDrugFilterLoading(false);
+    });
+  }, [drugSearch, events]);
+
+  const filteredEvents = useMemo(() => {
+    const query = drugSearch.trim().toLowerCase();
+    if (!query) return events;
+    return events.filter((e) => {
+      if (e.type !== 'Receta') return false;
+      const drugs = drugMap.get(e.id) ?? [];
+      return drugs.some((d) =>
+        d.name.toLowerCase().includes(query) ||
+        d.dosage.toLowerCase().includes(query) ||
+        d.frequency.toLowerCase().includes(query)
+      );
+    });
+  }, [events, drugSearch, drugMap]);
+
+  const isLoading = loading || drugFilterLoading;
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -171,11 +214,23 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
               ))}
             </select>
           </div>
+
+          <div className="col-span-2">
+            <label htmlFor="filtro-medicamento" className="block text-xs text-gray-500 mb-1">Medicamento</label>
+            <input
+              id="filtro-medicamento"
+              type="text"
+              value={drugSearch}
+              onChange={(e) => setDrugSearch(e.target.value)}
+              placeholder="Buscar por nombre, dosis o frecuencia..."
+              className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
+            />
+          </div>
         </div>
       </div>
 
       {/* Results */}
-      {loading && (
+      {isLoading && (
         <div className="flex items-center justify-center h-32">
           <p className="text-gray-500 text-sm">Buscando...</p>
         </div>
@@ -187,17 +242,17 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
         </div>
       )}
 
-      {!loading && !error && (
+      {!isLoading && !error && (
         <>
           <p className="text-xs text-gray-400">
-            {events.length} evento{events.length !== 1 ? 's' : ''} encontrado{events.length !== 1 ? 's' : ''}
+            {filteredEvents.length} evento{filteredEvents.length !== 1 ? 's' : ''} encontrado{filteredEvents.length !== 1 ? 's' : ''}
           </p>
           <div className="space-y-3">
-            {events.map((evento) => (
+            {filteredEvents.map((evento) => (
               <EventCard key={evento.id} evento={evento} onClick={onEventClick} />
             ))}
           </div>
-          {events.length === 0 && (
+          {filteredEvents.length === 0 && (
             <p className="text-center text-gray-400 text-sm py-8">
               No se encontraron eventos con los filtros seleccionados
             </p>

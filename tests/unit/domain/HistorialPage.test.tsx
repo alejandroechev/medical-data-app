@@ -13,11 +13,13 @@ vi.mock('../../../src/infra/store-provider', () => ({
   createProfessional: vi.fn(),
   listLocations: vi.fn().mockResolvedValue([]),
   createLocation: vi.fn(),
+  listPrescriptionDrugsByEvent: vi.fn().mockResolvedValue([]),
 }));
 
-import { listEvents } from '../../../src/infra/store-provider';
+import { listEvents, listPrescriptionDrugsByEvent } from '../../../src/infra/store-provider';
 
 const mockList = vi.mocked(listEvents);
+const mockListDrugs = vi.mocked(listPrescriptionDrugsByEvent);
 
 describe('HistorialPage', () => {
   beforeEach(() => {
@@ -33,6 +35,7 @@ describe('HistorialPage', () => {
     expect(screen.getByLabelText('Hasta')).toBeInTheDocument();
     expect(screen.getByLabelText('ISAPRE')).toBeInTheDocument();
     expect(screen.getByLabelText('Seguro')).toBeInTheDocument();
+    expect(screen.getByLabelText('Medicamento')).toBeInTheDocument();
   });
 
   it('should show message when there are no results', async () => {
@@ -136,5 +139,48 @@ describe('HistorialPage', () => {
         expect.objectContaining({ insuranceReimbursementStatus: 'requested' })
       );
     });
+  });
+
+  it('should filter Receta events by drug name search', async () => {
+    mockList.mockResolvedValue([
+      {
+        id: 'receta-1',
+        date: '2024-06-15',
+        type: 'Receta' as const,
+        description: 'Receta antibiótico',
+        patientId: '1',
+        isapreReimbursementStatus: 'none' as const,
+        insuranceReimbursementStatus: 'none' as const,
+        createdAt: '2024-06-15T10:00:00Z',
+        updatedAt: '2024-06-15T10:00:00Z',
+      },
+      {
+        id: 'consulta-1',
+        date: '2024-06-15',
+        type: 'Consulta Médica' as const,
+        description: 'Control general',
+        patientId: '1',
+        isapreReimbursementStatus: 'none' as const,
+        insuranceReimbursementStatus: 'none' as const,
+        createdAt: '2024-06-15T10:00:00Z',
+        updatedAt: '2024-06-15T10:00:00Z',
+      },
+    ]);
+    mockListDrugs.mockResolvedValue([
+      { id: 'd1', eventId: 'receta-1', name: 'Amoxicilina', dosage: '500mg', frequency: 'cada 8h', createdAt: '2024-06-15T10:00:00Z' },
+    ]);
+
+    const user = userEvent.setup();
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    await screen.findByText('2 eventos encontrados');
+
+    await user.type(screen.getByLabelText('Medicamento'), 'Amox');
+
+    await vi.waitFor(() => {
+      expect(screen.getByText('1 evento encontrado')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Receta antibiótico')).toBeInTheDocument();
+    expect(screen.queryByText('Control general')).not.toBeInTheDocument();
   });
 });
