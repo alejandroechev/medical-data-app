@@ -8,14 +8,17 @@ import * as supabasePhotoStore from './supabase/event-photo-store.js';
 import * as supabasePhotoStorage from './supabase/photo-storage.js';
 import * as supabaseRecordingStore from './supabase/recording-store.js';
 import * as supabaseProfLocStore from './supabase/professional-location-store.js';
+import * as supabaseDrugStore from './supabase/prescription-drug-store.js';
 import { InMemoryMedicalEventStore } from './memory/medical-event-store.js';
 import { InMemoryEventPhotoStore } from './memory/event-photo-store.js';
 import { InMemoryPhotoUploader } from './memory/photo-uploader.js';
 import { InMemoryRecordingStore } from './memory/recording-store.js';
 import { InMemoryProfessionalStore, InMemoryLocationStore } from './memory/professional-location-store.js';
+import { InMemoryPrescriptionDrugStore } from './memory/prescription-drug-store.js';
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../domain/models/medical-event.js';
 import type { EventPhoto, LinkPhotoInput } from '../domain/models/event-photo.js';
 import type { EventRecording, CreateRecordingInput } from '../domain/models/event-recording.js';
+import type { PrescriptionDrug, CreatePrescriptionDrugInput } from '../domain/models/prescription-drug.js';
 import type { Professional, Location } from '../domain/models/professional-location.js';
 import type { MedicalEventFilters } from '../domain/services/medical-event-repository.js';
 import type { UploadResult } from '../domain/services/photo-uploader.js';
@@ -29,6 +32,7 @@ const memoryPhotoUploader = new InMemoryPhotoUploader();
 const memoryRecordingStore = new InMemoryRecordingStore();
 const memoryProfessionalStore = new InMemoryProfessionalStore();
 const memoryLocationStore = new InMemoryLocationStore();
+const memoryDrugStore = new InMemoryPrescriptionDrugStore();
 
 export function isUsingSupabase(): boolean {
   return useSupabase;
@@ -120,4 +124,18 @@ export async function listLocations(): Promise<Location[]> {
 
 export async function getLocationById(id: string): Promise<Location | undefined> {
   return useSupabase ? supabaseProfLocStore.getLocationById(id) : memoryLocationStore.getById(id);
+}
+
+// --- Prescription Drugs ---
+
+export async function createPrescriptionDrug(input: CreatePrescriptionDrugInput): Promise<PrescriptionDrug> {
+  return useSupabase ? supabaseDrugStore.createPrescriptionDrug(input) : memoryDrugStore.create(input);
+}
+
+export async function listPrescriptionDrugsByEvent(eventId: string): Promise<PrescriptionDrug[]> {
+  return useSupabase ? supabaseDrugStore.listPrescriptionDrugsByEvent(eventId) : memoryDrugStore.listByEvent(eventId);
+}
+
+export async function deletePrescriptionDrug(id: string): Promise<void> {
+  return useSupabase ? supabaseDrugStore.deletePrescriptionDrug(id) : memoryDrugStore.delete(id);
 }

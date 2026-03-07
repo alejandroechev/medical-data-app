@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPrescriptionDrug, listPrescriptionDrugsByEvent, deletePrescriptionDrug } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
@@ -9,9 +9,11 @@ import { AudioRecorder } from '../components/AudioRecorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { CreatableSelect } from '../components/CreatableSelect';
 import { ConfirmDeleteButton } from '../components/ConfirmDeleteButton';
+import { PrescriptionDrugList } from '../components/PrescriptionDrugList';
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
+import type { PrescriptionDrug } from '../../domain/models/prescription-drug';
 import type { Professional, Location } from '../../domain/models/professional-location';
 
 interface DetalleEventoPageProps {
@@ -34,6 +36,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const [parentEvento, setParentEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
   const [recordings, setRecordings] = useState<EventRecording[]>([]);
+  const [drugs, setDrugs] = useState<PrescriptionDrug[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,20 +52,27 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     setRecordings(recs);
   }, [eventoId]);
 
+  const reloadDrugs = useCallback(async () => {
+    const d = await listPrescriptionDrugsByEvent(eventoId);
+    setDrugs(d);
+  }, [eventoId]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const [ev, ph, recs, profs, locs] = await Promise.all([
+        const [ev, ph, recs, d, profs, locs] = await Promise.all([
           getEventById(eventoId),
           listPhotosByEvent(eventoId),
           listRecordingsByEvent(eventoId),
+          listPrescriptionDrugsByEvent(eventoId),
           listProfessionals(),
           listLocations(),
         ]);
         setEvento(ev);
         setFotos(ph);
         setRecordings(recs);
+        setDrugs(d);
         setProfessionals(profs);
         setLocations(locs);
         if (ev?.parentEventId) {
@@ -154,6 +164,16 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const handleDeleteRecording = async (id: string) => {
     await deleteRecording(id);
     await reloadRecordings();
+  };
+
+  const handleAddDrug = async (drug: { name: string; dosage: string; frequency: string; durationDays?: number }) => {
+    await createPrescriptionDrug({ eventId: eventoId, ...drug });
+    await reloadDrugs();
+  };
+
+  const handleDeleteDrug = async (id: string) => {
+    await deletePrescriptionDrug(id);
+    await reloadDrugs();
   };
 
   if (loading) {
@@ -291,6 +311,15 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
             </div>
           )}
         </div>
+      )}
+
+      {/* Prescription Drugs (Receta only) */}
+      {isReceta && (
+        <PrescriptionDrugList
+          drugs={drugs}
+          onAdd={handleAddDrug}
+          onDelete={handleDeleteDrug}
+        />
       )}
 
       {/* Reembolsos & Delete */}
