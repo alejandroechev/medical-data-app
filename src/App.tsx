@@ -45,7 +45,10 @@ function App() {
 
       <main className="max-w-lg mx-auto pb-20">
         {currentPage === 'inicio' && (
-          <InicioPage onEventClick={handleEventClick} />
+          <InicioPage
+            onEventClick={handleEventClick}
+            onViewPatientHistory={(patientId) => navigateTo('historial', { patientId })}
+          />
         )}
         {currentPage === 'nuevo-evento' && (
           <NuevoEventoPage onCreated={() => navigateTo('inicio')} />
@@ -58,7 +61,7 @@ function App() {
           />
         )}
         {currentPage === 'historial' && (
-          <HistorialPage onEventClick={handleEventClick} />
+          <HistorialPage onEventClick={handleEventClick} initialPatientId={params.patientId} />
         )}
         {currentPage === 'tratamientos' && (
           <TratamientosPage />

@@ -16,7 +16,11 @@ interface MemberSummary {
   reimbursedCost: number;
 }
 
-export function FamilySummary() {
+interface FamilySummaryProps {
+  onViewHistory?: (patientId: string) => void;
+}
+
+export function FamilySummary({ onViewHistory }: FamilySummaryProps) {
   const members = getFamilyMembers();
   const [summaries, setSummaries] = useState<MemberSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +61,10 @@ export function FamilySummary() {
     load();
   }, []);
 
+  const notifiable = summaries.filter(
+    (s) => s.activeDrugs.length > 0 || s.pendingIsapre > 0 || s.pendingInsurance > 0
+  );
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
@@ -65,12 +73,14 @@ export function FamilySummary() {
     );
   }
 
+  if (notifiable.length === 0) return null;
+
   return (
     <div className="space-y-2">
       <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
         Resumen familiar
       </h2>
-      {summaries.map((s) => {
+      {notifiable.map((s) => {
         const isExpanded = expandedId === s.member.id;
         const color = getMemberColor(s.member.name);
         const hasPending = s.pendingIsapre > 0 || s.pendingInsurance > 0;
@@ -139,6 +149,15 @@ export function FamilySummary() {
 
                 {s.totalEvents === 0 && s.activeDrugs.length === 0 && (
                   <p className="text-xs text-gray-400 text-center">Sin actividad registrada</p>
+                )}
+
+                {onViewHistory && (
+                  <button
+                    onClick={() => onViewHistory(s.member.id)}
+                    className="w-full text-xs text-blue-600 hover:text-blue-800 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                  >
+                    🔍 Ver historial de {s.member.name}
+                  </button>
                 )}
               </div>
             )}

@@ -19,11 +19,12 @@ const STATUS_LABELS: Record<ReimbursementStatus, string> = {
 
 interface HistorialPageProps {
   onEventClick: (id: string) => void;
+  initialPatientId?: string;
 }
 
-export function HistorialPage({ onEventClick }: HistorialPageProps) {
+export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageProps) {
   const members = getFamilyMembers();
-  const [patientId, setPatientId] = useState('');
+  const [patientId, setPatientId] = useState(initialPatientId ?? '');
   const [type, setType] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');

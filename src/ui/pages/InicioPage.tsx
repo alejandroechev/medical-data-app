@@ -4,9 +4,10 @@ import { FamilySummary } from '../components/FamilySummary';
 
 interface InicioPageProps {
   onEventClick: (id: string) => void;
+  onViewPatientHistory?: (patientId: string) => void;
 }
 
-export function InicioPage({ onEventClick }: InicioPageProps) {
+export function InicioPage({ onEventClick, onViewPatientHistory }: InicioPageProps) {
   const { events, loading, error } = useEvents();
 
   if (loading) {
@@ -30,7 +31,7 @@ export function InicioPage({ onEventClick }: InicioPageProps) {
   if (events.length === 0) {
     return (
       <div className="p-4 space-y-4">
-        <FamilySummary />
+        <FamilySummary onViewHistory={onViewPatientHistory} />
         <div className="flex flex-col items-center justify-center h-32 text-center">
           <span className="text-4xl mb-3">📋</span>
           <p className="text-gray-500 text-lg">Sin eventos médicos</p>
@@ -44,7 +45,7 @@ export function InicioPage({ onEventClick }: InicioPageProps) {
 
   return (
     <div className="p-4 space-y-3">
-      <FamilySummary />
+      <FamilySummary onViewHistory={onViewPatientHistory} />
 
       <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
         Eventos recientes
