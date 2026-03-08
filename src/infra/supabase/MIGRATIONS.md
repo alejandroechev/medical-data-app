@@ -8,7 +8,7 @@
 | 006 | `migration-006-patient-drugs.sql` | patient_drugs table + drop event drug fields | ✅ Applied | 2026-03-08 |
 | 007 | `migration-007-drug-start-time.sql` | Add start_time column to patient_drugs | ✅ Applied | 2026-03-08 |
 | 008 | `migration-008-event-cost.sql` | Add costo column to medical_events | ✅ Applied | 2026-03-08 |
-| 009 | `migration-009-backup-rpc.sql` | Add get_public_tables() RPC for generic backup | ⏳ Pending | — |
+| 009 | `migration-009-backup-rpc.sql` | Add get_public_tables() RPC for generic backup | ✅ Applied | 2026-03-08 |
 
 ## How to use
 
