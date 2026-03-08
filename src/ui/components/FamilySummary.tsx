@@ -61,9 +61,7 @@ export function FamilySummary({ onViewHistory }: FamilySummaryProps) {
     load();
   }, []);
 
-  const notifiable = summaries.filter(
-    (s) => s.activeDrugs.length > 0 || s.pendingIsapre > 0 || s.pendingInsurance > 0
-  );
+  const notifiable = summaries.filter((s) => s.totalEvents > 0);
 
   if (loading) {
     return (
