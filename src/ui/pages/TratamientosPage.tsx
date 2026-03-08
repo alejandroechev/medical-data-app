@@ -3,7 +3,7 @@ import { getFamilyMembers } from '../../infra/supabase/family-member-store';
 import { listPatientDrugsByPatient, createPatientDrug, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
 import { DrugCard } from '../components/DrugCard';
 import { DrugForm } from '../components/DrugForm';
-import type { PatientDrug, CreatePatientDrugInput } from '../../domain/models/prescription-drug';
+import type { PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
 
 type FilterStatus = 'active' | 'all' | 'stopped';
 
@@ -33,6 +33,11 @@ export function TratamientosPage() {
   const handleAddDrug = async (input: CreatePatientDrugInput) => {
     await createPatientDrug(input);
     setShowForm(false);
+    await loadDrugs();
+  };
+
+  const handleEditDrug = async (id: string, input: UpdatePatientDrugInput) => {
+    await updatePatientDrug(id, input);
     await loadDrugs();
   };
 
@@ -117,6 +122,7 @@ export function TratamientosPage() {
               <DrugCard
                 key={drug.id}
                 drug={drug}
+                onEdit={handleEditDrug}
                 onStop={handleStopDrug}
                 onDelete={handleDeleteDrug}
               />

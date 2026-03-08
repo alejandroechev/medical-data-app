@@ -90,6 +90,7 @@ interface DbPatientDrug {
   schedule: string; // JSON
   duration: string; // JSON
   start_date: string;
+  start_time: string | null;
   end_date: string | null;
   is_permanent: boolean;
   next_pickup_date: string | null;
@@ -107,6 +108,7 @@ function mapPatientDrugFromDb(row: DbPatientDrug): PatientDrug {
     schedule: JSON.parse(row.schedule) as DrugSchedule,
     duration: JSON.parse(row.duration) as DrugDuration,
     startDate: row.start_date,
+    ...(row.start_time !== null && { startTime: row.start_time }),
     ...(row.end_date !== null && { endDate: row.end_date }),
     isPermanent: row.is_permanent,
     ...(row.next_pickup_date !== null && { nextPickupDate: row.next_pickup_date }),
@@ -127,6 +129,7 @@ export async function createPatientDrug(input: CreatePatientDrugInput): Promise<
       schedule: JSON.stringify(input.schedule),
       duration: JSON.stringify(input.duration),
       start_date: input.startDate,
+      start_time: input.startTime ?? null,
       is_permanent: input.isPermanent ?? false,
       next_pickup_date: input.nextPickupDate ?? null,
       status: 'active',
@@ -146,6 +149,7 @@ export async function updatePatientDrug(id: string, input: UpdatePatientDrugInpu
   if (input.schedule !== undefined) updateData.schedule = JSON.stringify(input.schedule);
   if (input.duration !== undefined) updateData.duration = JSON.stringify(input.duration);
   if (input.startDate !== undefined) updateData.start_date = input.startDate;
+  if (input.startTime !== undefined) updateData.start_time = input.startTime;
   if (input.endDate !== undefined) updateData.end_date = input.endDate;
   if (input.isPermanent !== undefined) updateData.is_permanent = input.isPermanent;
   if (input.nextPickupDate !== undefined) updateData.next_pickup_date = input.nextPickupDate;

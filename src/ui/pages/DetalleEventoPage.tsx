@@ -14,7 +14,7 @@ import { DrugForm } from '../components/DrugForm';
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
-import type { PatientDrug, CreatePatientDrugInput } from '../../domain/models/prescription-drug';
+import type { PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
 import type { Professional, Location } from '../../domain/models/professional-location';
 
 interface DetalleEventoPageProps {
@@ -161,6 +161,11 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     await reloadDrugs();
   };
 
+  const handleEditDrug = async (id: string, input: UpdatePatientDrugInput) => {
+    await updatePatientDrug(id, input);
+    await reloadDrugs();
+  };
+
   const handleStopDrug = async (id: string) => {
     await updatePatientDrug(id, { status: 'stopped', endDate: new Date().toISOString().split('T')[0] });
     await reloadDrugs();
@@ -293,6 +298,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
               <DrugCard
                 key={drug.id}
                 drug={drug}
+                onEdit={handleEditDrug}
                 onStop={handleStopDrug}
                 onDelete={handleDeleteDrug}
               />

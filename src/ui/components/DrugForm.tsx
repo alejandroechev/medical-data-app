@@ -1,26 +1,35 @@
 import { useState } from 'react';
-import type { CreatePatientDrugInput, DrugSchedule, DrugDuration } from '../../domain/models/prescription-drug';
+import type { CreatePatientDrugInput, DrugSchedule, DrugDuration, PatientDrug } from '../../domain/models/prescription-drug';
 
 interface DrugFormProps {
   patientId: string;
   eventId?: string;
+  initialValues?: PatientDrug;
   onSubmit: (input: CreatePatientDrugInput) => Promise<void>;
   onCancel: () => void;
 }
 
-export function DrugForm({ patientId, eventId, onSubmit, onCancel }: DrugFormProps) {
+export function DrugForm({ patientId, eventId, initialValues, onSubmit, onCancel }: DrugFormProps) {
   const today = new Date().toISOString().split('T')[0];
+  const nowTime = new Date().toTimeString().slice(0, 5);
 
-  const [name, setName] = useState('');
-  const [dosage, setDosage] = useState('');
-  const [scheduleType, setScheduleType] = useState<'interval' | 'fixed'>('interval');
-  const [intervalHours, setIntervalHours] = useState('8');
-  const [fixedTimes, setFixedTimes] = useState<string[]>(['08:00']);
-  const [durationType, setDurationType] = useState<'days' | 'indefinite'>('days');
-  const [durationDays, setDurationDays] = useState('7');
-  const [startDate, setStartDate] = useState(today);
-  const [isPermanent, setIsPermanent] = useState(false);
-  const [nextPickupDate, setNextPickupDate] = useState('');
+  const [name, setName] = useState(initialValues?.name ?? '');
+  const [dosage, setDosage] = useState(initialValues?.dosage ?? '');
+  const [scheduleType, setScheduleType] = useState<'interval' | 'fixed'>(initialValues?.schedule.type ?? 'interval');
+  const [intervalHours, setIntervalHours] = useState(
+    initialValues?.schedule.type === 'interval' ? String(initialValues.schedule.intervalHours) : '8'
+  );
+  const [fixedTimes, setFixedTimes] = useState<string[]>(
+    initialValues?.schedule.type === 'fixed' ? [...initialValues.schedule.times] : ['08:00']
+  );
+  const [durationType, setDurationType] = useState<'days' | 'indefinite'>(initialValues?.duration.type ?? 'days');
+  const [durationDays, setDurationDays] = useState(
+    initialValues?.duration.type === 'days' ? String(initialValues.duration.days) : '7'
+  );
+  const [startDate, setStartDate] = useState(initialValues?.startDate ?? today);
+  const [startTime, setStartTime] = useState(initialValues?.startTime ?? nowTime);
+  const [isPermanent, setIsPermanent] = useState(initialValues?.isPermanent ?? false);
+  const [nextPickupDate, setNextPickupDate] = useState(initialValues?.nextPickupDate ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +82,7 @@ export function DrugForm({ patientId, eventId, onSubmit, onCancel }: DrugFormPro
         schedule,
         duration,
         startDate,
+        startTime: startTime || undefined,
         isPermanent,
         nextPickupDate: nextPickupDate || undefined,
       });
@@ -230,16 +240,28 @@ export function DrugForm({ patientId, eventId, onSubmit, onCancel }: DrugFormPro
         )}
       </div>
 
-      {/* Start date */}
-      <div>
-        <label htmlFor="drug-start" className="block text-xs text-gray-500 mb-1">Inicio tratamiento</label>
-        <input
-          id="drug-start"
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        />
+      {/* Start date & time */}
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label htmlFor="drug-start" className="block text-xs text-gray-500 mb-1">Fecha inicio</label>
+          <input
+            id="drug-start"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label htmlFor="drug-start-time" className="block text-xs text-gray-500 mb-1">Hora inicio</label>
+          <input
+            id="drug-start-time"
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
       </div>
 
       {/* Permanent prescription */}
@@ -276,7 +298,7 @@ export function DrugForm({ patientId, eventId, onSubmit, onCancel }: DrugFormPro
           disabled={saving}
           className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
-          {saving ? 'Guardando...' : 'Agregar tratamiento'}
+          {saving ? 'Guardando...' : initialValues ? 'Guardar cambios' : 'Agregar tratamiento'}
         </button>
         <button
           onClick={onCancel}
