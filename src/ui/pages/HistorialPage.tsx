@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useEvents } from '../hooks/useEventos';
 import { EventCard } from '../components/EventCard';
+import { ExpenseSummary } from '../components/ExpenseSummary';
 import { EVENT_TYPES, REIMBURSEMENT_STATUSES } from '../../domain/models/medical-event';
 import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
@@ -266,6 +267,9 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Expense summary for filtered results */}
+      {!isLoading && !error && <ExpenseSummary events={filteredEvents} />}
 
       {/* Results */}
       {isLoading && (
