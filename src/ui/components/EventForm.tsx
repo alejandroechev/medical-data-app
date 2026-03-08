@@ -23,8 +23,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const [professionalId, setProfessionalId] = useState('');
   const [locationId, setLocationId] = useState('');
   const [parentEventId, setParentEventId] = useState('');
-  const [isPermanent, setIsPermanent] = useState(false);
-  const [nextPickupDate, setNextPickupDate] = useState('');
   const [errores, setErrores] = useState<string[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -68,8 +66,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       locationId: locationId || undefined,
       ...(isReceta && {
         parentEventId: parentEventId || undefined,
-        isPermanent,
-        nextPickupDate: nextPickupDate || undefined,
       }),
     };
 
@@ -83,8 +79,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       await onSubmit(input);
       setDescription('');
       setParentEventId('');
-      setIsPermanent(false);
-      setNextPickupDate('');
     } catch (err) {
       setErrores([(err as Error).message]);
     }
@@ -153,31 +147,6 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
               ))}
             </select>
           </div>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={isPermanent}
-              onChange={(e) => setIsPermanent(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700">Receta permanente</span>
-          </label>
-
-          {isPermanent && (
-            <div>
-              <label htmlFor="fecha-retiro" className="block text-sm font-medium text-gray-700 mb-1">
-                Próximo retiro
-              </label>
-              <input
-                id="fecha-retiro"
-                type="date"
-                value={nextPickupDate}
-                onChange={(e) => setNextPickupDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          )}
         </>
       )}
 

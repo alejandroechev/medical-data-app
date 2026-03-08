@@ -27,8 +27,6 @@ export interface MedicalEvent {
   professionalId?: string;
   locationId?: string;
   parentEventId?: string;
-  isPermanent?: boolean;
-  nextPickupDate?: string;
   isapreReimbursementStatus: ReimbursementStatus;
   insuranceReimbursementStatus: ReimbursementStatus;
   createdAt: string;
@@ -43,8 +41,6 @@ export interface CreateMedicalEventInput {
   professionalId?: string;
   locationId?: string;
   parentEventId?: string;
-  isPermanent?: boolean;
-  nextPickupDate?: string;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
 }
@@ -57,8 +53,6 @@ export interface UpdateMedicalEventInput {
   professionalId?: string | null;
   locationId?: string | null;
   parentEventId?: string | null;
-  isPermanent?: boolean;
-  nextPickupDate?: string | null;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
 }

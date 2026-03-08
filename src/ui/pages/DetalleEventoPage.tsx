@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPrescriptionDrug, listPrescriptionDrugsByEvent, deletePrescriptionDrug } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
@@ -9,11 +9,12 @@ import { AudioRecorder } from '../components/AudioRecorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { CreatableSelect } from '../components/CreatableSelect';
 import { ConfirmDeleteButton } from '../components/ConfirmDeleteButton';
-import { PrescriptionDrugList } from '../components/PrescriptionDrugList';
+import { DrugCard } from '../components/DrugCard';
+import { DrugForm } from '../components/DrugForm';
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
-import type { PrescriptionDrug } from '../../domain/models/prescription-drug';
+import type { PatientDrug, CreatePatientDrugInput } from '../../domain/models/prescription-drug';
 import type { Professional, Location } from '../../domain/models/professional-location';
 
 interface DetalleEventoPageProps {
@@ -36,7 +37,8 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const [parentEvento, setParentEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
   const [recordings, setRecordings] = useState<EventRecording[]>([]);
-  const [drugs, setDrugs] = useState<PrescriptionDrug[]>([]);
+  const [drugs, setDrugs] = useState<PatientDrug[]>([]);
+  const [showDrugForm, setShowDrugForm] = useState(false);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   }, [eventoId]);
 
   const reloadDrugs = useCallback(async () => {
-    const d = await listPrescriptionDrugsByEvent(eventoId);
+    const d = await listPatientDrugsByEvent(eventoId);
     setDrugs(d);
   }, [eventoId]);
 
@@ -65,7 +67,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           getEventById(eventoId),
           listPhotosByEvent(eventoId),
           listRecordingsByEvent(eventoId),
-          listPrescriptionDrugsByEvent(eventoId),
+          listPatientDrugsByEvent(eventoId),
           listProfessionals(),
           listLocations(),
         ]);
@@ -123,20 +125,7 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     setEvento(updated);
   };
 
-  const handleTogglePermanent = async (value: boolean) => {
-    const updated = await updateEvent(eventoId, {
-      isPermanent: value,
-      ...(value ? {} : { nextPickupDate: null }),
-    });
-    setEvento(updated);
-  };
-
-  const handleUpdateNextPickupDate = async (newDate: string) => {
-    const updated = await updateEvent(eventoId, { nextPickupDate: newDate || null });
-    setEvento(updated);
-  };
-
-  const handleRecordingComplete = async (blob: Blob, durationSeconds: number) => {
+  const handleRecordingComplete= async (blob: Blob, durationSeconds: number) => {
     const file = new File([blob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
     const result = await uploadPhoto(eventoId, file);
     await createRecording({
@@ -166,13 +155,19 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
     await reloadRecordings();
   };
 
-  const handleAddDrug = async (drug: { name: string; dosage: string; frequency: string; durationDays?: number }) => {
-    await createPrescriptionDrug({ eventId: eventoId, ...drug });
+  const handleAddDrug = async (input: CreatePatientDrugInput) => {
+    await createPatientDrug(input);
+    setShowDrugForm(false);
+    await reloadDrugs();
+  };
+
+  const handleStopDrug = async (id: string) => {
+    await updatePatientDrug(id, { status: 'stopped', endDate: new Date().toISOString().split('T')[0] });
     await reloadDrugs();
   };
 
   const handleDeleteDrug = async (id: string) => {
-    await deletePrescriptionDrug(id);
+    await deletePatientDrug(id);
     await reloadDrugs();
   };
 
@@ -280,47 +275,47 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
         />
       </div>
 
-      {/* Receta: Permanente & Next Pickup */}
-      {isReceta && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
-          <h3 className="text-sm font-medium text-gray-700">Receta</h3>
+      {/* Treatments (any event type) */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">
+          💊 Tratamientos ({drugs.length})
+        </h3>
 
-          <label className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Receta permanente</span>
-            <input
-              type="checkbox"
-              checked={evento.isPermanent ?? false}
-              onChange={(e) => handleTogglePermanent(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
-              aria-label="Receta permanente"
-            />
-          </label>
+        {drugs.length === 0 && !showDrugForm && (
+          <p className="text-sm text-gray-400 text-center py-2">
+            Sin tratamientos vinculados
+          </p>
+        )}
 
-          {evento.isPermanent && (
-            <div>
-              <label htmlFor="next-pickup" className="block text-xs text-gray-500 mb-1">
-                Próximo retiro
-              </label>
-              <input
-                id="next-pickup"
-                type="date"
-                value={evento.nextPickupDate ?? ''}
-                onChange={(e) => handleUpdateNextPickupDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        {drugs.length > 0 && (
+          <div className="space-y-2 mb-3">
+            {drugs.map((drug) => (
+              <DrugCard
+                key={drug.id}
+                drug={drug}
+                onStop={handleStopDrug}
+                onDelete={handleDeleteDrug}
               />
-            </div>
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* Prescription Drugs (Receta only) */}
-      {isReceta && (
-        <PrescriptionDrugList
-          drugs={drugs}
-          onAdd={handleAddDrug}
-          onDelete={handleDeleteDrug}
-        />
-      )}
+        {showDrugForm ? (
+          <DrugForm
+            patientId={evento.patientId}
+            eventId={eventoId}
+            onSubmit={handleAddDrug}
+            onCancel={() => setShowDrugForm(false)}
+          />
+        ) : (
+          <button
+            onClick={() => setShowDrugForm(true)}
+            className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 transition-colors"
+          >
+            + Agregar tratamiento
+          </button>
+        )}
+      </div>
 
       {/* Reembolsos & Delete */}
       <EventActions

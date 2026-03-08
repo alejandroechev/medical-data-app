@@ -55,16 +55,6 @@ export function EventCard({ evento, onClick }: EventCardProps) {
             <span className={`text-xs px-2 py-0.5 rounded-full ${memberColor}`}>
               {paciente?.name ?? 'Desconocido'}
             </span>
-            {evento.isPermanent && (
-              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
-                Permanente
-              </span>
-            )}
-            {evento.nextPickupDate && (
-              <span className="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full">
-                Retiro: {evento.nextPickupDate}
-              </span>
-            )}
             {evento.isapreReimbursementStatus !== 'none' && (
               <span className={`text-xs px-2 py-0.5 rounded-full ${BADGE_STYLES[evento.isapreReimbursementStatus]}`}>
                 ISAPRE {BADGE_LABELS[evento.isapreReimbursementStatus]}

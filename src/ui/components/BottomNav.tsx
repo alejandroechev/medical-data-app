@@ -9,6 +9,7 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
   const tabs: { page: Page; label: string; icon: string }[] = [
     { page: 'inicio', label: 'Inicio', icon: '🏠' },
     { page: 'nuevo-evento', label: 'Nuevo', icon: '➕' },
+    { page: 'tratamientos', label: 'Tratamientos', icon: '💊' },
     { page: 'historial', label: 'Historial', icon: '🔍' },
   ];
 

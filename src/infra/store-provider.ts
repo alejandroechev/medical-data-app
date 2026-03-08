@@ -14,11 +14,11 @@ import { InMemoryEventPhotoStore } from './memory/event-photo-store.js';
 import { InMemoryPhotoUploader } from './memory/photo-uploader.js';
 import { InMemoryRecordingStore } from './memory/recording-store.js';
 import { InMemoryProfessionalStore, InMemoryLocationStore } from './memory/professional-location-store.js';
-import { InMemoryPrescriptionDrugStore } from './memory/prescription-drug-store.js';
+import { InMemoryPrescriptionDrugStore, InMemoryPatientDrugStore } from './memory/prescription-drug-store.js';
 import type { MedicalEvent, CreateMedicalEventInput, UpdateMedicalEventInput } from '../domain/models/medical-event.js';
 import type { EventPhoto, LinkPhotoInput } from '../domain/models/event-photo.js';
 import type { EventRecording, CreateRecordingInput } from '../domain/models/event-recording.js';
-import type { PrescriptionDrug, CreatePrescriptionDrugInput } from '../domain/models/prescription-drug.js';
+import type { PrescriptionDrug, CreatePrescriptionDrugInput, PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../domain/models/prescription-drug.js';
 import type { Professional, Location } from '../domain/models/professional-location.js';
 import type { MedicalEventFilters } from '../domain/services/medical-event-repository.js';
 import type { UploadResult } from '../domain/services/photo-uploader.js';
@@ -33,6 +33,7 @@ const memoryRecordingStore = new InMemoryRecordingStore();
 const memoryProfessionalStore = new InMemoryProfessionalStore();
 const memoryLocationStore = new InMemoryLocationStore();
 const memoryDrugStore = new InMemoryPrescriptionDrugStore();
+const memoryPatientDrugStore = new InMemoryPatientDrugStore();
 
 export function isUsingSupabase(): boolean {
   return useSupabase;
@@ -142,4 +143,34 @@ export async function listAllPrescriptionDrugs(): Promise<PrescriptionDrug[]> {
 
 export async function deletePrescriptionDrug(id: string): Promise<void> {
   return useSupabase ? supabaseDrugStore.deletePrescriptionDrug(id) : memoryDrugStore.delete(id);
+}
+
+// --- Patient Drugs (first-class treatments) ---
+
+export async function createPatientDrug(input: CreatePatientDrugInput): Promise<PatientDrug> {
+  return useSupabase ? supabaseDrugStore.createPatientDrug(input) : memoryPatientDrugStore.create(input);
+}
+
+export async function updatePatientDrug(id: string, input: UpdatePatientDrugInput): Promise<PatientDrug> {
+  return useSupabase ? supabaseDrugStore.updatePatientDrug(id, input) : memoryPatientDrugStore.update(id, input);
+}
+
+export async function listPatientDrugsByPatient(patientId: string): Promise<PatientDrug[]> {
+  return useSupabase ? supabaseDrugStore.listPatientDrugsByPatient(patientId) : memoryPatientDrugStore.listByPatient(patientId);
+}
+
+export async function listPatientDrugsByEvent(eventId: string): Promise<PatientDrug[]> {
+  return useSupabase ? supabaseDrugStore.listPatientDrugsByEvent(eventId) : memoryPatientDrugStore.listByEvent(eventId);
+}
+
+export async function listActivePatientDrugs(patientId?: string): Promise<PatientDrug[]> {
+  return useSupabase ? supabaseDrugStore.listActivePatientDrugs(patientId) : memoryPatientDrugStore.listActive(patientId);
+}
+
+export async function listAllPatientDrugs(): Promise<PatientDrug[]> {
+  return useSupabase ? supabaseDrugStore.listAllPatientDrugs() : memoryPatientDrugStore.listAll();
+}
+
+export async function deletePatientDrug(id: string): Promise<void> {
+  return useSupabase ? supabaseDrugStore.deletePatientDrug(id) : memoryPatientDrugStore.delete(id);
 }

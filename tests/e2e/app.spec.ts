@@ -10,6 +10,7 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.goto('/');
     await expect(page.getByLabel('Inicio')).toBeVisible();
     await expect(page.getByLabel('Nuevo')).toBeVisible();
+    await expect(page.getByLabel('Tratamientos')).toBeVisible();
     await expect(page.getByLabel('Historial')).toBeVisible();
   });
 

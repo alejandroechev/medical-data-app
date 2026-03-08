@@ -4,10 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { BottomNav } from '../../../src/ui/components/BottomNav';
 
 describe('BottomNav', () => {
-  it('should render the three tabs', () => {
+  it('should render the four tabs', () => {
     render(<BottomNav currentPage="inicio" onNavigate={() => {}} />);
     expect(screen.getByLabelText('Inicio')).toBeInTheDocument();
     expect(screen.getByLabelText('Nuevo')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tratamientos')).toBeInTheDocument();
     expect(screen.getByLabelText('Historial')).toBeInTheDocument();
   });
 

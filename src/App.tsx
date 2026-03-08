@@ -6,6 +6,7 @@ import { InicioPage } from './ui/pages/InicioPage';
 import { NuevoEventoPage } from './ui/pages/NuevoEventoPage';
 import { DetalleEventoPage } from './ui/pages/DetalleEventoPage';
 import { HistorialPage } from './ui/pages/HistorialPage';
+import { TratamientosPage } from './ui/pages/TratamientosPage';
 import { loadFamilyMembers } from './infra/supabase/family-member-store';
 
 const PAGE_TITLES: Record<string, string> = {
@@ -13,6 +14,7 @@ const PAGE_TITLES: Record<string, string> = {
   'nuevo-evento': 'Nuevo Evento',
   'detalle-evento': 'Detalle del Evento',
   'historial': 'Historial',
+  'tratamientos': 'Tratamientos',
 };
 
 function App() {
@@ -53,6 +55,9 @@ function App() {
         )}
         {currentPage === 'historial' && (
           <HistorialPage onEventClick={handleEventClick} />
+        )}
+        {currentPage === 'tratamientos' && (
+          <TratamientosPage />
         )}
       </main>
 
