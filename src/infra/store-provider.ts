@@ -136,6 +136,10 @@ export async function listPrescriptionDrugsByEvent(eventId: string): Promise<Pre
   return useSupabase ? supabaseDrugStore.listPrescriptionDrugsByEvent(eventId) : memoryDrugStore.listByEvent(eventId);
 }
 
+export async function listAllPrescriptionDrugs(): Promise<PrescriptionDrug[]> {
+  return useSupabase ? supabaseDrugStore.listAllPrescriptionDrugs() : memoryDrugStore.listAll();
+}
+
 export async function deletePrescriptionDrug(id: string): Promise<void> {
   return useSupabase ? supabaseDrugStore.deletePrescriptionDrug(id) : memoryDrugStore.delete(id);
 }

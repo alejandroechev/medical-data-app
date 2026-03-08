@@ -4,7 +4,7 @@ import { EventCard } from '../components/EventCard';
 import { EVENT_TYPES, REIMBURSEMENT_STATUSES } from '../../domain/models/medical-event';
 import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { listProfessionals, listLocations, listPrescriptionDrugsByEvent } from '../../infra/store-provider';
+import { listProfessionals, listLocations, listPrescriptionDrugsByEvent, listAllPrescriptionDrugs } from '../../infra/store-provider';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository';
 import type { Professional, Location } from '../../domain/models/professional-location';
 import type { PrescriptionDrug } from '../../domain/models/prescription-drug';
@@ -32,13 +32,18 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
   const [locationId, setLocationId] = useState('');
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
-  const [drugSearch, setDrugSearch] = useState('');
+  const [drugName, setDrugName] = useState('');
+  const [knownDrugNames, setKnownDrugNames] = useState<string[]>([]);
   const [drugMap, setDrugMap] = useState<Map<string, PrescriptionDrug[]>>(new Map());
   const [drugFilterLoading, setDrugFilterLoading] = useState(false);
 
   useEffect(() => {
     listProfessionals().then(setProfessionals);
     listLocations().then(setLocations);
+    listAllPrescriptionDrugs().then((drugs) => {
+      const names = [...new Set(drugs.map((d) => d.name))].sort();
+      setKnownDrugNames(names);
+    });
   }, []);
 
   const filters: MedicalEventFilters = useMemo(
@@ -57,9 +62,9 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
 
   const { events, loading, error } = useEvents(filters);
 
-  // Load drugs for Receta events when drug search is active
+  // Load drugs for Receta events when drug filter is active
   useEffect(() => {
-    if (!drugSearch.trim()) {
+    if (!drugName) {
       setDrugMap(new Map());
       return;
     }
@@ -78,21 +83,16 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
       setDrugMap(new Map(entries));
       setDrugFilterLoading(false);
     });
-  }, [drugSearch, events]);
+  }, [drugName, events]);
 
   const filteredEvents = useMemo(() => {
-    const query = drugSearch.trim().toLowerCase();
-    if (!query) return events;
+    if (!drugName) return events;
     return events.filter((e) => {
       if (e.type !== 'Receta') return false;
       const drugs = drugMap.get(e.id) ?? [];
-      return drugs.some((d) =>
-        d.name.toLowerCase().includes(query) ||
-        d.dosage.toLowerCase().includes(query) ||
-        d.frequency.toLowerCase().includes(query)
-      );
+      return drugs.some((d) => d.name === drugName);
     });
-  }, [events, drugSearch, drugMap]);
+  }, [events, drugName, drugMap]);
 
   const isLoading = loading || drugFilterLoading;
 
@@ -217,14 +217,17 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
 
           <div className="col-span-2">
             <label htmlFor="filtro-medicamento" className="block text-xs text-gray-500 mb-1">Medicamento</label>
-            <input
+            <select
               id="filtro-medicamento"
-              type="text"
-              value={drugSearch}
-              onChange={(e) => setDrugSearch(e.target.value)}
-              placeholder="Buscar por nombre, dosis o frecuencia..."
+              value={drugName}
+              onChange={(e) => setDrugName(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
-            />
+            >
+              <option value="">Todos</option>
+              {knownDrugNames.map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

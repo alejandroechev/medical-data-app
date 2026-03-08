@@ -14,12 +14,14 @@ vi.mock('../../../src/infra/store-provider', () => ({
   listLocations: vi.fn().mockResolvedValue([]),
   createLocation: vi.fn(),
   listPrescriptionDrugsByEvent: vi.fn().mockResolvedValue([]),
+  listAllPrescriptionDrugs: vi.fn().mockResolvedValue([]),
 }));
 
-import { listEvents, listPrescriptionDrugsByEvent } from '../../../src/infra/store-provider';
+import { listEvents, listPrescriptionDrugsByEvent, listAllPrescriptionDrugs } from '../../../src/infra/store-provider';
 
 const mockList = vi.mocked(listEvents);
 const mockListDrugs = vi.mocked(listPrescriptionDrugsByEvent);
+const mockListAllDrugs = vi.mocked(listAllPrescriptionDrugs);
 
 describe('HistorialPage', () => {
   beforeEach(() => {
@@ -141,7 +143,10 @@ describe('HistorialPage', () => {
     });
   });
 
-  it('should filter Receta events by drug name search', async () => {
+  it('should filter Receta events by drug name select', async () => {
+    mockListAllDrugs.mockResolvedValue([
+      { id: 'd1', eventId: 'receta-1', name: 'Amoxicilina', dosage: '500mg', frequency: 'cada 8h', createdAt: '2024-06-15T10:00:00Z' },
+    ]);
     mockList.mockResolvedValue([
       {
         id: 'receta-1',
@@ -175,7 +180,7 @@ describe('HistorialPage', () => {
 
     await screen.findByText('2 eventos encontrados');
 
-    await user.type(screen.getByLabelText('Medicamento'), 'Amox');
+    await user.selectOptions(screen.getByLabelText('Medicamento'), 'Amoxicilina');
 
     await vi.waitFor(() => {
       expect(screen.getByText('1 evento encontrado')).toBeInTheDocument();

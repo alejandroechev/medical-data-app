@@ -25,6 +25,12 @@ export class InMemoryPrescriptionDrugStore {
       .map((d) => ({ ...d }));
   }
 
+  async listAll(): Promise<PrescriptionDrug[]> {
+    return Array.from(this.drugs.values())
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((d) => ({ ...d }));
+  }
+
   async delete(id: string): Promise<void> {
     this.drugs.delete(id);
   }

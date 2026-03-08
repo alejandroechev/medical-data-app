@@ -58,6 +58,17 @@ export async function listPrescriptionDrugsByEvent(eventId: string): Promise<Pre
   return (data as DbPrescriptionDrug[]).map(mapFromDb);
 }
 
+export async function listAllPrescriptionDrugs(): Promise<PrescriptionDrug[]> {
+  const db = requireSupabase();
+  const { data, error } = await db
+    .from('prescription_drugs')
+    .select()
+    .order('name', { ascending: true });
+
+  if (error) throw new Error(`Error al listar medicamentos: ${error.message}`);
+  return (data as DbPrescriptionDrug[]).map(mapFromDb);
+}
+
 export async function deletePrescriptionDrug(id: string): Promise<void> {
   const db = requireSupabase();
   const { error } = await db

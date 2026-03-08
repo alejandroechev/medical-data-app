@@ -3,6 +3,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PrescriptionDrugList } from '../../../src/ui/components/PrescriptionDrugList';
 
+vi.mock('../../../src/infra/store-provider', () => ({
+  listAllPrescriptionDrugs: vi.fn().mockResolvedValue([]),
+}));
+
 describe('PrescriptionDrugList', () => {
   it('should show empty message when no drugs', () => {
     render(<PrescriptionDrugList drugs={[]} onAdd={vi.fn()} onDelete={vi.fn()} />);
