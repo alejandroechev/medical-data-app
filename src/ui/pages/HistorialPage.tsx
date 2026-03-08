@@ -96,11 +96,46 @@ export function HistorialPage({ onEventClick }: HistorialPageProps) {
 
   const isLoading = loading || drugFilterLoading;
 
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+  const today = formatDate(new Date());
+
+  const presets = [
+    { label: 'Última semana', days: 7 },
+    { label: 'Último mes', days: 30 },
+    { label: 'Último año', days: 365 },
+  ] as const;
+
+  const isPresetActive = (days: number) => {
+    const expectedFrom = formatDate(new Date(Date.now() - days * 86400000));
+    return from === expectedFrom && to === today;
+  };
+
+  const applyPreset = (days: number) => {
+    setFrom(formatDate(new Date(Date.now() - days * 86400000)));
+    setTo(today);
+  };
+
   return (
     <div className="p-4 pb-20 space-y-4">
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
         <h2 className="text-sm font-medium text-gray-700">Filtros</h2>
+
+        <div className="flex gap-2">
+          {presets.map((p) => (
+            <button
+              key={p.days}
+              onClick={() => applyPreset(p.days)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                isPresetActive(p.days)
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>

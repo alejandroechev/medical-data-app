@@ -27,6 +27,7 @@ export interface MedicalEvent {
   professionalId?: string;
   locationId?: string;
   parentEventId?: string;
+  cost?: number;
   isapreReimbursementStatus: ReimbursementStatus;
   insuranceReimbursementStatus: ReimbursementStatus;
   createdAt: string;
@@ -41,6 +42,7 @@ export interface CreateMedicalEventInput {
   professionalId?: string;
   locationId?: string;
   parentEventId?: string;
+  cost?: number;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
 }
@@ -53,6 +55,7 @@ export interface UpdateMedicalEventInput {
   professionalId?: string | null;
   locationId?: string | null;
   parentEventId?: string | null;
+  cost?: number | null;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
 }

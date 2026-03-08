@@ -23,6 +23,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
   const [professionalId, setProfessionalId] = useState('');
   const [locationId, setLocationId] = useState('');
   const [parentEventId, setParentEventId] = useState('');
+  const [cost, setCost] = useState('');
   const [errores, setErrores] = useState<string[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -64,6 +65,7 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
       patientId,
       professionalId: hasParent ? undefined : (professionalId || undefined),
       locationId: locationId || undefined,
+      cost: cost ? parseInt(cost) : undefined,
       ...(isReceta && {
         parentEventId: parentEventId || undefined,
       }),
@@ -211,6 +213,22 @@ export function EventForm({ onSubmit, loading }: EventFormProps) {
           rows={3}
           placeholder={isReceta ? 'Detalle de los medicamentos...' : 'Describe el evento médico...'}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="costo" className="block text-sm font-medium text-gray-700 mb-1">
+          Costo ($)
+        </label>
+        <input
+          id="costo"
+          type="number"
+          step="1"
+          min="0"
+          value={cost}
+          onChange={(e) => setCost(e.target.value)}
+          placeholder="Opcional"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 

@@ -23,6 +23,7 @@ interface DbMedicalEvent {
   parent_event_id: string | null;
   reembolso_isapre_status: string;
   reembolso_seguro_status: string;
+  costo: number | null;
   creado_en: string;
   actualizado_en: string;
 }
@@ -37,6 +38,7 @@ function mapFromDb(row: DbMedicalEvent): MedicalEvent {
     ...(row.professional_id !== null && { professionalId: row.professional_id }),
     ...(row.location_id !== null && { locationId: row.location_id }),
     ...(row.parent_event_id !== null && { parentEventId: row.parent_event_id }),
+    ...(row.costo !== null && { cost: row.costo }),
     isapreReimbursementStatus: (row.reembolso_isapre_status ?? 'none') as ReimbursementStatus,
     insuranceReimbursementStatus: (row.reembolso_seguro_status ?? 'none') as ReimbursementStatus,
     createdAt: row.creado_en,
@@ -60,6 +62,7 @@ export async function createEvent(
       parent_event_id: input.parentEventId ?? null,
       reembolso_isapre_status: input.isapreReimbursementStatus ?? 'none',
       reembolso_seguro_status: input.insuranceReimbursementStatus ?? 'none',
+      costo: input.cost ?? null,
     })
     .select()
     .single();
@@ -144,6 +147,7 @@ export async function updateEvent(
     updateData.reembolso_isapre_status = input.isapreReimbursementStatus;
   if (input.insuranceReimbursementStatus !== undefined)
     updateData.reembolso_seguro_status = input.insuranceReimbursementStatus;
+  if (input.cost !== undefined) updateData.costo = input.cost;
 
   const { data, error } = await db
     .from('medical_events')

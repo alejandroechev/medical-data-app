@@ -55,6 +55,11 @@ export function EventCard({ evento, onClick }: EventCardProps) {
             <span className={`text-xs px-2 py-0.5 rounded-full ${memberColor}`}>
               {paciente?.name ?? 'Desconocido'}
             </span>
+            {evento.cost != null && evento.cost > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                ${evento.cost.toLocaleString('es-CL')}
+              </span>
+            )}
             {evento.isapreReimbursementStatus !== 'none' && (
               <span className={`text-xs px-2 py-0.5 rounded-full ${BADGE_STYLES[evento.isapreReimbursementStatus]}`}>
                 ISAPRE {BADGE_LABELS[evento.isapreReimbursementStatus]}

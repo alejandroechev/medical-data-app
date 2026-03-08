@@ -51,7 +51,11 @@ function App() {
           <NuevoEventoPage onCreated={() => navigateTo('inicio')} />
         )}
         {currentPage === 'detalle-evento' && params.eventoId && (
-          <DetalleEventoPage eventoId={params.eventoId} onDeleted={() => navigateTo('inicio')} />
+          <DetalleEventoPage
+            eventoId={params.eventoId}
+            onDeleted={() => navigateTo('inicio')}
+            onDuplicated={(id) => navigateTo('detalle-evento', { eventoId: id })}
+          />
         )}
         {currentPage === 'historial' && (
           <HistorialPage onEventClick={handleEventClick} />

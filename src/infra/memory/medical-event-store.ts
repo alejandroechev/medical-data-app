@@ -22,6 +22,7 @@ export class InMemoryMedicalEventStore {
       parentEventId: input.parentEventId,
       isapreReimbursementStatus: input.isapreReimbursementStatus ?? 'none',
       insuranceReimbursementStatus: input.insuranceReimbursementStatus ?? 'none',
+      cost: input.cost,
       createdAt: now,
       updatedAt: now,
     };
@@ -80,6 +81,7 @@ export class InMemoryMedicalEventStore {
       ...(input.parentEventId !== undefined && { parentEventId: input.parentEventId ?? undefined }),
       ...(input.isapreReimbursementStatus !== undefined && { isapreReimbursementStatus: input.isapreReimbursementStatus }),
       ...(input.insuranceReimbursementStatus !== undefined && { insuranceReimbursementStatus: input.insuranceReimbursementStatus }),
+      ...(input.cost !== undefined && { cost: input.cost ?? undefined }),
       updatedAt: new Date().toISOString(),
     };
     this.events.set(id, updated);

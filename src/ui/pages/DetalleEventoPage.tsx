@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug, createEvent } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
@@ -20,6 +20,7 @@ import type { Professional, Location } from '../../domain/models/professional-lo
 interface DetalleEventoPageProps {
   eventoId: string;
   onDeleted?: () => void;
+  onDuplicated?: (newId: string) => void;
 }
 
 const TYPE_ICONS: Record<string, string> = {
@@ -32,7 +33,7 @@ const TYPE_ICONS: Record<string, string> = {
   'Otro': '📋',
 };
 
-export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProps) {
+export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: DetalleEventoPageProps) {
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
   const [parentEvento, setParentEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
@@ -43,6 +44,8 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingCost, setEditingCost] = useState(false);
+  const [costInput, setCostInput] = useState('');
 
   const reloadPhotos = useCallback(async () => {
     const ph = await listPhotosByEvent(eventoId);
@@ -123,6 +126,27 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
   const handleUpdateDate = async (newDate: string) => {
     const updated = await updateEvent(eventoId, { date: newDate });
     setEvento(updated);
+  };
+
+  const handleUpdateCost = async (newCost: number | null) => {
+    const updated = await updateEvent(eventoId, { cost: newCost });
+    setEvento(updated);
+    setEditingCost(false);
+  };
+
+  const handleDuplicate = async () => {
+    if (!evento) return;
+    const today = new Date().toISOString().split('T')[0];
+    const newEvent = await createEvent({
+      date: today,
+      type: evento.type,
+      description: evento.description,
+      patientId: evento.patientId,
+      professionalId: evento.professionalId,
+      locationId: evento.locationId,
+      cost: evento.cost,
+    });
+    onDuplicated?.(newEvent.id);
   };
 
   const handleRecordingComplete= async (blob: Blob, durationSeconds: number) => {
@@ -278,6 +302,47 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           }}
           placeholder="Sin lugar"
         />
+
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-500">Costo</span>
+          {editingCost ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                step="1"
+                min="0"
+                value={costInput}
+                onChange={(e) => setCostInput(e.target.value)}
+                className="w-28 border border-gray-300 rounded px-2 py-1 text-sm"
+                aria-label="Editar costo"
+              />
+              <button
+                onClick={() => handleUpdateCost(costInput ? parseInt(costInput) : null)}
+                className="text-xs text-blue-600 font-medium"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setEditingCost(false)}
+                className="text-xs text-gray-400"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setCostInput(evento.cost != null ? String(evento.cost) : '');
+                setEditingCost(true);
+              }}
+              className="text-sm font-medium text-blue-600 hover:underline"
+            >
+              {evento.cost != null && evento.cost > 0
+                ? `$${evento.cost.toLocaleString('es-CL')}`
+                : 'Sin costo'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Treatments (any event type) */}
@@ -322,6 +387,14 @@ export function DetalleEventoPage({ eventoId, onDeleted }: DetalleEventoPageProp
           </button>
         )}
       </div>
+
+      {/* Duplicate event */}
+      <button
+        onClick={handleDuplicate}
+        className="w-full bg-white rounded-lg shadow-sm border border-gray-100 p-3 text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors"
+      >
+        📋 Copiar evento
+      </button>
 
       {/* Reembolsos & Delete */}
       <EventActions
