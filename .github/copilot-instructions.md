@@ -97,7 +97,7 @@ Before running `git commit`, mentally verify:
 
 ### Backup
 - **Weekly DB backup** runs every Sunday 3:00 AM UTC via GitHub Actions (`.github/workflows/backup.yml`).
+- **Monthly file backup** runs 1st of each month at 4:00 AM UTC — downloads all files from Supabase Storage.
 - Exports all DB tables as JSON to an orphan `backups` branch (not on main).
-- Can be triggered manually from GitHub Actions → "Weekly DB Backup" → "Run workflow".
-- Files in Supabase Storage are NOT backed up — only metadata (URLs in DB export). Files persist in Supabase Storage.
+- Can be triggered manually from GitHub Actions → "Weekly DB Backup" → "Run workflow" (with optional file backup checkbox).
 - Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` GitHub secrets.

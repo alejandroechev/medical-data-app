@@ -19,6 +19,8 @@ const TABLES = [
   'event_recordings',
   'professionals',
   'locations',
+  'prescription_drugs',
+  'patient_drugs',
 ];
 
 async function exportTable(table: string): Promise<unknown[]> {
