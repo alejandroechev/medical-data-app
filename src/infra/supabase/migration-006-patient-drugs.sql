@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS patient_drugs (
   schedule JSONB NOT NULL,  -- {"type":"interval","intervalHours":8} or {"type":"fixed","times":["08:00","20:00"]}
   duration JSONB NOT NULL,  -- {"type":"days","days":7} or {"type":"indefinite"}
   start_date DATE NOT NULL,
-  start_time TEXT,  -- HH:mm format, time of first dose
   end_date DATE,
   is_permanent BOOLEAN NOT NULL DEFAULT FALSE,
   next_pickup_date DATE,
