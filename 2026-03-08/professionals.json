@@ -1,0 +1,20 @@
+[
+  {
+    "id": "0b1e53af-9e8a-4df6-ba44-b7d16a8f901a",
+    "name": "Catalina Bley",
+    "specialty": null,
+    "created_at": "2026-03-02T12:23:25.129135+00:00"
+  },
+  {
+    "id": "14e67972-c309-4fdc-90b5-9d524d49c4a2",
+    "name": "Fernanda Avila",
+    "specialty": null,
+    "created_at": "2026-03-05T20:08:28.714122+00:00"
+  },
+  {
+    "id": "bceb9b37-7f4c-45fe-823b-6fb5f6c77c7c",
+    "name": "Alejandro Schmauk",
+    "specialty": null,
+    "created_at": "2026-03-07T11:40:13.190697+00:00"
+  }
+]
