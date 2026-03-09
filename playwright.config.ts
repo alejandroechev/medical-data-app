@@ -27,6 +27,8 @@ export default defineConfig({
       // Force in-memory stubs for E2E tests (no external dependencies)
       VITE_SUPABASE_URL: '',
       VITE_SUPABASE_ANON_KEY: '',
+      // Disable PIN gate for E2E tests
+      VITE_APP_PIN: '',
     },
   },
 });
