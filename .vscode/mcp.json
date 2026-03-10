@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "medical-data": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "mcp-server/src/server.ts"],
+      "env": {
+        "SUPABASE_URL": "${env:VITE_SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${env:SUPABASE_SERVICE_ROLE_KEY}"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "medical-data-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@supabase/supabase-js": "^2.98.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "~5.8.3"
+  }
+}
