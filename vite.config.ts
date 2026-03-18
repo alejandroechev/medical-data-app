@@ -10,7 +10,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'apple-touch-icon.svg'],
       manifest: {
         name: 'Registro Médico Familiar',
@@ -33,6 +37,9 @@ export default defineConfig({
             type: 'image/svg+xml',
           },
         ],
+      },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
       },
     }),
   ],

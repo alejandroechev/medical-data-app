@@ -147,12 +147,22 @@ export async function deletePrescriptionDrug(id: string): Promise<void> {
 
 // --- Patient Drugs (first-class treatments) ---
 
+function notifyDrugsChanged() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('medapp:drugs-changed'));
+  }
+}
+
 export async function createPatientDrug(input: CreatePatientDrugInput): Promise<PatientDrug> {
-  return useSupabase ? supabaseDrugStore.createPatientDrug(input) : memoryPatientDrugStore.create(input);
+  const result = useSupabase ? await supabaseDrugStore.createPatientDrug(input) : await memoryPatientDrugStore.create(input);
+  notifyDrugsChanged();
+  return result;
 }
 
 export async function updatePatientDrug(id: string, input: UpdatePatientDrugInput): Promise<PatientDrug> {
-  return useSupabase ? supabaseDrugStore.updatePatientDrug(id, input) : memoryPatientDrugStore.update(id, input);
+  const result = useSupabase ? await supabaseDrugStore.updatePatientDrug(id, input) : await memoryPatientDrugStore.update(id, input);
+  notifyDrugsChanged();
+  return result;
 }
 
 export async function listPatientDrugsByPatient(patientId: string): Promise<PatientDrug[]> {
@@ -172,5 +182,7 @@ export async function listAllPatientDrugs(): Promise<PatientDrug[]> {
 }
 
 export async function deletePatientDrug(id: string): Promise<void> {
-  return useSupabase ? supabaseDrugStore.deletePatientDrug(id) : memoryPatientDrugStore.delete(id);
+  const result = useSupabase ? await supabaseDrugStore.deletePatientDrug(id) : await memoryPatientDrugStore.delete(id);
+  notifyDrugsChanged();
+  return result;
 }

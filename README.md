@@ -8,6 +8,8 @@ Progressive Web App (PWA) to record and browse family medical events.
 - 👨‍👩‍👧‍👦 Associate events with family members
 - 📸 Link document photos from Google Photos
 - 💰 Reimbursement tracking (ISAPRE and Complementary Insurance)
+- 💊 Treatment tracking with drug schedules and progress
+- 🔔 Prescription pickup notifications (in-app alerts + browser notifications)
 - 📱 Mobile-first design (installable PWA)
 - 🔍 Search and filter by patient, type, and date range
 
@@ -55,6 +57,7 @@ npm run cli -- miembros listar
 npm run cli -- evento crear --tipo "Consulta Médica" --paciente "Juan" --fecha "2024-01-15" --descripcion "Control anual"
 npm run cli -- evento listar
 npm run cli -- evento ver <id>
+npm run cli -- notificaciones          # Check upcoming prescription pickups
 ```
 
 ## License

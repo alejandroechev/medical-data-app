@@ -10,9 +10,11 @@ import {
   linkPhoto,
   listPhotosByEvent,
   unlinkPhoto,
+  listAllPatientDrugs,
 } from '../infra/store-provider.js';
 import { validateCreateEvent, validateUpdateEvent } from '../domain/validators/medical-event-validator.js';
 import { validateLinkPhoto } from '../domain/validators/event-photo-validator.js';
+import { checkPickupAlerts } from '../domain/services/pickup-notification-checker.js';
 import type { EventType, ReimbursementStatus } from '../domain/models/medical-event.js';
 
 const program = new Command();
@@ -289,6 +291,42 @@ foto
     try {
       await unlinkPhoto(fotoId);
       console.log(`Foto ${fotoId} desvinculada exitosamente.`);
+    } catch (err) {
+      console.error('Error:', (err as Error).message);
+      process.exit(1);
+    }
+  });
+
+// --- Notificaciones ---
+program
+  .command('notificaciones')
+  .description('Verificar notificaciones de retiro de recetas próximas')
+  .action(async () => {
+    try {
+      const drugs = await listAllPatientDrugs();
+      const alerts = checkPickupAlerts(drugs);
+
+      if (alerts.length === 0) {
+        console.log('✅ Sin notificaciones de retiro de recetas pendientes.');
+        return;
+      }
+
+      const members = getFamilyMembers();
+      const nameMap = new Map(members.map((m) => [m.id, m.name]));
+
+      console.log(`\n🔔 ${alerts.length} notificación(es) de retiro:\n`);
+
+      for (const alert of alerts) {
+        const patient = nameMap.get(alert.patientId) ?? alert.patientId;
+        if (alert.level === 'reminder') {
+          console.log(`  📋 En ${alert.daysUntilPickup} día(s): ${alert.drugName} — ${patient} (${alert.nextPickupDate})`);
+        } else if (alert.level === 'due') {
+          console.log(`  ⚠️  Hoy: ${alert.drugName} — ${patient} (${alert.nextPickupDate})`);
+        } else {
+          console.log(`  🔴 Atrasado: ${alert.drugName} — ${patient} (${alert.nextPickupDate})`);
+        }
+      }
+      console.log();
     } catch (err) {
       console.error('Error:', (err as Error).message);
       process.exit(1);

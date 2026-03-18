@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigation } from './ui/hooks/useNavigation';
+import { usePickupAlerts } from './ui/hooks/usePickupAlerts';
 import { Header } from './ui/components/Header';
 import { BottomNav } from './ui/components/BottomNav';
 import { PinGate } from './ui/components/PinGate';
+import { PickupAlertBanner } from './ui/components/PickupAlertBanner';
 import { InicioPage } from './ui/pages/InicioPage';
 import { NuevoEventoPage } from './ui/pages/NuevoEventoPage';
 import { DetalleEventoPage } from './ui/pages/DetalleEventoPage';
@@ -20,6 +22,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 function App() {
   const { currentPage, params, navigateTo, goBack } = useNavigation();
+  const { visibleAlerts, patientNames, dismissAlert } = usePickupAlerts();
   const [ready, setReady] = useState(false);
   const showBack = currentPage !== 'inicio';
   const title = PAGE_TITLES[currentPage] ?? 'Registro Médico';
@@ -44,6 +47,12 @@ function App() {
     <PinGate>
       <div className="min-h-screen bg-gray-50">
         <Header titulo={title} onBack={showBack ? goBack : undefined} />
+
+        <PickupAlertBanner
+          alerts={visibleAlerts}
+          onDismiss={dismissAlert}
+          patientNames={patientNames}
+        />
 
         <main className="max-w-lg mx-auto pb-20">
           {currentPage === 'inicio' && (
