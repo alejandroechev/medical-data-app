@@ -1,17 +1,29 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// Load .env from project root (one level up from mcp-server/)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.VITE_SUPABASE_ANON_KEY ?? '';
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
-  process.exit(1);
+let supabase: SupabaseClient | null = null;
+if (SUPABASE_URL && SUPABASE_KEY) {
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+  process.stderr.write('Warning: Missing Supabase credentials. Tools will return errors.\n');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+function requireSupabase(): SupabaseClient {
+  if (!supabase) throw new Error('Supabase not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or VITE_ equivalents) in .env');
+  return supabase;
+}
 
 const server = new McpServer({
   name: 'medical-data',
@@ -20,7 +32,7 @@ const server = new McpServer({
 
 // --- list_family_members ---
 server.tool('list_family_members', 'List all family members', {}, async () => {
-  const { data, error } = await supabase.from('family_members').select('*').order('nombre');
+  const { data, error } = await requireSupabase().from('family_members').select('*').order('nombre');
   if (error) return { content: [{ type: 'text', text: `Error: ${error.message}` }] };
   const members = (data ?? []).map((m: Record<string, unknown>) => ({
     id: m.id, name: m.nombre, relationship: m.parentesco,
@@ -36,7 +48,7 @@ server.tool('list_events', 'List medical events with optional filters', {
   to_date: z.string().optional().describe('To date YYYY-MM-DD'),
   limit: z.number().optional().describe('Max results (default 20)'),
 }, async ({ patient_name, type, from_date, to_date, limit }) => {
-  let query = supabase.from('medical_events').select('*, family_members!inner(nombre, parentesco)')
+  let query = requireSupabase().from('medical_events').select('*, family_members!inner(nombre, parentesco)')
     .order('fecha', { ascending: false })
     .limit(limit ?? 20);
 
@@ -63,7 +75,7 @@ server.tool('list_events', 'List medical events with optional filters', {
 server.tool('get_event', 'Get full details of a medical event by ID', {
   event_id: z.string().describe('The event UUID'),
 }, async ({ event_id }) => {
-  const { data, error } = await supabase.from('medical_events')
+  const { data, error } = await requireSupabase().from('medical_events')
     .select('*, family_members(nombre, parentesco), professionals(name, specialty), locations(name)')
     .eq('id', event_id).single();
   if (error) return { content: [{ type: 'text', text: `Error: ${error.message}` }] };
@@ -75,7 +87,7 @@ server.tool('list_treatments', 'List patient drugs/treatments', {
   patient_name: z.string().optional().describe('Filter by patient name'),
   status: z.enum(['active', 'completed', 'stopped', 'all']).optional().describe('Filter by status (default: all)'),
 }, async ({ patient_name, status }) => {
-  let query = supabase.from('patient_drugs')
+  let query = requireSupabase().from('patient_drugs')
     .select('*, family_members!inner(nombre)')
     .order('start_date', { ascending: false });
 
@@ -103,7 +115,7 @@ server.tool('get_expense_summary', 'Get expense summary by patient and date rang
   from_date: z.string().optional().describe('From date YYYY-MM-DD'),
   to_date: z.string().optional().describe('To date YYYY-MM-DD'),
 }, async ({ patient_name, from_date, to_date }) => {
-  let query = supabase.from('medical_events')
+  let query = requireSupabase().from('medical_events')
     .select('costo, reembolso_isapre_status, reembolso_seguro_status, family_members!inner(nombre)')
     .not('costo', 'is', null);
 
@@ -139,7 +151,7 @@ server.tool('get_expense_summary', 'Get expense summary by patient and date rang
 server.tool('get_reimbursement_status', 'Get pending and approved reimbursement counts', {
   patient_name: z.string().optional().describe('Filter by patient name'),
 }, async ({ patient_name }) => {
-  let query = supabase.from('medical_events')
+  let query = requireSupabase().from('medical_events')
     .select('reembolso_isapre_status, reembolso_seguro_status, family_members!inner(nombre)');
 
   if (patient_name) query = query.ilike('family_members.nombre', `%${patient_name}%`);
@@ -168,7 +180,7 @@ server.tool('get_reimbursement_status', 'Get pending and approved reimbursement 
 server.tool('list_event_documents', 'List documents/photos linked to an event', {
   event_id: z.string().describe('The event UUID'),
 }, async ({ event_id }) => {
-  const { data, error } = await supabase.from('event_photos')
+  const { data, error } = await requireSupabase().from('event_photos')
     .select('*').eq('evento_id', event_id).order('creado_en');
   if (error) return { content: [{ type: 'text', text: `Error: ${error.message}` }] };
 
