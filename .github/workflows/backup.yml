@@ -2,7 +2,7 @@ name: Weekly DB Backup
 
 on:
   schedule:
-    - cron: '0 3 * * 0' # Sunday 3:00 AM UTC — DB backup
+    - cron: '0 3 * * 0,3' # Sunday 3:00 AM UTC — DB backup
     - cron: '0 4 1 * *' # 1st of month 4:00 AM UTC — DB + file backup
   workflow_dispatch: # Allow manual trigger
     inputs:
