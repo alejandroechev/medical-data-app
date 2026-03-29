@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ec9df0ee-8c1c-43ed-963f-6dab54e2e972",
+    "event_id": "6895c8be-eefb-4dcf-8de5-a8be142b19fc",
+    "name": "Fesema",
+    "dosage": "2 Puf",
+    "frequency": "4 horas",
+    "duration_days": 7,
+    "created_at": "2026-03-07T22:01:39.907807+00:00"
+  },
+  {
+    "id": "01340d3d-dd28-44d2-baeb-2bf470f70cb0",
+    "event_id": "6895c8be-eefb-4dcf-8de5-a8be142b19fc",
+    "name": "Frenaler D",
+    "dosage": "3 ml",
+    "frequency": "cada 12 h",
+    "duration_days": 7,
+    "created_at": "2026-03-08T00:16:52.751934+00:00"
+  }
+]
