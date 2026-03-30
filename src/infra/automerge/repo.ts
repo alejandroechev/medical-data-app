@@ -3,8 +3,8 @@ import { BrowserWebSocketClientAdapter } from "@automerge/automerge-repo-network
 import { IndexedDBStorageAdapter } from "@automerge/automerge-repo-storage-indexeddb";
 import type { AutomergeUrl, DocHandle } from "@automerge/automerge-repo";
 import type { MedAppDoc } from "./schema.js";
+import { getAuthenticatedWsUrl } from "./auth.js";
 
-const SYNC_SERVER_URL = import.meta.env.VITE_SYNC_SERVER_URL || "ws://localhost:3030";
 const DOC_URL_KEY = "medapp-automerge-doc-url";
 const IDB_NAME = "medapp-automerge";
 
@@ -25,8 +25,9 @@ function createInitialDoc(): MedAppDoc {
 
 export function getRepo(): Repo {
   if (!repoInstance) {
+    const wsUrl = getAuthenticatedWsUrl();
     repoInstance = new Repo({
-      network: [new BrowserWebSocketClientAdapter(SYNC_SERVER_URL)],
+      network: [new BrowserWebSocketClientAdapter(wsUrl)],
       storage: new IndexedDBStorageAdapter(IDB_NAME),
     });
   }
