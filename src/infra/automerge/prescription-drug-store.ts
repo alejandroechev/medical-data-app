@@ -11,7 +11,7 @@ import type {
 // --- Prescription Drugs ---
 
 export async function createPrescriptionDrug(input: CreatePrescriptionDrugInput): Promise<PrescriptionDrug> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const id = uuidv4();
   const now = new Date().toISOString();
 
@@ -46,7 +46,7 @@ export async function listAllPrescriptionDrugs(): Promise<PrescriptionDrug[]> {
 }
 
 export async function deletePrescriptionDrug(id: string): Promise<void> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   handle.change((d) => {
     delete d.prescriptionDrugs[id];
   });
@@ -55,7 +55,7 @@ export async function deletePrescriptionDrug(id: string): Promise<void> {
 // --- Patient Drugs (first-class treatments) ---
 
 export async function createPatientDrug(input: CreatePatientDrugInput): Promise<PatientDrug> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const id = uuidv4();
   const now = new Date().toISOString();
 
@@ -84,7 +84,7 @@ export async function createPatientDrug(input: CreatePatientDrugInput): Promise<
 }
 
 export async function updatePatientDrug(id: string, input: UpdatePatientDrugInput): Promise<PatientDrug> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const doc = await waitForDoc();
   const existing = doc.patientDrugs?.[id];
   if (!existing) throw new Error(`Tratamiento ${id} no encontrado`);
@@ -136,7 +136,7 @@ export async function listAllPatientDrugs(): Promise<PatientDrug[]> {
 }
 
 export async function deletePatientDrug(id: string): Promise<void> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   handle.change((d) => {
     delete d.patientDrugs[id];
   });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { checkAuthStatus, registerDevice } from "../infra/automerge/auth.js";
-import { getStorageBackend } from "../infra/store-provider.js";
+import { checkAuthStatus, registerDevice } from "../../infra/automerge/auth.js";
+import { getStorageBackend } from "../../infra/store-provider.js";
 
 interface SyncAuthGateProps {
   children: React.ReactNode;

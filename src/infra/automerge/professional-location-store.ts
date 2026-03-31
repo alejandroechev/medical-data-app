@@ -5,7 +5,7 @@ import type { Professional, Location } from "../../domain/models/professional-lo
 // --- Professionals ---
 
 export async function createProfessional(name: string, specialty?: string): Promise<Professional> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const id = uuidv4();
   const now = new Date().toISOString();
 
@@ -33,7 +33,7 @@ export async function getProfessionalById(id: string): Promise<Professional | un
 // --- Locations ---
 
 export async function createLocation(name: string): Promise<Location> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const id = uuidv4();
   const now = new Date().toISOString();
 

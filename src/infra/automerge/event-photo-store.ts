@@ -6,7 +6,7 @@ import type { UploadResult } from "../../domain/services/photo-uploader.js";
 // --- Event Photo Store ---
 
 export async function linkPhoto(input: LinkPhotoInput): Promise<EventPhoto> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const id = uuidv4();
   const now = new Date().toISOString();
 
@@ -35,7 +35,7 @@ export async function listPhotosByEvent(eventId: string): Promise<EventPhoto[]> 
 }
 
 export async function unlinkPhoto(id: string): Promise<void> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   handle.change((d) => {
     delete d.eventPhotos[id];
   });

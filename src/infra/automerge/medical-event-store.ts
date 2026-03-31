@@ -8,7 +8,7 @@ import type {
 import type { MedicalEventFilters } from "../../domain/services/medical-event-repository.js";
 
 export async function createEvent(input: CreateMedicalEventInput): Promise<MedicalEvent> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const now = new Date().toISOString();
   const id = uuidv4();
 
@@ -75,7 +75,7 @@ export async function listEvents(filters?: MedicalEventFilters): Promise<Medical
 }
 
 export async function updateEvent(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const doc = await waitForDoc();
   const existing = doc.medicalEvents?.[id];
   if (!existing) throw new Error(`Evento ${id} no encontrado`);
@@ -100,7 +100,7 @@ export async function updateEvent(id: string, input: UpdateMedicalEventInput): P
 }
 
 export async function deleteEvent(id: string): Promise<void> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   handle.change((d) => {
     delete d.medicalEvents[id];
   });

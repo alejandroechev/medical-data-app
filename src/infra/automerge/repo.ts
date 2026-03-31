@@ -34,14 +34,14 @@ export function getRepo(): Repo {
   return repoInstance;
 }
 
-export function getDocHandle(): DocHandle<MedAppDoc> {
+export async function getDocHandle(): Promise<DocHandle<MedAppDoc>> {
   if (docHandleInstance) return docHandleInstance;
 
   const repo = getRepo();
   const savedUrl = localStorage.getItem(DOC_URL_KEY);
 
   if (savedUrl) {
-    docHandleInstance = repo.find<MedAppDoc>(savedUrl as AutomergeUrl);
+    docHandleInstance = await repo.find<MedAppDoc>(savedUrl as AutomergeUrl);
   } else {
     docHandleInstance = repo.create<MedAppDoc>(createInitialDoc());
     localStorage.setItem(DOC_URL_KEY, docHandleInstance.url);
@@ -52,8 +52,8 @@ export function getDocHandle(): DocHandle<MedAppDoc> {
 
 /** Wait for the document to be ready (loaded from storage or network) */
 export async function waitForDoc(): Promise<MedAppDoc> {
-  const handle = getDocHandle();
-  const doc = await handle.doc();
+  const handle = await getDocHandle();
+  const doc = handle.doc();
   if (!doc) throw new Error("Failed to load Automerge document");
   return doc;
 }

@@ -6,7 +6,7 @@ import type {
 } from "../../domain/models/event-recording.js";
 
 export async function createRecording(input: CreateRecordingInput): Promise<EventRecording> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   const id = uuidv4();
   const now = new Date().toISOString();
 
@@ -36,7 +36,7 @@ export async function listRecordingsByEvent(eventId: string): Promise<EventRecor
 }
 
 export async function deleteRecording(id: string): Promise<void> {
-  const handle = getDocHandle();
+  const handle = await getDocHandle();
   handle.change((d) => {
     delete d.eventRecordings[id];
   });
