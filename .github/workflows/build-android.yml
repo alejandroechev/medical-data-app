@@ -24,7 +24,7 @@ jobs:
           cache: npm
 
       - name: Install Rust
-        uses: dtolnay/rust-action/setup@v1
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Add Android targets
         run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android

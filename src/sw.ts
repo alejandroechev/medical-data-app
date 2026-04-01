@@ -19,8 +19,8 @@ async function checkAndNotify(): Promise<void> {
     // Dynamically import the checker to keep SW lean
     const { checkPickupAlerts } = await import('./domain/services/pickup-notification-checker');
 
-    // Fetch active drugs — we need to call the store directly since SW can't use React hooks
-    const { listAllPatientDrugs } = await import('./infra/store-provider');
+    // Fetch active drugs — import Supabase store directly to avoid Automerge/WASM in SW context
+    const { listAllPatientDrugs } = await import('./infra/supabase/prescription-drug-store');
     const drugs = await listAllPatientDrugs();
     const alerts = checkPickupAlerts(drugs);
 
