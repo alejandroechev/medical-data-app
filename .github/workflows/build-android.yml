@@ -39,10 +39,10 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android NDK
-        run: sdkmanager "ndk;27.0.12077973"
+        run: sdkmanager --install "ndk;27.2.12479018"
 
       - name: Set NDK_HOME
-        run: echo "NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+        run: echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> $GITHUB_ENV
 
       - name: Install npm dependencies
         run: npm ci
