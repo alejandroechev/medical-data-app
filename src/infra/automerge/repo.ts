@@ -3,7 +3,10 @@ import { BrowserWebSocketClientAdapter } from "@automerge/automerge-repo-network
 import { IndexedDBStorageAdapter } from "@automerge/automerge-repo-storage-indexeddb";
 import type { AutomergeUrl, DocHandle } from "@automerge/automerge-repo";
 import type { MedAppDoc } from "./schema.js";
+import { CURRENT_SCHEMA_VERSION } from "./schema.js";
 import { getAuthenticatedWsUrl } from "./auth.js";
+import { migrateDocument } from "./migrations.js";
+import { startBlobSyncListener } from "./blob-sync.js";
 
 const DOC_URL_KEY = "medapp-automerge-doc-url";
 const IDB_NAME = "medapp-automerge";
@@ -17,6 +20,7 @@ let docHandleInstance: DocHandle<MedAppDoc> | null = null;
 
 function createInitialDoc(): MedAppDoc {
   return {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     medicalEvents: {},
     eventPhotos: {},
     eventRecordings: {},
@@ -47,10 +51,15 @@ export async function getDocHandle(): Promise<DocHandle<MedAppDoc>> {
   if (savedUrl) {
     docHandleInstance = await repo.find<MedAppDoc>(savedUrl as AutomergeUrl);
     localStorage.setItem(DOC_URL_KEY, savedUrl);
+    // Run schema migrations if needed
+    migrateDocument(docHandleInstance);
   } else {
     docHandleInstance = repo.create<MedAppDoc>(createInitialDoc());
     localStorage.setItem(DOC_URL_KEY, docHandleInstance.url);
   }
+
+  // Start blob sync retry listener
+  startBlobSyncListener();
 
   return docHandleInstance;
 }

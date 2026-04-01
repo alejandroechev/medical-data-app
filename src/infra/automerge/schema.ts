@@ -31,6 +31,7 @@ export interface AutomergeEventRecording {
 
 /** Root document shape */
 export interface MedAppDoc {
+  schemaVersion: number;
   medicalEvents: { [id: string]: MedicalEvent };
   eventPhotos: { [id: string]: AutomergeEventPhoto };
   eventRecordings: { [id: string]: AutomergeEventRecording };
@@ -39,3 +40,5 @@ export interface MedAppDoc {
   prescriptionDrugs: { [id: string]: PrescriptionDrug };
   patientDrugs: { [id: string]: PatientDrug };
 }
+
+export const CURRENT_SCHEMA_VERSION = 1;

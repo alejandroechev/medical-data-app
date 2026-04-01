@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getDocHandle, waitForDoc } from "./repo.js";
 import type { EventPhoto, LinkPhotoInput } from "../../domain/models/event-photo.js";
 import type { UploadResult } from "../../domain/services/photo-uploader.js";
+import { storeAndSyncBlob } from "./blob-sync.js";
 
 // --- Event Photo Store ---
 
@@ -41,16 +42,13 @@ export async function unlinkPhoto(id: string): Promise<void> {
   });
 }
 
-// --- Photo Storage (local-first, no Supabase) ---
-// For now, reuse the same URL-based approach.
-// In Phase 3+, this will use blob-store with content-addressed IDs.
+// --- Photo Storage (local-first with blob sync) ---
 
 export async function uploadPhoto(_eventId: string, file: File): Promise<UploadResult> {
-  // Store as a local object URL for now — Phase 3 will add blob sync
-  const url = URL.createObjectURL(file);
-  return { url, fileName: file.name };
+  const { blobId, localUrl } = await storeAndSyncBlob(file);
+  return { url: localUrl, fileName: `blob:${blobId}` };
 }
 
 export async function deletePhoto(_url: string): Promise<void> {
-  // No-op for object URLs; blob cleanup handled in Phase 3
+  // Blob GC handled server-side (Phase 5)
 }
