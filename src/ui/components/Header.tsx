@@ -5,7 +5,7 @@ interface HeaderProps {
 
 export function Header({ titulo, onBack }: HeaderProps) {
   return (
-    <header className="sticky top-0 bg-blue-600 text-white shadow-md z-40">
+    <header className="sticky top-0 bg-blue-600 text-white shadow-md z-40 safe-area-pt">
       <div className="flex items-center h-14 px-4 max-w-lg mx-auto">
         {onBack && (
           <button
