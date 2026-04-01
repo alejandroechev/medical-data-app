@@ -1,54 +1,90 @@
-# Family Medical Records
+# MedTracker — Family Medical Records
 
-Progressive Web App (PWA) to record and browse family medical events.
+> **v0.2.0** — PWA (web) · Native Desktop (Tauri/Windows) · Native Android (Tauri)
+
+Personal app to record and browse family medical events. Runs as an installable PWA on the web, a native desktop app on Windows, and a native Android app — all from the same React codebase.
+
+**Production URL:** https://medical-data-app.vercel.app
+**Sync server:** sync.stormlab.app
 
 ## Features
 
 - 📋 Medical event tracking (consultations, emergencies, surgeries, exams, etc.)
 - 👨‍👩‍👧‍👦 Associate events with family members
-- 📸 Link document photos from Google Photos
+- 📸 Event photos via Supabase Storage (cloud) or sync server blobs (local-first)
 - 💰 Reimbursement tracking (ISAPRE and Complementary Insurance)
 - 💊 Treatment tracking with drug schedules and progress
 - 🔔 Prescription pickup notifications (in-app alerts + browser notifications)
-- 📱 Mobile-first design (installable PWA)
+- 📱 Mobile-first design (installable PWA + native Android APK)
+- 🖥️ Native Windows desktop app (Tauri)
+- 🔄 Offline-first with CRDT sync (Automerge)
 - 🔍 Search and filter by patient, type, and date range
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Frontend  | React + TypeScript + Vite |
-| PWA       | vite-plugin-pwa (Workbox) |
-| Styling   | Tailwind CSS |
-| Backend   | Supabase (PostgreSQL) |
-| Photos    | Google Photos API |
-| Tests     | Vitest + Playwright |
-| CLI       | Commander.js |
+| Frontend | React + TypeScript + Vite |
+| PWA | vite-plugin-pwa (Workbox) |
+| Desktop/Mobile | Tauri 2.0 (Windows + Android) |
+| Styling | Tailwind CSS |
+| Cloud Backend | Supabase (PostgreSQL + Storage) |
+| Local-First Backend | Automerge CRDTs + sync server |
+| Tests | Vitest + Playwright |
+| CLI | Commander.js |
+
+## Deployment Modes
+
+The app currently runs in two parallel modes during the local-first migration:
+
+### Cloud-First (Production — Vercel)
+- **URL:** https://medical-data-app.vercel.app
+- **Backend:** Supabase PostgreSQL
+- **Storage:** Supabase Storage (event-photos bucket)
+- **How:** No `VITE_STORAGE_BACKEND` env var set → defaults to Supabase
+
+### Local-First (Testing — Native Apps)
+- **Backend:** Automerge CRDTs synced via `sync.stormlab.app`
+- **Storage:** IndexedDB (local) + blob HTTP endpoint on sync server
+- **Auth:** JWT device registration
+- **How:** Set `VITE_STORAGE_BACKEND=automerge` + `VITE_SYNC_SERVER_URL=wss://sync.stormlab.app` + `VITE_AUTOMERGE_DOC_URL=automerge:3KG1BsgCVwhJp6BLwYTnCPGjBmtU`
+
+Both backends coexist via the `store-provider.ts` adapter. The Vercel deployment is untouched — it keeps using Supabase. The native desktop (Tauri Windows) and mobile (Tauri Android) apps use the Automerge backend.
+
+**Goal:** Test the local-first flow with real medical events before removing Supabase entirely.
 
 ## Requirements
 
-- Node.js 18+
-- Supabase account (free tier)
-- Google Cloud project with Google Photos API enabled
+- Node.js 22+
+- npm
+- Rust toolchain (optional — only for native desktop/Android builds)
 
 ## Setup
 
 1. Clone the repository
 2. `npm install`
 3. Copy `.env.example` to `.env` and configure the variables
-4. Run the SQL schema in Supabase (`src/infra/supabase/schema.sql`)
-5. `npm run dev`
+4. `npm run dev`
 
 ## Commands
 
 ```bash
-npm run dev          # Development server
+npm run dev          # Development server (web)
 npm run build        # Production build
 npm run test         # Unit tests
 npm run test:coverage # Tests with coverage
 npm run test:e2e     # E2E tests (Playwright)
 npm run cli          # CLI (feature parity)
 ```
+
+## Native Apps
+
+```bash
+npx tauri dev        # Run desktop app (Windows) in development mode
+npx tauri build      # Build desktop app for production
+```
+
+The Android APK is built automatically by GitHub Actions on push to master and attached to the corresponding GitHub Release.
 
 ## CLI
 

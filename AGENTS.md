@@ -6,8 +6,6 @@ An app to keep records of personal medical events from me and my family
 
 ## Code Implementation Flow
 
-<important>Mandatory Development Loop (non-negotiable)</important>
-
 ### Pre-Development
 - **Read ADRs** Before starting any development work, read all Architecture Decision Records in `docs/adrs/` to understand existing design decisions and constraints. Do not contradict or duplicate existing ADRs without explicit user approval.
 
@@ -29,14 +27,10 @@ An app to keep records of personal medical events from me and my family
 
 ### Coding — TDD Workflow (strict, per-function)
 
-<important>For EVERY function, component, or module you implement, follow this exact sequence. Do NOT skip steps or batch them.</important>
-
 1. **RED** — Write a failing test FIRST. Run it. Confirm it fails. Show the failure output.
 2. **GREEN** — Write the MINIMUM implementation code to make the test pass. Run the test. Confirm it passes.
 3. **REFACTOR** — Clean up if needed. Run the test again to confirm it still passes.
 4. Repeat for the next behavior/function.
-
-<important>NEVER write implementation code without a pre-existing failing test. If you catch yourself writing code first, STOP, delete it, and write the test first.</important>
 
 ### Coding — E2E and CLI Tests (per-feature, not batched)
 
@@ -45,8 +39,6 @@ For every user-facing feature, before considering it complete:
 - **CLI Scenario** — Write a CLI scenario AND execute it using the CLI. Confirm the output matches expectations.
 
 ### Validation — Pre-Commit Gate
-
-<important>You CANNOT commit until ALL of the following pass. This is a gate, not a suggestion. Run these exact commands before every `git commit`:</important>
 
 ```bash
 # 1. All unit tests pass with coverage above 90%
@@ -66,8 +58,6 @@ npx tsc -b
 # Review each screenshot visually. Store in screenshots/ folder.
 # If Playwright MCP is not available, STOP and tell the user.
 ```
-
-<important>If any validation step fails, fix the underlying issue. NEVER delete pre-existing tests or scenarios unless the user explicitly asks you to.</important>
 
 ### Documentation
 - **README** Update readme file with any relevant public change to the app
@@ -101,3 +91,31 @@ Before running `git commit`, mentally verify:
 - Exports all DB tables as JSON to an orphan `backups` branch (not on main).
 - Can be triggered manually from GitHub Actions → "Weekly DB Backup" → "Run workflow" (with optional file backup checkbox).
 - Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` GitHub secrets.
+
+## Release & Update Flow
+
+To publish a new version of MedTracker:
+1. Bump the version in both `package.json` and `src-tauri/tauri.conf.json`
+2. Push to master
+3. CI will build the Android APK and create a GitHub Release with the APK attached
+4. The app checks for updates on startup (once/day) and shows a banner if a newer version is available
+
+## Dual Backend Mode
+
+The app currently runs in two parallel modes during the local-first migration:
+
+### Cloud-First (Production — Vercel)
+- **URL:** https://medical-data-app.vercel.app
+- **Backend:** Supabase PostgreSQL
+- **Storage:** Supabase Storage (event-photos bucket)
+- **How:** No `VITE_STORAGE_BACKEND` env var set → defaults to Supabase
+
+### Local-First (Testing — Native Apps)
+- **Backend:** Automerge CRDTs synced via `sync.stormlab.app`
+- **Storage:** IndexedDB (local) + blob HTTP endpoint on sync server
+- **Auth:** JWT device registration
+- **How:** Set `VITE_STORAGE_BACKEND=automerge` + `VITE_SYNC_SERVER_URL=wss://sync.stormlab.app` + `VITE_AUTOMERGE_DOC_URL=automerge:3KG1BsgCVwhJp6BLwYTnCPGjBmtU`
+
+Both backends coexist via the `store-provider.ts` adapter. The Vercel deployment is untouched — it keeps using Supabase. The native desktop (Tauri Windows) and mobile (Tauri Android) apps use the Automerge backend.
+
+**Goal:** Test the local-first flow with real medical events before removing Supabase entirely.
