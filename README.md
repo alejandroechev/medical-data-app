@@ -35,23 +35,14 @@ Personal app to record and browse family medical events. Runs as an installable 
 
 ## Deployment Modes
 
-The app currently runs in two parallel modes during the local-first migration:
+The app runs in two parallel backends during the local-first migration. See [ADR-004](docs/adrs/004-local-first-automerge-migration.md) for the full architecture and rationale.
 
-### Cloud-First (Production — Vercel)
-- **URL:** https://medical-data-app.vercel.app
-- **Backend:** Supabase PostgreSQL
-- **Storage:** Supabase Storage (event-photos bucket)
-- **How:** No `VITE_STORAGE_BACKEND` env var set → defaults to Supabase
+| Mode | Backend | Activated by |
+|------|---------|-------------|
+| **Cloud-First** (Vercel) | Supabase PostgreSQL | Default (no env var) |
+| **Local-First** (Native apps) | Automerge CRDTs → `sync.stormlab.app` | `VITE_STORAGE_BACKEND=automerge` |
 
-### Local-First (Testing — Native Apps)
-- **Backend:** Automerge CRDTs synced via `sync.stormlab.app`
-- **Storage:** IndexedDB (local) + blob HTTP endpoint on sync server
-- **Auth:** JWT device registration
-- **How:** Set `VITE_STORAGE_BACKEND=automerge` + `VITE_SYNC_SERVER_URL=wss://sync.stormlab.app` + `VITE_AUTOMERGE_DOC_URL=automerge:3KG1BsgCVwhJp6BLwYTnCPGjBmtU`
-
-Both backends coexist via the `store-provider.ts` adapter. The Vercel deployment is untouched — it keeps using Supabase. The native desktop (Tauri Windows) and mobile (Tauri Android) apps use the Automerge backend.
-
-**Goal:** Test the local-first flow with real medical events before removing Supabase entirely.
+Both coexist via the `store-provider.ts` adapter. Goal: validate local-first with real usage before removing Supabase.
 
 ## Requirements
 

@@ -79,17 +79,16 @@ Before running `git commit`, mentally verify:
 - [ ] ADR written (if major design decision)?
 
 ### Deployment
-- **CI/CD** is handled by GitHub Actions (`.github/workflows/ci-cd.yml`). Push to `master` triggers: TypeScript check → unit tests with coverage → E2E tests → build → deploy to Vercel.
-- **Vercel auto-deploy is disabled** (`vercel.json` → `github.enabled: false`). Deployments ONLY happen through the GitHub Actions pipeline after all tests pass.
-- **If any CI step fails, deployment is skipped.** No manual rollback needed — the previous production deployment stays live.
-- **Production URL:** https://medical-data-app.vercel.app
+- **CI/CD** is handled by GitHub Actions. See [README.md](README.md) for production URLs and deployment modes.
+- Push to `master` triggers: TypeScript check → unit tests with coverage → E2E tests → build → deploy to Vercel.
+- **Vercel auto-deploy is disabled** (`vercel.json` → `github.enabled: false`). Deployments ONLY happen through CI after all tests pass.
+- **If any CI step fails, deployment is skipped.** The previous production deployment stays live.
 - **Never deploy manually** with `vercel deploy`. Always push to `master` and let CI/CD handle it.
 
 ### Backup
 - **Weekly DB backup** runs every Sunday 3:00 AM UTC via GitHub Actions (`.github/workflows/backup.yml`).
-- **Monthly file backup** runs 1st of each month at 4:00 AM UTC — downloads all files from Supabase Storage.
-- Exports all DB tables as JSON to an orphan `backups` branch (not on main).
-- Can be triggered manually from GitHub Actions → "Weekly DB Backup" → "Run workflow" (with optional file backup checkbox).
+- **Monthly file backup** runs 1st of each month at 4:00 AM UTC.
+- Exports to an orphan `backups` branch. Can be triggered manually.
 - Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` GitHub secrets.
 
 ## Release & Update Flow
@@ -102,20 +101,4 @@ To publish a new version of MedTracker:
 
 ## Dual Backend Mode
 
-The app currently runs in two parallel modes during the local-first migration:
-
-### Cloud-First (Production — Vercel)
-- **URL:** https://medical-data-app.vercel.app
-- **Backend:** Supabase PostgreSQL
-- **Storage:** Supabase Storage (event-photos bucket)
-- **How:** No `VITE_STORAGE_BACKEND` env var set → defaults to Supabase
-
-### Local-First (Testing — Native Apps)
-- **Backend:** Automerge CRDTs synced via `sync.stormlab.app`
-- **Storage:** IndexedDB (local) + blob HTTP endpoint on sync server
-- **Auth:** JWT device registration
-- **How:** Set `VITE_STORAGE_BACKEND=automerge` + `VITE_SYNC_SERVER_URL=wss://sync.stormlab.app` + `VITE_AUTOMERGE_DOC_URL=automerge:3KG1BsgCVwhJp6BLwYTnCPGjBmtU`
-
-Both backends coexist via the `store-provider.ts` adapter. The Vercel deployment is untouched — it keeps using Supabase. The native desktop (Tauri Windows) and mobile (Tauri Android) apps use the Automerge backend.
-
-**Goal:** Test the local-first flow with real medical events before removing Supabase entirely.
+The app runs two parallel backends during migration. See [ADR-004](docs/adrs/004-local-first-automerge-migration.md) for architecture details and [README.md](README.md#deployment-modes) for configuration.
