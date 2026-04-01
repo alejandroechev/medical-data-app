@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Safe area padding for mobile devices with gesture navigation / notches */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

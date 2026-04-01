@@ -55,6 +55,7 @@ jobs:
         env:
           VITE_STORAGE_BACKEND: automerge
           VITE_SYNC_SERVER_URL: wss://sync.stormlab.app
+          VITE_AUTOMERGE_DOC_URL: automerge:3KG1BsgCVwhJp6BLwYTnCPGjBmtU
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

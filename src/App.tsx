@@ -56,7 +56,7 @@ function App() {
           patientNames={patientNames}
         />
 
-        <main className="max-w-lg mx-auto pb-20">
+        <main className="max-w-lg mx-auto pb-24">
           {currentPage === 'inicio' && (
             <InicioPage
               onEventClick={handleEventClick}

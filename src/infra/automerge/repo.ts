@@ -8,6 +8,10 @@ import { getAuthenticatedWsUrl } from "./auth.js";
 const DOC_URL_KEY = "medapp-automerge-doc-url";
 const IDB_NAME = "medapp-automerge";
 
+// Default shared document URL — all devices connect to this same document.
+// Set via env var, or falls back to the migrated document.
+const DEFAULT_DOC_URL = import.meta.env.VITE_AUTOMERGE_DOC_URL || "";
+
 let repoInstance: Repo | null = null;
 let docHandleInstance: DocHandle<MedAppDoc> | null = null;
 
@@ -38,10 +42,11 @@ export async function getDocHandle(): Promise<DocHandle<MedAppDoc>> {
   if (docHandleInstance) return docHandleInstance;
 
   const repo = getRepo();
-  const savedUrl = localStorage.getItem(DOC_URL_KEY);
+  const savedUrl = localStorage.getItem(DOC_URL_KEY) || DEFAULT_DOC_URL;
 
   if (savedUrl) {
     docHandleInstance = await repo.find<MedAppDoc>(savedUrl as AutomergeUrl);
+    localStorage.setItem(DOC_URL_KEY, savedUrl);
   } else {
     docHandleInstance = repo.create<MedAppDoc>(createInitialDoc());
     localStorage.setItem(DOC_URL_KEY, docHandleInstance.url);
