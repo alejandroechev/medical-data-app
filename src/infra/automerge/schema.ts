@@ -5,7 +5,6 @@
  */
 
 import type { MedicalEvent } from "../../domain/models/medical-event.js";
-import type { EventRecording } from "../../domain/models/event-recording.js";
 import type { PrescriptionDrug, PatientDrug } from "../../domain/models/prescription-drug.js";
 import type { Professional, Location } from "../../domain/models/professional-location.js";
 
