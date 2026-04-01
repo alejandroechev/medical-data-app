@@ -62,9 +62,25 @@ jobs:
           VITE_SYNC_SERVER_URL: wss://sync.stormlab.app
           VITE_AUTOMERGE_DOC_URL: automerge:3KG1BsgCVwhJp6BLwYTnCPGjBmtU
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: registro-medico-android
+          name: medtracker-android
           path: src-tauri/gen/android/app/build/outputs/apk/universal/debug/*.apk
           retention-days: 30
+
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: MedTracker v${{ steps.version.outputs.version }}
+          files: src-tauri/gen/android/app/build/outputs/apk/universal/debug/*.apk
+          make_latest: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

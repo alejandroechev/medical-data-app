@@ -5,6 +5,7 @@ import { Header } from './ui/components/Header';
 import { BottomNav } from './ui/components/BottomNav';
 import { PinGate } from './ui/components/PinGate';
 import { SyncAuthGate } from './ui/components/SyncAuthGate';
+import { UpdateBanner } from './ui/components/UpdateBanner';
 import { PickupAlertBanner } from './ui/components/PickupAlertBanner';
 import { InicioPage } from './ui/pages/InicioPage';
 import { NuevoEventoPage } from './ui/pages/NuevoEventoPage';
@@ -49,6 +50,8 @@ function App() {
     <PinGate>
       <div className="min-h-screen bg-gray-50">
         <Header titulo={title} onBack={showBack ? goBack : undefined} />
+
+        <UpdateBanner />
 
         <PickupAlertBanner
           alerts={visibleAlerts}
