@@ -1,12 +1,12 @@
 import type { FamilyMember } from '../../domain/models/family-member.js';
 import { supabase } from './client.js';
 
-// Fallback seed data for in-memory mode
+// Seed data with real Supabase IDs (used by all backends for consistent patient mapping)
 const SEED_MEMBERS: FamilyMember[] = [
-  { id: '1', name: 'Alejandro', relationship: 'Padre' },
-  { id: '2', name: 'Daniela', relationship: 'Madre' },
-  { id: '3', name: 'Antonio', relationship: 'Hijo' },
-  { id: '4', name: 'Gaspar', relationship: 'Hijo' },
+  { id: '861ac938-aad9-4172-b21a-b7be9ff10676', name: 'Alejandro', relationship: 'Padre' },
+  { id: '73877ce7-d43f-47ad-8752-fc966e659189', name: 'Daniela', relationship: 'Madre' },
+  { id: 'c8af6b39-c4ae-451c-87cc-9e68ab02b3f7', name: 'Antonio', relationship: 'Hijo' },
+  { id: '2c26a593-c699-41e9-8c57-5056349ef861', name: 'Gaspar', relationship: 'Hijo' },
 ];
 
 // Cached members loaded from Supabase
