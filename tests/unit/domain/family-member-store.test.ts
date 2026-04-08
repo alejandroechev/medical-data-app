@@ -22,9 +22,11 @@ describe('FamilyMemberStore', () => {
   });
 
   it('should find a member by ID', () => {
-    const member = getFamilyMemberById('1');
+    const members = getFamilyMembers();
+    const first = members[0];
+    const member = getFamilyMemberById(first.id);
     expect(member).toBeDefined();
-    expect(member!.id).toBe('1');
+    expect(member!.id).toBe(first.id);
   });
 
   it('should return undefined for non-existent ID', () => {

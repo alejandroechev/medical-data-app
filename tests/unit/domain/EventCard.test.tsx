@@ -9,7 +9,7 @@ const mockEvento: MedicalEvent = {
   date: '2024-06-15',
   type: 'Consulta Médica',
   description: 'Control anual con médico general',
-  patientId: '1', // Alejandro in seed data
+  patientId: '861ac938-aad9-4172-b21a-b7be9ff10676', // Alejandro in seed data
   isapreReimbursementStatus: 'approved',
   insuranceReimbursementStatus: 'none',
   createdAt: '2024-06-15T10:00:00Z',
