@@ -4,6 +4,7 @@ import { getFamilyMembers } from '../../infra/supabase/family-member-store';
 import { checkPickupAlerts } from '../../domain/services/pickup-notification-checker';
 import { LocalStorageNotificationStateTracker } from '../../infra/notification-state';
 import { showBrowserNotification, requestNotificationPermission } from '../../infra/browser-notifications';
+import { schedulePickupNotifications } from '../../infra/notification-scheduler';
 import { alertKey } from '../../domain/models/pickup-notification';
 import type { PickupAlert } from '../../domain/models/pickup-notification';
 
@@ -52,6 +53,9 @@ export function usePickupAlerts(today: Date = new Date()) {
 
         const found = checkPickupAlerts(drugs, today);
         setAlerts(found);
+
+        // Schedule native notifications (Tauri) or no-op (web)
+        schedulePickupNotifications(drugs, found);
 
         // Fire browser notifications for unseen alerts
         for (const alert of found) {
