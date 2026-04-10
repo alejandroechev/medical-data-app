@@ -77,6 +77,7 @@ Before running `git commit`, mentally verify:
 - [ ] README updated (if public-facing change)?
 - [ ] System diagram updated (if architecture changed)?
 - [ ] ADR written (if major design decision)?
+- [ ] **Version bumped** in both `package.json` and `src-tauri/tauri.conf.json`? Every feature or fix must bump the version so CI publishes a new GitHub Release with the APK. Use semver: patch for fixes, minor for features, major for breaking changes.
 
 ### Deployment
 - **CI/CD** is handled by GitHub Actions. See [README.md](README.md) for production URLs and deployment modes.
