@@ -31,6 +31,13 @@ export function useEvents(filters?: MedicalEventFilters) {
     load();
   }, [load]);
 
+  // Re-load when Automerge document changes from remote sync
+  useEffect(() => {
+    function onDocChanged() { load(); }
+    window.addEventListener("medapp:doc-changed", onDocChanged);
+    return () => window.removeEventListener("medapp:doc-changed", onDocChanged);
+  }, [load]);
+
   const create = async (input: CreateMedicalEventInput) => {
     const event = await createEvent(input);
     await load();

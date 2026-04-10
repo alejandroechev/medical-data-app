@@ -25,7 +25,7 @@ export function usePickupAlerts(today: Date = new Date()) {
   const members = getFamilyMembers();
   const patientNames = new Map(members.map((m) => [m.id, m.name]));
 
-  // Re-check when drugs change or page becomes visible
+  // Re-check when drugs change, page becomes visible, or Automerge doc syncs
   useEffect(() => {
     function onVisibilityChange() {
       if (document.visibilityState === 'visible') {
@@ -35,11 +35,16 @@ export function usePickupAlerts(today: Date = new Date()) {
     function onDrugsChanged() {
       setRefreshKey((k) => k + 1);
     }
+    function onDocChanged() {
+      setRefreshKey((k) => k + 1);
+    }
     document.addEventListener('visibilitychange', onVisibilityChange);
     window.addEventListener('medapp:drugs-changed', onDrugsChanged);
+    window.addEventListener('medapp:doc-changed', onDocChanged);
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('medapp:drugs-changed', onDrugsChanged);
+      window.removeEventListener('medapp:doc-changed', onDocChanged);
     };
   }, []);
 

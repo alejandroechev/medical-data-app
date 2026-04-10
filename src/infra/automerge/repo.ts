@@ -61,6 +61,13 @@ export async function getDocHandle(): Promise<DocHandle<MedAppDoc>> {
   // Start blob sync retry listener
   startBlobSyncListener();
 
+  // Emit custom event on document changes (enables real-time UI updates from remote edits)
+  docHandleInstance.on("change", () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("medapp:doc-changed"));
+    }
+  });
+
   return docHandleInstance;
 }
 
