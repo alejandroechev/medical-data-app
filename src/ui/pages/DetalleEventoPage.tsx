@@ -9,6 +9,7 @@ import { AudioRecorder } from '../components/AudioRecorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { CreatableSelect } from '../components/CreatableSelect';
 import { ConfirmDeleteButton } from '../components/ConfirmDeleteButton';
+import { ClickableImage } from '../components/ImageModal';
 import { DrugCard } from '../components/DrugCard';
 import { DrugForm } from '../components/DrugForm';
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
@@ -427,18 +428,11 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
                   className="rounded-lg border border-gray-100 overflow-hidden"
                 >
                   {isImage && (
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src={url}
-                        alt={foto.description ?? foto.googlePhotosId}
-                        className="w-full h-40 object-cover"
-                        loading="lazy"
-                      />
-                    </a>
+                    <ClickableImage
+                      src={url}
+                      alt={foto.description ?? foto.googlePhotosId}
+                      className="w-full h-40 object-cover"
+                    />
                   )}
                   <div className="flex items-center gap-2 p-2">
                     <span className="text-lg">{icon}</span>
