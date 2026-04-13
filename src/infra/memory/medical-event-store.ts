@@ -22,7 +22,7 @@ export class InMemoryMedicalEventStore {
       parentEventId: input.parentEventId,
       isapreReimbursementStatus: input.isapreReimbursementStatus ?? 'none',
       insuranceReimbursementStatus: input.insuranceReimbursementStatus ?? 'none',
-      isArchived: input.isArchived ?? false,
+      isArchived: false,
       cost: input.cost,
       createdAt: now,
       updatedAt: now,

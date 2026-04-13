@@ -59,7 +59,7 @@ export async function createEvent(
       tipo: input.type,
       descripcion: input.description,
       paciente_id: input.patientId,
-      is_archived: input.isArchived ?? false,
+      is_archived: false,
       professional_id: input.professionalId ?? null,
       location_id: input.locationId ?? null,
       parent_event_id: input.parentEventId ?? null,
