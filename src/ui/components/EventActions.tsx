@@ -3,9 +3,11 @@ import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { REEMBOLSO_LINKS } from '../../domain/models/medical-event';
 
 interface EventActionsProps {
+  isArchived: boolean;
   isapreReimbursementStatus: ReimbursementStatus;
   insuranceReimbursementStatus: ReimbursementStatus;
-  onDelete: () => Promise<void>;
+  onArchive: () => Promise<void>;
+  onUnarchive: () => Promise<void>;
   onChangeIsapreStatus: (status: ReimbursementStatus) => Promise<void>;
   onChangeInsuranceStatus: (status: ReimbursementStatus) => Promise<void>;
 }
@@ -74,22 +76,33 @@ function ReimbursementStatusControl({
 }
 
 export function EventActions({
+  isArchived,
   isapreReimbursementStatus,
   insuranceReimbursementStatus,
-  onDelete,
+  onArchive,
+  onUnarchive,
   onChangeIsapreStatus,
   onChangeInsuranceStatus,
 }: EventActionsProps) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [isSubmittingArchive, setIsSubmittingArchive] = useState(false);
 
-  const handleConfirmDelete = async () => {
-    setDeleting(true);
+  const handleConfirmArchive = async () => {
+    setIsSubmittingArchive(true);
     try {
-      await onDelete();
+      await onArchive();
     } finally {
-      setDeleting(false);
+      setIsSubmittingArchive(false);
       setShowConfirm(false);
+    }
+  };
+
+  const handleUnarchive = async () => {
+    setIsSubmittingArchive(true);
+    try {
+      await onUnarchive();
+    } finally {
+      setIsSubmittingArchive(false);
     }
   };
 
@@ -116,15 +129,15 @@ export function EventActions({
       <hr className="border-gray-100" />
 
       {showConfirm ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-2">
-          <p className="text-sm text-red-700">¿Estás seguro de eliminar este evento?</p>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+          <p className="text-sm text-amber-800">¿Estás seguro de archivar este evento?</p>
           <div className="flex gap-2">
             <button
-              onClick={handleConfirmDelete}
-              disabled={deleting}
-              className="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+              onClick={handleConfirmArchive}
+              disabled={isSubmittingArchive}
+              className="flex-1 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 disabled:opacity-50 transition-colors"
             >
-              {deleting ? 'Eliminando...' : 'Sí, eliminar'}
+              {isSubmittingArchive ? 'Archivando...' : 'Sí, archivar'}
             </button>
             <button
               onClick={() => setShowConfirm(false)}
@@ -136,10 +149,15 @@ export function EventActions({
         </div>
       ) : (
         <button
-          onClick={() => setShowConfirm(true)}
-          className="w-full py-2 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50 transition-colors"
+          onClick={isArchived ? handleUnarchive : () => setShowConfirm(true)}
+          disabled={isSubmittingArchive}
+          className={`w-full py-2 rounded-lg text-sm transition-colors disabled:opacity-50 ${
+            isArchived
+              ? 'border border-blue-200 text-blue-600 hover:bg-blue-50'
+              : 'border border-amber-200 text-amber-700 hover:bg-amber-50'
+          }`}
         >
-          🗑 Eliminar evento
+          {isArchived ? '📦 Desarchivar evento' : '📦 Archivar evento'}
         </button>
       )}
     </div>

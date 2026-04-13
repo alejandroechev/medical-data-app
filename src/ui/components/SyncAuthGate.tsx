@@ -19,7 +19,7 @@ export function SyncAuthGate({ children }: SyncAuthGateProps) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (getStorageBackend() !== "automerge") {
+    if (import.meta.env.VITE_DISABLE_SYNC_AUTH === "1" || getStorageBackend() !== "automerge") {
       setStatus("authenticated");
       return;
     }

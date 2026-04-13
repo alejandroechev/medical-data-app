@@ -18,6 +18,7 @@ interface DbMedicalEvent {
   tipo: string;
   descripcion: string;
   paciente_id: string;
+  is_archived?: boolean | null;
   professional_id: string | null;
   location_id: string | null;
   parent_event_id: string | null;
@@ -35,6 +36,7 @@ function mapFromDb(row: DbMedicalEvent): MedicalEvent {
     type: row.tipo as MedicalEvent['type'],
     description: row.descripcion,
     patientId: row.paciente_id,
+    ...(row.is_archived !== null && row.is_archived !== undefined && { isArchived: row.is_archived }),
     ...(row.professional_id !== null && { professionalId: row.professional_id }),
     ...(row.location_id !== null && { locationId: row.location_id }),
     ...(row.parent_event_id !== null && { parentEventId: row.parent_event_id }),
@@ -57,6 +59,7 @@ export async function createEvent(
       tipo: input.type,
       descripcion: input.description,
       paciente_id: input.patientId,
+      is_archived: input.isArchived ?? false,
       professional_id: input.professionalId ?? null,
       location_id: input.locationId ?? null,
       parent_event_id: input.parentEventId ?? null,
@@ -109,6 +112,9 @@ export async function listEvents(
   if (filters?.to) {
     query = query.lte('fecha', filters.to);
   }
+  if (!filters?.includeArchived) {
+    query = query.or('is_archived.is.null,is_archived.eq.false');
+  }
   if (filters?.isapreReimbursementStatus !== undefined) {
     query = query.eq('reembolso_isapre_status', filters.isapreReimbursementStatus);
   }
@@ -137,6 +143,7 @@ export async function updateEvent(
   if (input.type !== undefined) updateData.tipo = input.type;
   if (input.description !== undefined) updateData.descripcion = input.description;
   if (input.patientId !== undefined) updateData.paciente_id = input.patientId;
+  if (input.isArchived !== undefined) updateData.is_archived = input.isArchived;
   if (input.professionalId !== undefined)
     updateData.professional_id = input.professionalId;
   if (input.locationId !== undefined)

@@ -32,12 +32,14 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
   const [insuranceStatus, setInsuranceStatus] = useState('');
   const [professionalId, setProfessionalId] = useState('');
   const [locationId, setLocationId] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [drugName, setDrugName] = useState('');
   const [knownDrugNames, setKnownDrugNames] = useState<string[]>([]);
   const [drugMap, setDrugMap] = useState<Map<string, PrescriptionDrug[]>>(new Map());
   const [drugFilterLoading, setDrugFilterLoading] = useState(false);
+  const [referenceDate] = useState(() => new Date());
 
   useEffect(() => {
     listProfessionals().then(setProfessionals);
@@ -54,12 +56,13 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
       type: type || undefined,
       from: from || undefined,
       to: to || undefined,
+      includeArchived: showArchived || undefined,
       isapreReimbursementStatus: (isapreStatus || undefined) as ReimbursementStatus | undefined,
       insuranceReimbursementStatus: (insuranceStatus || undefined) as ReimbursementStatus | undefined,
       professionalId: professionalId || undefined,
       locationId: locationId || undefined,
     }),
-    [patientId, type, from, to, isapreStatus, insuranceStatus, professionalId, locationId]
+    [patientId, type, from, to, showArchived, isapreStatus, insuranceStatus, professionalId, locationId]
   );
 
   const { events, loading, error } = useEvents(filters);
@@ -99,7 +102,7 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
   const isLoading = loading || drugFilterLoading;
 
   const formatDate = (d: Date) => d.toISOString().split('T')[0];
-  const today = formatDate(new Date());
+  const today = formatDate(referenceDate);
 
   const presets = [
     { label: 'Última semana', days: 7 },
@@ -108,12 +111,12 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
   ] as const;
 
   const isPresetActive = (days: number) => {
-    const expectedFrom = formatDate(new Date(Date.now() - days * 86400000));
+    const expectedFrom = formatDate(new Date(referenceDate.getTime() - days * 86400000));
     return from === expectedFrom && to === today;
   };
 
   const applyPreset = (days: number) => {
-    setFrom(formatDate(new Date(Date.now() - days * 86400000)));
+    setFrom(formatDate(new Date(referenceDate.getTime() - days * 86400000)));
     setTo(today);
   };
 
@@ -122,6 +125,19 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
         <h2 className="text-sm font-medium text-gray-700">Filtros</h2>
+
+        <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+          <label htmlFor="filtro-archivados" className="text-sm text-gray-700">
+            Mostrar archivados
+          </label>
+          <input
+            id="filtro-archivados"
+            type="checkbox"
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+        </div>
 
         <div className="flex gap-2">
           {presets.map((p) => (

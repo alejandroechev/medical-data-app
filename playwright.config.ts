@@ -25,6 +25,8 @@ export default defineConfig({
     timeout: 30000,
     env: {
       // Force in-memory stubs for E2E tests (no external dependencies)
+      VITE_STORAGE_BACKEND: 'memory',
+      VITE_DISABLE_SYNC_AUTH: '1',
       VITE_SUPABASE_URL: '',
       VITE_SUPABASE_ANON_KEY: '',
       // Disable PIN gate for E2E tests

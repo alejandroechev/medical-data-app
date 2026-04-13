@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, deleteEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug, createEvent } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, archiveEvent, unarchiveEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug, createEvent } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
@@ -63,36 +63,40 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
     setDrugs(d);
   }, [eventoId]);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const [ev, ph, recs, d, profs, locs] = await Promise.all([
-          getEventById(eventoId),
-          listPhotosByEvent(eventoId),
-          listRecordingsByEvent(eventoId),
-          listPatientDrugsByEvent(eventoId),
-          listProfessionals(),
-          listLocations(),
-        ]);
-        setEvento(ev);
-        setFotos(ph);
-        setRecordings(recs);
-        setDrugs(d);
-        setProfessionals(profs);
-        setLocations(locs);
-        if (ev?.parentEventId) {
-          const parent = await getEventById(ev.parentEventId);
-          setParentEvento(parent);
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
+  const loadPageData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [ev, ph, recs, d, profs, locs] = await Promise.all([
+        getEventById(eventoId),
+        listPhotosByEvent(eventoId),
+        listRecordingsByEvent(eventoId),
+        listPatientDrugsByEvent(eventoId),
+        listProfessionals(),
+        listLocations(),
+      ]);
+      setEvento(ev);
+      setFotos(ph);
+      setRecordings(recs);
+      setDrugs(d);
+      setProfessionals(profs);
+      setLocations(locs);
+      if (ev?.parentEventId) {
+        const parent = await getEventById(ev.parentEventId);
+        setParentEvento(parent);
+      } else {
+        setParentEvento(null);
       }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
-    load();
   }, [eventoId]);
+
+  useEffect(() => {
+    void loadPageData();
+  }, [loadPageData]);
 
   const handleLinkPhoto = async (input: LinkPhotoInput) => {
     await linkPhoto(input);
@@ -104,9 +108,14 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
     await reloadPhotos();
   };
 
-  const handleDelete = async () => {
-    await deleteEvent(eventoId);
+  const handleArchive = async () => {
+    await archiveEvent(eventoId);
     onDeleted?.();
+  };
+
+  const handleUnarchive = async () => {
+    await unarchiveEvent(eventoId);
+    await loadPageData();
   };
 
   const handleToggleIsapre = async (status: ReimbursementStatus) => {
@@ -397,11 +406,13 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
         📋 Copiar evento
       </button>
 
-      {/* Reembolsos & Delete */}
+      {/* Reembolsos & Archive */}
       <EventActions
+        isArchived={evento.isArchived === true}
         isapreReimbursementStatus={evento.isapreReimbursementStatus}
         insuranceReimbursementStatus={evento.insuranceReimbursementStatus}
-        onDelete={handleDelete}
+        onArchive={handleArchive}
+        onUnarchive={handleUnarchive}
         onChangeIsapreStatus={handleToggleIsapre}
         onChangeInsuranceStatus={handleToggleInsurance}
       />

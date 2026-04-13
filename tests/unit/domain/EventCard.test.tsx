@@ -67,4 +67,10 @@ describe('EventCard', () => {
     render(<EventCard evento={sinPaciente} onClick={() => {}} />);
     expect(screen.getByText('Desconocido')).toBeInTheDocument();
   });
+
+  it('should show archived badge for archived events', () => {
+    const archivedEvent: MedicalEvent = { ...mockEvento, isArchived: true };
+    render(<EventCard evento={archivedEvent} onClick={() => {}} />);
+    expect(screen.getByText(/archivado/i)).toBeInTheDocument();
+  });
 });

@@ -191,29 +191,44 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText('Sin documentos vinculados')).toBeVisible();
   });
 
-  test('full flow: delete event with confirmation', async ({ page }) => {
-    await page.goto('/');
+  test('full flow: archive event, show it in history, and unarchive it', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     // Create event
     await page.getByLabel('Nuevo').click();
-    await page.getByLabel('Descripción').fill('Evento a eliminar');
+    await page.getByLabel('Descripción').fill('Evento a archivar');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
 
     // Go to detail
-    await page.getByText('Evento a eliminar').click();
+    await page.getByText('Evento a archivar').click();
     await expect(page.locator('header')).toContainText('Detalle del Evento');
 
-    // Click delete → confirm dialog appears
-    await page.getByRole('button', { name: /eliminar evento/i }).click();
-    await expect(page.getByText(/¿estás seguro/i)).toBeVisible();
+    // Archive the event
+    await page.getByRole('button', { name: /archivar evento/i }).click();
+    await expect(page.getByText(/¿estás seguro de archivar este evento\?/i)).toBeVisible();
+    await page.getByRole('button', { name: /sí, archivar/i }).click();
 
-    // Confirm delete
-    await page.getByRole('button', { name: /sí, eliminar/i }).click();
-
-    // Back to home, event gone
+    // Back to home, event hidden by default
     await expect(page.locator('header')).toContainText('Registro Médico Familiar');
-    await expect(page.getByText('Evento a eliminar')).not.toBeVisible();
+    await expect(page.getByText('Evento a archivar')).not.toBeVisible();
+
+    // History hides archived events until the toggle is enabled
+    await page.getByLabel('Historial').click();
+    await expect(page.getByText('Evento a archivar')).not.toBeVisible();
+
+    await page.getByLabel('Mostrar archivados').check();
+    await expect(page.getByText('Evento a archivar')).toBeVisible();
+    await expect(page.getByText('📦 Archivado')).toBeVisible();
+
+    // Open archived event and unarchive it
+    await page.getByText('Evento a archivar').click();
+    await expect(page.getByRole('button', { name: /desarchivar evento/i })).toBeVisible();
+    await page.getByRole('button', { name: /desarchivar evento/i }).click();
+
+    // Stay on detail page and the archive action becomes available again
+    await expect(page.locator('header')).toContainText('Detalle del Evento');
+    await expect(page.getByRole('button', { name: /archivar evento/i })).toBeVisible();
   });
 
   test('full flow: change reembolso status on event detail', async ({ page }) => {

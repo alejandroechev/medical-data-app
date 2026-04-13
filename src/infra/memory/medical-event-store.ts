@@ -22,6 +22,7 @@ export class InMemoryMedicalEventStore {
       parentEventId: input.parentEventId,
       isapreReimbursementStatus: input.isapreReimbursementStatus ?? 'none',
       insuranceReimbursementStatus: input.insuranceReimbursementStatus ?? 'none',
+      isArchived: input.isArchived ?? false,
       cost: input.cost,
       createdAt: now,
       updatedAt: now,
@@ -37,6 +38,10 @@ export class InMemoryMedicalEventStore {
 
   async list(filters?: MedicalEventFilters): Promise<MedicalEvent[]> {
     let results = Array.from(this.events.values());
+
+    if (!filters?.includeArchived) {
+      results = results.filter((e) => e.isArchived !== true);
+    }
 
     if (filters?.patientId) {
       results = results.filter((e) => e.patientId === filters.patientId);
@@ -81,6 +86,7 @@ export class InMemoryMedicalEventStore {
       ...(input.parentEventId !== undefined && { parentEventId: input.parentEventId ?? undefined }),
       ...(input.isapreReimbursementStatus !== undefined && { isapreReimbursementStatus: input.isapreReimbursementStatus }),
       ...(input.insuranceReimbursementStatus !== undefined && { insuranceReimbursementStatus: input.insuranceReimbursementStatus }),
+      ...(input.isArchived !== undefined && { isArchived: input.isArchived }),
       ...(input.cost !== undefined && { cost: input.cost ?? undefined }),
       updatedAt: new Date().toISOString(),
     };

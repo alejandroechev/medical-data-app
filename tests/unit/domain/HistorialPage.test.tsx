@@ -38,6 +38,24 @@ describe('HistorialPage', () => {
     expect(screen.getByLabelText('ISAPRE')).toBeInTheDocument();
     expect(screen.getByLabelText('Seguro')).toBeInTheDocument();
     expect(screen.getByLabelText('Medicamento')).toBeInTheDocument();
+    expect(screen.getByLabelText('Mostrar archivados')).toBeInTheDocument();
+  });
+
+  it('should pass includeArchived filter when toggle is enabled', async () => {
+    mockList.mockResolvedValue([]);
+    const user = userEvent.setup();
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    await screen.findByText(/encontrado/);
+    mockList.mockClear();
+
+    await user.click(screen.getByLabelText('Mostrar archivados'));
+
+    await vi.waitFor(() => {
+      expect(mockList).toHaveBeenCalledWith(
+        expect.objectContaining({ includeArchived: true })
+      );
+    });
   });
 
   it('should show message when there are no results', async () => {

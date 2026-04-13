@@ -1,6 +1,6 @@
 # MedTracker — Family Medical Records
 
-> **v0.2.0** — PWA (web) · Native Desktop (Tauri/Windows) · Native Android (Tauri)
+> **v0.4.0** — PWA (web) · Native Desktop (Tauri/Windows) · Native Android (Tauri)
 
 Personal app to record and browse family medical events. Runs as an installable PWA on the web, a native desktop app on Windows, and a native Android app — all from the same React codebase.
 
@@ -13,6 +13,7 @@ Personal app to record and browse family medical events. Runs as an installable 
 - 👨‍👩‍👧‍👦 Associate events with family members
 - 📸 Event photos via Supabase Storage (cloud) or sync server blobs (local-first)
 - 💰 Reimbursement tracking (ISAPRE and Complementary Insurance)
+- 📦 Event archiving with archive-aware history filters
 - 💊 Treatment tracking with drug schedules and progress
 - 🔔 Prescription pickup notifications (in-app alerts + browser notifications)
 - 📱 Mobile-first design (installable PWA + native Android APK)

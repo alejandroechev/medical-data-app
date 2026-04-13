@@ -4,6 +4,8 @@ import { DetalleEventoPage } from '../../../src/ui/pages/DetalleEventoPage';
 
 vi.mock('../../../src/infra/store-provider', () => ({
   getEventById: vi.fn(),
+  archiveEvent: vi.fn(),
+  unarchiveEvent: vi.fn(),
   createEvent: vi.fn(),
   listEvents: vi.fn(),
   updateEvent: vi.fn(),

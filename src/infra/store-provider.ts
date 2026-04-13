@@ -39,7 +39,8 @@ import type { UploadResult } from '../domain/services/photo-uploader.js';
 type StorageBackend = 'supabase' | 'automerge' | 'memory';
 
 function detectBackend(): StorageBackend {
-  const explicit = import.meta.env.VITE_STORAGE_BACKEND as string | undefined;
+  const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
+  const explicit = viteEnv?.VITE_STORAGE_BACKEND ?? process.env.VITE_STORAGE_BACKEND;
   if (explicit === 'automerge') return 'automerge';
   if (explicit === 'memory') return 'memory';
   if (explicit === 'supabase' || supabase !== null) return 'supabase';
@@ -99,12 +100,20 @@ export async function deleteEvent(id: string): Promise<void> {
 
 export async function archiveEvent(id: string): Promise<void> {
   if (backend === 'automerge') return (await automerge().event).archiveEvent(id);
-  throw new Error('Archive not supported on this backend');
+  if (backend === 'supabase') {
+    await supabaseEventStore.updateEvent(id, { isArchived: true });
+    return;
+  }
+  await memoryEventStore.update(id, { isArchived: true });
 }
 
 export async function unarchiveEvent(id: string): Promise<void> {
   if (backend === 'automerge') return (await automerge().event).unarchiveEvent(id);
-  throw new Error('Archive not supported on this backend');
+  if (backend === 'supabase') {
+    await supabaseEventStore.updateEvent(id, { isArchived: false });
+    return;
+  }
+  await memoryEventStore.update(id, { isArchived: false });
 }
 
 // --- Event Photos ---
