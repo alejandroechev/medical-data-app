@@ -97,6 +97,16 @@ export async function deleteEvent(id: string): Promise<void> {
   return backend === 'supabase' ? supabaseEventStore.deleteEvent(id) : memoryEventStore.delete(id);
 }
 
+export async function archiveEvent(id: string): Promise<void> {
+  if (backend === 'automerge') return (await automerge().event).archiveEvent(id);
+  throw new Error('Archive not supported on this backend');
+}
+
+export async function unarchiveEvent(id: string): Promise<void> {
+  if (backend === 'automerge') return (await automerge().event).unarchiveEvent(id);
+  throw new Error('Archive not supported on this backend');
+}
+
 // --- Event Photos ---
 
 export async function linkPhoto(input: LinkPhotoInput): Promise<EventPhoto> {

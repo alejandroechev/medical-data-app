@@ -92,11 +92,33 @@ export async function updateEvent(id: string, input: UpdateMedicalEventInput): P
     if (input.cost !== undefined) e.cost = input.cost ?? undefined;
     if (input.isapreReimbursementStatus !== undefined) e.isapreReimbursementStatus = input.isapreReimbursementStatus;
     if (input.insuranceReimbursementStatus !== undefined) e.insuranceReimbursementStatus = input.insuranceReimbursementStatus;
+    if (input.isArchived !== undefined) e.isArchived = input.isArchived;
     e.updatedAt = new Date().toISOString();
   });
 
   const updated = (await waitForDoc()).medicalEvents[id];
   return { ...updated };
+}
+
+async function setArchivedState(id: string, isArchived: boolean): Promise<void> {
+  const handle = await getDocHandle();
+  const doc = await waitForDoc();
+  const existing = doc.medicalEvents?.[id];
+  if (!existing) throw new Error(`Evento ${id} no encontrado`);
+
+  handle.change((d) => {
+    const event = d.medicalEvents[id];
+    event.isArchived = isArchived;
+    event.updatedAt = new Date().toISOString();
+  });
+}
+
+export async function archiveEvent(id: string): Promise<void> {
+  await setArchivedState(id, true);
+}
+
+export async function unarchiveEvent(id: string): Promise<void> {
+  await setArchivedState(id, false);
 }
 
 export async function deleteEvent(id: string): Promise<void> {

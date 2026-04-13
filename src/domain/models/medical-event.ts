@@ -30,6 +30,7 @@ export interface MedicalEvent {
   cost?: number;
   isapreReimbursementStatus: ReimbursementStatus;
   insuranceReimbursementStatus: ReimbursementStatus;
+  isArchived?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,4 +59,5 @@ export interface UpdateMedicalEventInput {
   cost?: number | null;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
+  isArchived?: boolean;
 }

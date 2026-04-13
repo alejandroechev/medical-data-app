@@ -41,4 +41,4 @@ export interface MedAppDoc {
   patientDrugs: { [id: string]: PatientDrug };
 }
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;

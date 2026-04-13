@@ -34,16 +34,9 @@ const migrations: Migration[] = [
     if (!doc.patientDrugs) doc.patientDrugs = {};
   },
 
-  // --- Add future migrations here ---
-  // Migration 1 → 2: example
-  // (doc) => {
-  //   for (const event of Object.values(doc.medicalEvents)) {
-  //     if (event.someOldField !== undefined) {
-  //       event.someNewField = event.someOldField;
-  //       delete (event as any).someOldField;
-  //     }
-  //   }
-  // },
+  // Migration 1 → 2: no-op. Existing events simply omit `isArchived`,
+  // and undefined is treated as "not archived".
+  () => {},
 ];
 
 /**
