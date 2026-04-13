@@ -4,7 +4,7 @@ import { IndexedDBStorageAdapter } from "@automerge/automerge-repo-storage-index
 import type { AutomergeUrl, DocHandle } from "@automerge/automerge-repo";
 import type { MedAppDoc } from "./schema.js";
 import { CURRENT_SCHEMA_VERSION } from "./schema.js";
-import { getAuthenticatedWsUrl } from "./auth.js";
+import { getAuthenticatedWsUrl, getStoredToken } from "./auth.js";
 import { migrateDocument } from "./migrations.js";
 import { startBlobSyncListener } from "./blob-sync.js";
 
@@ -34,9 +34,18 @@ function createInitialDoc(): MedAppDoc {
 export function getRepo(): Repo {
   if (!repoInstance) {
     const wsUrl = getAuthenticatedWsUrl();
+    const isLocalSyncServer = wsUrl.includes("localhost") || wsUrl.includes("127.0.0.1");
+    const canUseNetwork =
+      !import.meta.env.VITEST &&
+      typeof WebSocket !== "undefined" &&
+      (Boolean(getStoredToken()) || isLocalSyncServer);
+    const network = canUseNetwork ? [new BrowserWebSocketClientAdapter(wsUrl)] : [];
+    const storage =
+      typeof indexedDB !== "undefined" ? new IndexedDBStorageAdapter(IDB_NAME) : undefined;
+
     repoInstance = new Repo({
-      network: [new BrowserWebSocketClientAdapter(wsUrl)],
-      storage: new IndexedDBStorageAdapter(IDB_NAME),
+      network,
+      storage,
     });
   }
   return repoInstance;
@@ -49,10 +58,15 @@ export async function getDocHandle(): Promise<DocHandle<MedAppDoc>> {
   const savedUrl = localStorage.getItem(DOC_URL_KEY) || DEFAULT_DOC_URL;
 
   if (savedUrl) {
-    docHandleInstance = await repo.find<MedAppDoc>(savedUrl as AutomergeUrl);
-    localStorage.setItem(DOC_URL_KEY, savedUrl);
-    // Run schema migrations if needed
-    migrateDocument(docHandleInstance);
+    try {
+      docHandleInstance = await repo.find<MedAppDoc>(savedUrl as AutomergeUrl);
+      localStorage.setItem(DOC_URL_KEY, savedUrl);
+      // Run schema migrations if needed
+      migrateDocument(docHandleInstance);
+    } catch {
+      docHandleInstance = repo.create<MedAppDoc>(createInitialDoc());
+      localStorage.setItem(DOC_URL_KEY, docHandleInstance.url);
+    }
   } else {
     docHandleInstance = repo.create<MedAppDoc>(createInitialDoc());
     localStorage.setItem(DOC_URL_KEY, docHandleInstance.url);

@@ -25,7 +25,7 @@ export function useEvents(filters?: MedicalEventFilters) {
     } finally {
       setLoading(false);
     }
-  }, [filters?.patientId, filters?.type, filters?.from, filters?.to, filters?.isapreReimbursementStatus, filters?.insuranceReimbursementStatus, filters?.professionalId, filters?.locationId]);
+  }, [filters?.patientId, filters?.type, filters?.from, filters?.to, filters?.includeArchived, filters?.isapreReimbursementStatus, filters?.insuranceReimbursementStatus, filters?.professionalId, filters?.locationId]);
 
   useEffect(() => {
     load();

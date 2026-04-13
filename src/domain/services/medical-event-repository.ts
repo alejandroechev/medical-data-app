@@ -5,6 +5,7 @@ export interface MedicalEventFilters {
   type?: string;
   from?: string;
   to?: string;
+  includeArchived?: boolean;
   isapreReimbursementStatus?: ReimbursementStatus;
   insuranceReimbursementStatus?: ReimbursementStatus;
   professionalId?: string;

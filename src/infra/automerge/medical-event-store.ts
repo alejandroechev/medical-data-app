@@ -46,6 +46,10 @@ export async function listEvents(filters?: MedicalEventFilters): Promise<Medical
   const doc = await waitForDoc();
   let results = Object.values(doc.medicalEvents || {});
 
+  if (filters?.includeArchived !== true) {
+    results = results.filter((e) => e.isArchived !== true);
+  }
+
   if (filters?.patientId) {
     results = results.filter((e) => e.patientId === filters.patientId);
   }
