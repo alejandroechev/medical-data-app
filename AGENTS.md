@@ -76,6 +76,7 @@ Before running `git commit`, mentally verify:
 - [ ] Visual screenshots taken and reviewed (if UI feature)?
 - [ ] **Docs sync**: After completing a feature/fix, review `git diff --stat` against README.md, docs/system-diagram.md, and docs/adrs/. Update any stale docs. Create a new ADR if a major design decision was made. Commit doc changes separately with `docs:` prefix.
 - [ ] **Version bumped** in both `package.json` and `src-tauri/tauri.conf.json`? Every feature or fix must bump the version so CI publishes a new GitHub Release with the APK. Use semver: patch for fixes, minor for features, major for breaking changes.
+- [ ] **Pipeline validation**: After pushing, monitor CI/CD and Android APK build pipelines until both pass. No feature is done until pipelines are green. Use the `monitor-pipelines` skill or check GitHub Actions manually.
 
 ### Deployment
 - **CI/CD** is handled by GitHub Actions. See [README.md](README.md) for production URLs and deployment modes.

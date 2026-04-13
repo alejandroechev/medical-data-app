@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, archiveEvent, unarchiveEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug, createEvent } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
-import { EventActions } from '../components/EventActions';
+import { EventActions, ArchiveAction } from '../components/EventActions';
 import { EditableDescription } from '../components/EditableDescription';
 import { EditableDate } from '../components/EditableDate';
 import { AudioRecorder } from '../components/AudioRecorder';
@@ -398,21 +398,10 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
         )}
       </div>
 
-      {/* Duplicate event */}
-      <button
-        onClick={handleDuplicate}
-        className="w-full bg-white rounded-lg shadow-sm border border-gray-100 p-3 text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors"
-      >
-        📋 Copiar evento
-      </button>
-
-      {/* Reembolsos & Archive */}
+      {/* Reembolsos */}
       <EventActions
-        isArchived={evento.isArchived === true}
         isapreReimbursementStatus={evento.isapreReimbursementStatus}
         insuranceReimbursementStatus={evento.insuranceReimbursementStatus}
-        onArchive={handleArchive}
-        onUnarchive={handleUnarchive}
         onChangeIsapreStatus={handleToggleIsapre}
         onChangeInsuranceStatus={handleToggleInsurance}
       />
@@ -480,6 +469,22 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
             onCheckpointSaved={handleCheckpointSaved}
           />
         </div>
+      </div>
+
+      {/* Actions: Copy & Archive */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
+        <h3 className="text-sm font-medium text-gray-700">Acciones</h3>
+        <button
+          onClick={handleDuplicate}
+          className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 transition-colors"
+        >
+          📋 Copiar evento
+        </button>
+        <ArchiveAction
+          isArchived={evento.isArchived === true}
+          onArchive={handleArchive}
+          onUnarchive={handleUnarchive}
+        />
       </div>
     </div>
   );

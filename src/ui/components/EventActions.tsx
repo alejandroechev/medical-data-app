@@ -76,14 +76,39 @@ function ReimbursementStatusControl({
 }
 
 export function EventActions({
-  isArchived,
   isapreReimbursementStatus,
   insuranceReimbursementStatus,
-  onArchive,
-  onUnarchive,
   onChangeIsapreStatus,
   onChangeInsuranceStatus,
-}: EventActionsProps) {
+}: Omit<EventActionsProps, 'isArchived' | 'onArchive' | 'onUnarchive'>) {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-4">
+      <h3 className="text-sm font-medium text-gray-700">Reembolsos</h3>
+
+      <ReimbursementStatusControl
+        label="ISAPRE"
+        status={isapreReimbursementStatus}
+        onChange={onChangeIsapreStatus}
+        portalUrl={REEMBOLSO_LINKS.isapre}
+      />
+
+      <hr className="border-gray-100" />
+
+      <ReimbursementStatusControl
+        label="Seguro Complementario"
+        status={insuranceReimbursementStatus}
+        onChange={onChangeInsuranceStatus}
+        portalUrl={REEMBOLSO_LINKS.insurance}
+      />
+    </div>
+  );
+}
+
+export function ArchiveAction({
+  isArchived,
+  onArchive,
+  onUnarchive,
+}: Pick<EventActionsProps, 'isArchived' | 'onArchive' | 'onUnarchive'>) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmittingArchive, setIsSubmittingArchive] = useState(false);
 
@@ -106,60 +131,40 @@ export function EventActions({
     }
   };
 
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-4">
-      <h3 className="text-sm font-medium text-gray-700">Reembolsos</h3>
-
-      <ReimbursementStatusControl
-        label="ISAPRE"
-        status={isapreReimbursementStatus}
-        onChange={onChangeIsapreStatus}
-        portalUrl={REEMBOLSO_LINKS.isapre}
-      />
-
-      <hr className="border-gray-100" />
-
-      <ReimbursementStatusControl
-        label="Seguro Complementario"
-        status={insuranceReimbursementStatus}
-        onChange={onChangeInsuranceStatus}
-        portalUrl={REEMBOLSO_LINKS.insurance}
-      />
-
-      <hr className="border-gray-100" />
-
-      {showConfirm ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
-          <p className="text-sm text-amber-800">¿Estás seguro de archivar este evento?</p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleConfirmArchive}
-              disabled={isSubmittingArchive}
-              className="flex-1 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 disabled:opacity-50 transition-colors"
-            >
-              {isSubmittingArchive ? 'Archivando...' : 'Sí, archivar'}
-            </button>
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="flex-1 border border-gray-300 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-            >
-              Cancelar
-            </button>
-          </div>
+  if (showConfirm) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+        <p className="text-sm text-amber-800">¿Estás seguro de archivar este evento?</p>
+        <div className="flex gap-2">
+          <button
+            onClick={handleConfirmArchive}
+            disabled={isSubmittingArchive}
+            className="flex-1 bg-amber-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-700 disabled:opacity-50 transition-colors"
+          >
+            {isSubmittingArchive ? 'Archivando...' : 'Sí, archivar'}
+          </button>
+          <button
+            onClick={() => setShowConfirm(false)}
+            className="flex-1 border border-gray-300 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            Cancelar
+          </button>
         </div>
-      ) : (
-        <button
-          onClick={isArchived ? handleUnarchive : () => setShowConfirm(true)}
-          disabled={isSubmittingArchive}
-          className={`w-full py-2 rounded-lg text-sm transition-colors disabled:opacity-50 ${
-            isArchived
-              ? 'border border-blue-200 text-blue-600 hover:bg-blue-50'
-              : 'border border-amber-200 text-amber-700 hover:bg-amber-50'
-          }`}
-        >
-          {isArchived ? '📦 Desarchivar evento' : '📦 Archivar evento'}
-        </button>
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={isArchived ? handleUnarchive : () => setShowConfirm(true)}
+      disabled={isSubmittingArchive}
+      className={`w-full py-2 rounded-lg text-sm transition-colors disabled:opacity-50 ${
+        isArchived
+          ? 'border border-blue-200 text-blue-600 hover:bg-blue-50'
+          : 'border border-amber-200 text-amber-700 hover:bg-amber-50'
+      }`}
+    >
+      {isArchived ? '📦 Desarchivar evento' : '📦 Archivar evento'}
+    </button>
   );
 }
