@@ -6,6 +6,14 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.locator('header')).toContainText('Registro Médico Familiar');
   });
 
+  test('should show the app info panel with version details', async ({ page }) => {
+    await page.goto('/');
+    await page.getByLabel('Información de la app').click();
+    await expect(page.getByText(/Versión:/)).toBeVisible();
+    await expect(page.getByText(/Backend:/)).toBeVisible();
+    await expect(page.getByText(/Sync:/)).toBeVisible();
+  });
+
   test('should show the bottom navigation bar', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByLabel('Inicio')).toBeVisible();
@@ -174,9 +182,9 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.locator('header')).toContainText('Detalle del Evento');
 
     // Link a photo via URL paste
-    await page.getByRole('button', { name: /vincular foto/i }).click();
+    await page.getByRole('button', { name: /agregar documento/i }).click();
     await page.getByText('Pegar URL').click();
-    await page.getByLabel(/url de la foto/i).fill('https://example.com/photo/test123');
+    await page.getByLabel(/url del documento/i).fill('https://example.com/photo/test123');
     await page.getByLabel('Descripción (opcional)').fill('Resultado de examen');
     await page.getByRole('button', { name: /guardar/i }).click();
 

@@ -27,4 +27,13 @@ describe('Header', () => {
     await user.click(screen.getByLabelText('Volver'));
     expect(handleBack).toHaveBeenCalledOnce();
   });
+
+  it('should show and trigger the info button when provided', async () => {
+    const user = userEvent.setup();
+    const handleInfo = vi.fn();
+    render(<Header titulo="Test" onInfoToggle={handleInfo} />);
+
+    await user.click(screen.getByLabelText('Información de la app'));
+    expect(handleInfo).toHaveBeenCalledOnce();
+  });
 });

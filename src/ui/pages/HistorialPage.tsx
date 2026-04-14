@@ -5,10 +5,10 @@ import { ExpenseSummary } from '../components/ExpenseSummary';
 import { EVENT_TYPES, REIMBURSEMENT_STATUSES } from '../../domain/models/medical-event';
 import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { listProfessionals, listLocations, listPrescriptionDrugsByEvent, listAllPrescriptionDrugs } from '../../infra/store-provider';
+import { listProfessionals, listLocations, listPrescriptionDrugsByEvent, listAllPrescriptionDrugs, listAllPatientDrugs, listPatientDrugsByEvent } from '../../infra/store-provider';
 import type { MedicalEventFilters } from '../../domain/services/medical-event-repository';
 import type { Professional, Location } from '../../domain/models/professional-location';
-import type { PrescriptionDrug } from '../../domain/models/prescription-drug';
+import type { PatientDrug } from '../../domain/models/prescription-drug';
 
 const STATUS_LABELS: Record<ReimbursementStatus, string> = {
   none: 'Sin solicitar',
@@ -37,17 +37,35 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
   const [locations, setLocations] = useState<Location[]>([]);
   const [drugName, setDrugName] = useState('');
   const [knownDrugNames, setKnownDrugNames] = useState<string[]>([]);
-  const [drugMap, setDrugMap] = useState<Map<string, PrescriptionDrug[]>>(new Map());
+  const [drugMap, setDrugMap] = useState<Map<string, string[]>>(new Map());
   const [drugFilterLoading, setDrugFilterLoading] = useState(false);
   const [referenceDate] = useState(() => new Date());
 
   useEffect(() => {
+    const loadDrugNames = async () => {
+      const [prescriptionDrugs, patientDrugs] = await Promise.all([
+        listAllPrescriptionDrugs(),
+        listAllPatientDrugs(),
+      ]);
+
+      const names = [...new Set([
+        ...prescriptionDrugs.map((d) => d.name.trim()),
+        ...patientDrugs.map((d: PatientDrug) => d.name.trim()),
+      ].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+
+      setKnownDrugNames(names);
+    };
+
     listProfessionals().then(setProfessionals);
     listLocations().then(setLocations);
-    listAllPrescriptionDrugs().then((drugs) => {
-      const names = [...new Set(drugs.map((d) => d.name))].sort();
-      setKnownDrugNames(names);
-    });
+    void loadDrugNames();
+
+    const onDrugsChanged = () => {
+      void loadDrugNames();
+    };
+
+    window.addEventListener('medapp:drugs-changed', onDrugsChanged);
+    return () => window.removeEventListener('medapp:drugs-changed', onDrugsChanged);
   }, []);
 
   const filters: MedicalEventFilters = useMemo(
@@ -67,35 +85,50 @@ export function HistorialPage({ onEventClick, initialPatientId }: HistorialPageP
 
   const { events, loading, error } = useEvents(filters);
 
-  // Load drugs for Receta events when drug filter is active
   useEffect(() => {
-    if (!drugName) {
-      setDrugMap(new Map());
-      return;
-    }
-    const recetaEvents = events.filter((e) => e.type === 'Receta');
-    if (recetaEvents.length === 0) {
-      setDrugMap(new Map());
-      return;
-    }
-    setDrugFilterLoading(true);
-    Promise.all(
-      recetaEvents.map(async (e) => {
-        const drugs = await listPrescriptionDrugsByEvent(e.id);
-        return [e.id, drugs] as [string, PrescriptionDrug[]];
-      })
-    ).then((entries) => {
-      setDrugMap(new Map(entries));
-      setDrugFilterLoading(false);
-    });
+    const loadDrugMatches = async () => {
+      if (!drugName) {
+        setDrugMap(new Map());
+        return;
+      }
+
+      if (events.length === 0) {
+        setDrugMap(new Map());
+        return;
+      }
+
+      setDrugFilterLoading(true);
+      try {
+        const entries = await Promise.all(
+          events.map(async (e) => {
+            const [prescriptionDrugs, patientDrugs] = await Promise.all([
+              listPrescriptionDrugsByEvent(e.id),
+              listPatientDrugsByEvent(e.id),
+            ]);
+
+            const names = [...new Set([
+              ...prescriptionDrugs.map((d) => d.name.trim()),
+              ...patientDrugs.map((d) => d.name.trim()),
+            ].filter(Boolean))];
+
+            return [e.id, names] as [string, string[]];
+          })
+        );
+
+        setDrugMap(new Map(entries));
+      } finally {
+        setDrugFilterLoading(false);
+      }
+    };
+
+    void loadDrugMatches();
   }, [drugName, events]);
 
   const filteredEvents = useMemo(() => {
     if (!drugName) return events;
     return events.filter((e) => {
-      if (e.type !== 'Receta') return false;
       const drugs = drugMap.get(e.id) ?? [];
-      return drugs.some((d) => d.name === drugName);
+      return drugs.includes(drugName);
     });
   }, [events, drugName, drugMap]);
 

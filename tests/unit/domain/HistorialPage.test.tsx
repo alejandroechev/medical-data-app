@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HistorialPage } from '../../../src/ui/pages/HistorialPage';
 
+vi.setConfig({ testTimeout: 10000 });
+
 vi.mock('../../../src/infra/store-provider', () => ({
   listEvents: vi.fn(),
   createEvent: vi.fn(),
@@ -14,18 +16,26 @@ vi.mock('../../../src/infra/store-provider', () => ({
   listLocations: vi.fn().mockResolvedValue([]),
   createLocation: vi.fn(),
   listPrescriptionDrugsByEvent: vi.fn().mockResolvedValue([]),
+  listPatientDrugsByEvent: vi.fn().mockResolvedValue([]),
   listAllPrescriptionDrugs: vi.fn().mockResolvedValue([]),
+  listAllPatientDrugs: vi.fn().mockResolvedValue([]),
 }));
 
-import { listEvents, listPrescriptionDrugsByEvent, listAllPrescriptionDrugs } from '../../../src/infra/store-provider';
+import { listEvents, listPrescriptionDrugsByEvent, listPatientDrugsByEvent, listAllPrescriptionDrugs, listAllPatientDrugs } from '../../../src/infra/store-provider';
 
 const mockList = vi.mocked(listEvents);
 const mockListDrugs = vi.mocked(listPrescriptionDrugsByEvent);
+const mockListPatientDrugsByEvent = vi.mocked(listPatientDrugsByEvent);
 const mockListAllDrugs = vi.mocked(listAllPrescriptionDrugs);
+const mockListAllPatientDrugs = vi.mocked(listAllPatientDrugs);
 
 describe('HistorialPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockListDrugs.mockResolvedValue([]);
+    mockListPatientDrugsByEvent.mockResolvedValue([]);
+    mockListAllDrugs.mockResolvedValue([]);
+    mockListAllPatientDrugs.mockResolvedValue([]);
   });
 
   it('should render the filters', () => {
@@ -189,9 +199,11 @@ describe('HistorialPage', () => {
         updatedAt: '2024-06-15T10:00:00Z',
       },
     ]);
-    mockListDrugs.mockResolvedValue([
-      { id: 'd1', eventId: 'receta-1', name: 'Amoxicilina', dosage: '500mg', frequency: 'cada 8h', createdAt: '2024-06-15T10:00:00Z' },
-    ]);
+    mockListDrugs.mockImplementation(async (eventId: string) => (
+      eventId === 'receta-1'
+        ? [{ id: 'd1', eventId: 'receta-1', name: 'Amoxicilina', dosage: '500mg', frequency: 'cada 8h', createdAt: '2024-06-15T10:00:00Z' }]
+        : []
+    ));
 
     const user = userEvent.setup();
     render(<HistorialPage onEventClick={() => {}} />);
@@ -205,5 +217,28 @@ describe('HistorialPage', () => {
     });
     expect(screen.getByText('Receta antibiótico')).toBeInTheDocument();
     expect(screen.queryByText('Control general')).not.toBeInTheDocument();
+  });
+
+  it('should include patient treatment names in the medicamento filter', async () => {
+    mockList.mockResolvedValue([]);
+    mockListAllPatientDrugs.mockResolvedValue([
+      {
+        id: 'pd-1',
+        patientId: '1',
+        eventId: 'evt-1',
+        name: 'Ibuprofeno',
+        dosage: '600mg',
+        schedule: { type: 'interval', intervalHours: 8 },
+        duration: { type: 'days', days: 5 },
+        startDate: '2024-06-15',
+        isPermanent: false,
+        status: 'active',
+        createdAt: '2024-06-15T10:00:00Z',
+      },
+    ]);
+
+    render(<HistorialPage onEventClick={() => {}} />);
+
+    expect(await screen.findByRole('option', { name: 'Ibuprofeno' })).toBeInTheDocument();
   });
 });

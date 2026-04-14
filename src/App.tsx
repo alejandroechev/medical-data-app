@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigation } from './ui/hooks/useNavigation';
 import { usePickupAlerts } from './ui/hooks/usePickupAlerts';
 import { Header } from './ui/components/Header';
+import { AppInfo } from './ui/components/AppInfo';
 import { BottomNav } from './ui/components/BottomNav';
 import { PinGate } from './ui/components/PinGate';
 import { SyncAuthGate } from './ui/components/SyncAuthGate';
@@ -26,6 +27,7 @@ function App() {
   const { currentPage, params, navigateTo, goBack } = useNavigation();
   const { visibleAlerts, patientNames, dismissAlert } = usePickupAlerts();
   const [ready, setReady] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const showBack = currentPage !== 'inicio';
   const title = PAGE_TITLES[currentPage] ?? 'Registro Médico';
 
@@ -49,7 +51,13 @@ function App() {
     <SyncAuthGate>
     <PinGate>
       <div className="min-h-screen bg-gray-50">
-        <Header titulo={title} onBack={showBack ? goBack : undefined} />
+        <Header
+          titulo={title}
+          onBack={showBack ? goBack : undefined}
+          onInfoToggle={() => setShowInfo((current) => !current)}
+        />
+
+        {showInfo && <AppInfo />}
 
         <UpdateBanner />
 

@@ -22,7 +22,7 @@ const program = new Command();
 program
   .name('medical-app')
   .description('Registro Médico Familiar — CLI')
-  .version('0.1.0');
+  .version(process.env.npm_package_version || '0.4.1');
 
 // --- Miembros ---
 const miembros = program.command('miembros').description('Gestión de miembros de familia');

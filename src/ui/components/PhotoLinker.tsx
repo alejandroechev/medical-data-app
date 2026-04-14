@@ -83,7 +83,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
         onClick={() => setMode('choose')}
         className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors"
       >
-        📷 Vincular foto
+        📎 Agregar documento
       </button>
     );
   }
@@ -100,7 +100,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
             <span className="text-sm text-gray-600">{uploadProgress}</span>
           </div>
         )}
-        <p className="text-xs text-gray-500 text-center">¿Cómo quieres agregar la foto?</p>
+        <p className="text-xs text-gray-500 text-center">¿Cómo quieres agregar el documento?</p>
         <label
           className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors cursor-pointer"
         >
@@ -150,7 +150,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
 
       <div>
         <label htmlFor="photo-url" className="block text-xs text-gray-500 mb-1">
-          URL de la foto
+          URL del documento
         </label>
         <input
           id="photo-url"

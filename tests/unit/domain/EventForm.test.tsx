@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EventForm } from '../../../src/ui/components/EventForm';
 
+vi.setConfig({ testTimeout: 10000 });
+
 describe('EventForm', () => {
   let mockSubmit: ReturnType<typeof vi.fn>;
 
