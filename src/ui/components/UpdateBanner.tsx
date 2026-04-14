@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { checkForUpdate, dismissUpdate, type UpdateInfo } from "../../infra/update-checker.js";
+import {
+  checkForUpdate,
+  dismissUpdate,
+  openUpdateLink,
+  type UpdateInfo,
+} from "../../infra/update-checker.js";
 import { commonIcons } from "./icons";
 
 export function UpdateBanner() {
@@ -20,14 +25,15 @@ export function UpdateBanner() {
         </span>
       </div>
       <div className="flex gap-2 ml-2">
-        <a
-          href={update.downloadUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => {
+            void openUpdateLink(update);
+          }}
           className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
         >
           Descargar
-        </a>
+        </button>
         <button
           onClick={() => {
             dismissUpdate(update.version);

@@ -16,6 +16,10 @@ export interface UpdateInfo {
   publishedAt: string;
 }
 
+function isTauri(): boolean {
+  return typeof window !== "undefined" && "__TAURI__" in window;
+}
+
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   // Skip if checked recently
   const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
@@ -60,6 +64,27 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
 
 export function dismissUpdate(version: string): void {
   localStorage.setItem(DISMISSED_VERSION_KEY, version);
+}
+
+export async function openUpdateLink(update: UpdateInfo): Promise<void> {
+  const targetUrl = update.releaseUrl || update.downloadUrl;
+
+  if (typeof window === "undefined") return;
+
+  if (isTauri()) {
+    try {
+      const { openUrl } = await import("@tauri-apps/plugin-opener");
+      await openUrl(targetUrl);
+      return;
+    } catch (error) {
+      console.warn("Failed to open update link with Tauri opener", error);
+    }
+  }
+
+  const popup = window.open(targetUrl, "_blank", "noopener,noreferrer");
+  if (!popup) {
+    window.location.assign(targetUrl);
+  }
 }
 
 function isNewer(latest: string, current: string): boolean {

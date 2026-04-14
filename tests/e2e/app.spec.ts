@@ -14,6 +14,43 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByText(/Sync:/)).toBeVisible();
   });
 
+  test('should open the release page when an update is available', async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as typeof window & { __openedUrls: string[] }).__openedUrls = [];
+      window.open = ((url?: string | URL) => {
+        (window as typeof window & { __openedUrls: string[] }).__openedUrls.push(String(url));
+        return window;
+      }) as typeof window.open;
+    });
+
+    await page.route('https://api.github.com/repos/alejandroechev/medical-data-app/releases/latest', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          tag_name: 'v999.0.0',
+          html_url: 'https://github.com/alejandroechev/medical-data-app/releases/tag/v999.0.0',
+          published_at: '2026-04-14T00:00:00Z',
+          assets: [
+            {
+              name: 'medtracker-v999.0.0.apk',
+              browser_download_url: 'https://example.com/medtracker-v999.0.0.apk',
+            },
+          ],
+        }),
+      });
+    });
+
+    await page.goto('/');
+    await expect(page.getByText(/Nueva versión/i)).toBeVisible();
+
+    await page.getByRole('button', { name: 'Descargar' }).click();
+
+    await expect.poll(async () => page.evaluate(() => (window as typeof window & { __openedUrls: string[] }).__openedUrls)).toContain(
+      'https://github.com/alejandroechev/medical-data-app/releases/tag/v999.0.0'
+    );
+  });
+
   test('should show the bottom navigation bar', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByLabel('Inicio')).toBeVisible();
