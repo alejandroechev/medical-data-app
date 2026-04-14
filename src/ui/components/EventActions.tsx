@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ReimbursementStatus } from '../../domain/models/medical-event';
 import { REEMBOLSO_LINKS } from '../../domain/models/medical-event';
+import { commonIcons } from './icons';
 
 interface EventActionsProps {
   isArchived: boolean;
@@ -69,7 +70,8 @@ function ReimbursementStatusControl({
         className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
         aria-label={`Portal ${label}`}
       >
-        🔗 Ir al portal
+        <commonIcons.externalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        Ir al portal
       </a>
     </div>
   );
@@ -164,7 +166,10 @@ export function ArchiveAction({
           : 'border border-amber-200 text-amber-700 hover:bg-amber-50'
       }`}
     >
-      {isArchived ? '📦 Desarchivar evento' : '📦 Archivar evento'}
+      <span className="inline-flex items-center gap-1.5 justify-center">
+        <commonIcons.archive className="h-4 w-4" aria-hidden="true" />
+        {isArchived ? 'Desarchivar evento' : 'Archivar evento'}
+      </span>
     </button>
   );
 }

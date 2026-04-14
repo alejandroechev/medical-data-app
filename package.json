@@ -1,7 +1,7 @@
 {
   "name": "medical-data-app",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
     "@automerge/automerge-repo-network-websocket": "^2.5.4",
     "@automerge/automerge-repo-react-hooks": "^2.5.4",
     "@automerge/automerge-repo-storage-indexeddb": "^2.5.4",
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.98.0",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-notification": "^2.3.3",

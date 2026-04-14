@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { commonIcons } from './icons';
 
 const STORAGE_KEY = 'medical_app_auth';
 const APP_PIN = import.meta.env.VITE_APP_PIN ?? '';
@@ -34,7 +35,7 @@ export function PinGate({ children }: PinGateProps) {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-xs space-y-4 text-center">
-        <span className="text-4xl">🔒</span>
+        <commonIcons.lock className="h-10 w-10 text-blue-600 mx-auto" aria-hidden="true" />
         <h1 className="text-lg font-semibold text-gray-800">Registro Médico Familiar</h1>
         <p className="text-sm text-gray-500">Ingresa el PIN para continuar</p>
 

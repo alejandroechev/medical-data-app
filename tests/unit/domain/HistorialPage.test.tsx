@@ -239,6 +239,10 @@ describe('HistorialPage', () => {
 
     render(<HistorialPage onEventClick={() => {}} />);
 
-    expect(await screen.findByRole('option', { name: 'Ibuprofeno' })).toBeInTheDocument();
+    await vi.waitFor(() => {
+      const select = screen.getByLabelText('Medicamento');
+      const options = Array.from(select.querySelectorAll('option')).map((option) => option.textContent);
+      expect(options).toContain('Ibuprofeno');
+    });
   });
 });

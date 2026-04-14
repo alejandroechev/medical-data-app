@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { commonIcons } from './icons';
 
 interface EditableDescriptionProps {
   value: string;
@@ -39,7 +40,10 @@ export function EditableDescription({ value, onSave }: EditableDescriptionProps)
           className="text-xs text-blue-500 hover:text-blue-700 mt-1"
           aria-label="Editar descripción"
         >
-          ✏️ Editar
+          <span className="inline-flex items-center gap-1">
+            <commonIcons.edit className="h-4 w-4" aria-hidden="true" />
+            Editar
+          </span>
         </button>
       </div>
     );

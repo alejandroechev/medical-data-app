@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { commonIcons } from './icons';
+
 interface ImageModalProps {
   src: string;
   alt: string;
@@ -17,7 +19,7 @@ export function ImageModal({ src, alt, onClose }: ImageModalProps) {
         className="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
         aria-label="Cerrar"
       >
-        ✕
+        <commonIcons.close className="h-6 w-6" aria-hidden="true" />
       </button>
       <img
         src={src}

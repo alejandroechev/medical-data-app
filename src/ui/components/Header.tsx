@@ -1,3 +1,5 @@
+import { commonIcons } from './icons';
+
 interface HeaderProps {
   titulo: string;
   onBack?: () => void;
@@ -14,7 +16,7 @@ export function Header({ titulo, onBack, onInfoToggle }: HeaderProps) {
             className="mr-3 p-1 hover:bg-blue-700 rounded"
             aria-label="Volver"
           >
-            ← 
+            <commonIcons.back className="h-5 w-5" aria-hidden="true" />
           </button>
         )}
         <h1 className="text-lg font-semibold truncate flex-1">{titulo}</h1>
@@ -25,7 +27,7 @@ export function Header({ titulo, onBack, onInfoToggle }: HeaderProps) {
             aria-label="Información de la app"
             title="Información de la app"
           >
-            ⓘ
+            <commonIcons.info className="h-5 w-5" aria-hidden="true" />
           </button>
         )}
       </div>

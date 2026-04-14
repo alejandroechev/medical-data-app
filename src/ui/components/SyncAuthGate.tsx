@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { checkAuthStatus, registerDevice } from "../../infra/automerge/auth.js";
 import { getStorageBackend } from "../../infra/store-provider.js";
+import { commonIcons } from "./icons";
 
 interface SyncAuthGateProps {
   children: React.ReactNode;
@@ -33,7 +34,7 @@ export function SyncAuthGate({ children }: SyncAuthGateProps) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center text-gray-500">
-          <div className="text-2xl mb-2">🔄</div>
+          <commonIcons.retry className="h-8 w-8 mx-auto mb-2 animate-spin" aria-hidden="true" />
           <p>Conectando con el servidor de sincronización...</p>
         </div>
       </div>
@@ -65,7 +66,7 @@ export function SyncAuthGate({ children }: SyncAuthGateProps) {
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
         <div className="text-center mb-6">
-          <div className="text-3xl mb-2">🔐</div>
+          <commonIcons.lock className="h-9 w-9 mx-auto mb-2 text-blue-600" aria-hidden="true" />
           <h2 className="text-xl font-bold text-gray-800">Registrar Dispositivo</h2>
           <p className="text-sm text-gray-500 mt-1">
             Este dispositivo necesita registrarse para sincronizar datos.

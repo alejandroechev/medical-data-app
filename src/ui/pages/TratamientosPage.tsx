@@ -4,6 +4,7 @@ import { listPatientDrugsByPatient, createPatientDrug, updatePatientDrug, delete
 import { DrugCard } from '../components/DrugCard';
 import { DrugForm } from '../components/DrugForm';
 import type { PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
+import { commonIcons } from '../components/icons';
 
 type FilterStatus = 'active' | 'all' | 'stopped';
 
@@ -108,7 +109,7 @@ export function TratamientosPage() {
 
           {filteredDrugs.length === 0 && !showForm && (
             <div className="text-center py-8">
-              <span className="text-3xl">💊</span>
+              <commonIcons.treatments className="h-8 w-8 mx-auto text-gray-400" aria-hidden="true" />
               <p className="text-gray-400 text-sm mt-2">
                 {filterStatus === 'active'
                   ? `${patientName} no tiene tratamientos activos`
@@ -143,7 +144,10 @@ export function TratamientosPage() {
           onClick={() => setShowForm(true)}
           className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
-          + Nuevo tratamiento
+          <span className="inline-flex items-center gap-1.5">
+            <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
+            Nuevo tratamiento
+          </span>
         </button>
       )}
     </div>

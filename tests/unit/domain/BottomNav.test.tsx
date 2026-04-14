@@ -26,4 +26,11 @@ describe('BottomNav', () => {
     await user.click(screen.getByLabelText('Nuevo'));
     expect(handleNavigate).toHaveBeenCalledWith('nuevo-evento');
   });
+
+  it('should use svg icons instead of emoji glyphs', () => {
+    const { container } = render(<BottomNav currentPage="inicio" onNavigate={() => {}} />);
+    expect(container.querySelectorAll('svg').length).toBeGreaterThanOrEqual(4);
+    expect(screen.queryByText('🏠')).not.toBeInTheDocument();
+    expect(screen.queryByText('➕')).not.toBeInTheDocument();
+  });
 });

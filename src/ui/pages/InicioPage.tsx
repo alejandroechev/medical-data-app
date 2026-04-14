@@ -1,6 +1,7 @@
 import { useEvents } from '../hooks/useEventos';
 import { EventCard } from '../components/EventCard';
 import { FamilySummary } from '../components/FamilySummary';
+import { commonIcons } from '../components/icons';
 
 interface InicioPageProps {
   onEventClick: (id: string) => void;
@@ -33,7 +34,7 @@ export function InicioPage({ onEventClick, onViewPatientHistory }: InicioPagePro
       <div className="p-4 space-y-4">
         <FamilySummary onViewHistory={onViewPatientHistory} />
         <div className="flex flex-col items-center justify-center h-32 text-center">
-          <span className="text-4xl mb-3">📋</span>
+          <commonIcons.clipboard className="h-10 w-10 mb-3 text-gray-400" aria-hidden="true" />
           <p className="text-gray-500 text-lg">Sin eventos médicos</p>
           <p className="text-gray-400 text-sm mt-1">
             Toca el botón "+" para registrar tu primer evento

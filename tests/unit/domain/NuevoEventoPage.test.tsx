@@ -49,6 +49,6 @@ describe('NuevoEventoPage', () => {
     await user.type(screen.getByLabelText('Descripción'), 'Test evento');
     await user.click(screen.getByRole('button', { name: 'Guardar Evento' }));
 
-    expect(await screen.findByText('✓ Evento creado exitosamente')).toBeInTheDocument();
+    expect(await screen.findByText('Evento creado exitosamente')).toBeInTheDocument();
   });
 });

@@ -11,9 +11,9 @@ import type { PickupAlert } from '../../domain/models/pickup-notification';
 const stateTracker = new LocalStorageNotificationStateTracker();
 
 const LEVEL_MESSAGES: Record<PickupAlert['level'], (drug: string, patient: string | undefined, days: number) => string> = {
-  reminder: (drug, patient, days) => `📋 En ${days} día${days !== 1 ? 's' : ''}: retiro de ${drug}${patient ? ` para ${patient}` : ''}`,
-  due: (drug, patient) => `⚠️ Hoy: retiro de ${drug}${patient ? ` para ${patient}` : ''}`,
-  overdue: (drug, patient) => `🔴 Atrasado: retiro de ${drug}${patient ? ` para ${patient}` : ''}`,
+  reminder: (drug, patient, days) => `En ${days} día${days !== 1 ? 's' : ''}: retiro de ${drug}${patient ? ` para ${patient}` : ''}`,
+  due: (drug, patient) => `Hoy: retiro de ${drug}${patient ? ` para ${patient}` : ''}`,
+  overdue: (drug, patient) => `Atrasado: retiro de ${drug}${patient ? ` para ${patient}` : ''}`,
 };
 
 export function usePickupAlerts(today: Date = new Date()) {

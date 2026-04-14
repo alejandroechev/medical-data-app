@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { PatientDrug, DrugStatus, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
 import { formatSchedule, formatDuration, getTreatmentProgress } from '../../domain/models/prescription-drug';
 import { DrugForm } from './DrugForm';
+import { commonIcons } from './icons';
 
 interface DrugCardProps {
   drug: PatientDrug;
@@ -91,8 +92,9 @@ export function DrugCard({ drug, patientName, onEdit, onStop, onDelete }: DrugCa
 
       {/* Permanent pickup info */}
       {drug.isPermanent && drug.nextPickupDate && (
-        <p className="text-xs text-indigo-600">
-          📅 Próximo retiro: {drug.nextPickupDate}
+        <p className="inline-flex items-center gap-1 text-xs text-indigo-600">
+          <commonIcons.calendar className="h-4 w-4" aria-hidden="true" />
+          Próximo retiro: {drug.nextPickupDate}
         </p>
       )}
 
@@ -103,7 +105,10 @@ export function DrugCard({ drug, patientName, onEdit, onStop, onDelete }: DrugCa
             onClick={() => setEditing(true)}
             className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            ✏️ Editar
+            <span className="inline-flex items-center gap-1">
+              <commonIcons.edit className="h-3.5 w-3.5" aria-hidden="true" />
+              Editar
+            </span>
           </button>
         )}
         {drug.status === 'active' && onStop && (
@@ -111,7 +116,10 @@ export function DrugCard({ drug, patientName, onEdit, onStop, onDelete }: DrugCa
             onClick={() => onStop(drug.id)}
             className="text-xs text-orange-600 hover:text-orange-800 border border-orange-200 px-2 py-1 rounded-lg hover:bg-orange-50 transition-colors"
           >
-            ⏸ Detener
+            <span className="inline-flex items-center gap-1">
+              <commonIcons.stopAction className="h-3.5 w-3.5" aria-hidden="true" />
+              Detener
+            </span>
           </button>
         )}
         {onDelete && (
@@ -119,7 +127,10 @@ export function DrugCard({ drug, patientName, onEdit, onStop, onDelete }: DrugCa
             onClick={() => onDelete(drug.id)}
             className="text-xs text-red-500 hover:text-red-700 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
           >
-            🗑 Eliminar
+            <span className="inline-flex items-center gap-1">
+              <commonIcons.trash className="h-3.5 w-3.5" aria-hidden="true" />
+              Eliminar
+            </span>
           </button>
         )}
       </div>

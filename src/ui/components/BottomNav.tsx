@@ -1,4 +1,5 @@
 import type { Page } from '../hooks/useNavigation';
+import { commonIcons, type AppIcon } from './icons';
 
 interface BottomNavProps {
   currentPage: Page;
@@ -6,11 +7,11 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
-  const tabs: { page: Page; label: string; icon: string }[] = [
-    { page: 'inicio', label: 'Inicio', icon: '🏠' },
-    { page: 'nuevo-evento', label: 'Nuevo', icon: '➕' },
-    { page: 'tratamientos', label: 'Tratamientos', icon: '💊' },
-    { page: 'historial', label: 'Historial', icon: '🔍' },
+  const tabs: { page: Page; label: string; icon: AppIcon }[] = [
+    { page: 'inicio', label: 'Inicio', icon: commonIcons.home },
+    { page: 'nuevo-evento', label: 'Nuevo', icon: commonIcons.plusCircle },
+    { page: 'tratamientos', label: 'Tratamientos', icon: commonIcons.treatments },
+    { page: 'historial', label: 'Historial', icon: commonIcons.search },
   ];
 
   return (
@@ -27,7 +28,7 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
             }`}
             aria-label={tab.label}
           >
-            <span className="text-xl">{tab.icon}</span>
+            <tab.icon className="h-5 w-5" aria-hidden="true" />
             <span className="text-xs mt-1">{tab.label}</span>
           </button>
         ))}

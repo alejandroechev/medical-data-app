@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import type { LinkPhotoInput } from '../../domain/models/event-photo';
 import { uploadPhoto } from '../../infra/store-provider';
+import { commonIcons } from './icons';
 
 type Mode = 'closed' | 'choose' | 'manual';
 
@@ -83,7 +84,10 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
         onClick={() => setMode('choose')}
         className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors"
       >
-        📎 Agregar documento
+        <span className="inline-flex items-center gap-1.5">
+          <commonIcons.upload className="h-4 w-4" aria-hidden="true" />
+          Agregar documento
+        </span>
       </button>
     );
   }
@@ -104,7 +108,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
         <label
           className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors cursor-pointer"
         >
-          <span className="text-xl">📎</span>
+          <commonIcons.upload className="h-5 w-5 text-gray-500" aria-hidden="true" />
           <div>
             <p className="text-sm font-medium text-gray-800">Foto o documento</p>
             <p className="text-xs text-gray-500">Cámara, galería o archivo PDF</p>
@@ -124,7 +128,7 @@ export function PhotoLinker({ eventId, onPhotoLinked }: PhotoLinkerProps) {
           disabled={loading}
           className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition-colors text-left"
         >
-          <span className="text-xl">🔗</span>
+          <commonIcons.link className="h-5 w-5 text-gray-500" aria-hidden="true" />
           <div>
             <p className="text-sm font-medium text-gray-800">Pegar URL</p>
             <p className="text-xs text-gray-500">Ingresa un enlace manualmente</p>

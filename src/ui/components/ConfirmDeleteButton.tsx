@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { commonIcons } from './icons';
 
 interface ConfirmDeleteButtonProps {
   onConfirm: () => Promise<void>;
@@ -45,7 +46,7 @@ export function ConfirmDeleteButton({ onConfirm, label, confirmMessage = '¿Elim
       className="text-xs text-red-400 hover:text-red-600 px-2 py-1"
       aria-label={label}
     >
-      ✕
+      <commonIcons.close className="h-4 w-4" aria-hidden="true" />
     </button>
   );
 }

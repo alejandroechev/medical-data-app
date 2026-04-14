@@ -1,6 +1,7 @@
 import type { MedicalEvent } from '../../domain/models/medical-event';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
 import { getMemberColor } from '../../domain/models/family-member';
+import { commonIcons } from './icons';
 
 interface ExpenseSummaryProps {
   events: MedicalEvent[];
@@ -32,7 +33,10 @@ export function ExpenseSummary({ events }: ExpenseSummaryProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
-      <h3 className="text-sm font-medium text-gray-700">💰 Resumen de gastos</h3>
+      <h3 className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700">
+        <commonIcons.money className="h-4 w-4" aria-hidden="true" />
+        Resumen de gastos
+      </h3>
 
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-gray-50 rounded-lg p-2 text-center">
@@ -44,11 +48,17 @@ export function ExpenseSummary({ events }: ExpenseSummaryProps) {
           <p className="text-sm font-semibold text-red-700">${outOfPocket.toLocaleString('es-CL')}</p>
         </div>
         <div className="bg-green-50 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-500">ISAPRE ✓</p>
+          <p className="inline-flex items-center justify-center gap-1 text-xs text-gray-500">
+            <commonIcons.check className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
+            ISAPRE
+          </p>
           <p className="text-sm font-semibold text-green-700">${approvedIsapre.toLocaleString('es-CL')}</p>
         </div>
         <div className="bg-green-50 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-500">Seguro ✓</p>
+          <p className="inline-flex items-center justify-center gap-1 text-xs text-gray-500">
+            <commonIcons.check className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
+            Seguro
+          </p>
           <p className="text-sm font-semibold text-green-700">${approvedInsurance.toLocaleString('es-CL')}</p>
         </div>
       </div>

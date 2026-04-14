@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CreatePatientDrugInput, DrugSchedule, DrugDuration, PatientDrug } from '../../domain/models/prescription-drug';
+import { commonIcons } from './icons';
 
 interface DrugFormProps {
   patientId: string;
@@ -180,8 +181,9 @@ export function DrugForm({ patientId, eventId, initialValues, onSubmit, onCancel
                     type="button"
                     onClick={() => removeFixedTime(i)}
                     className="text-red-400 hover:text-red-600 text-xs"
+                    aria-label={`Eliminar horario ${i + 1}`}
                   >
-                    ✕
+                    <commonIcons.close className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -189,9 +191,10 @@ export function DrugForm({ patientId, eventId, initialValues, onSubmit, onCancel
             <button
               type="button"
               onClick={addFixedTime}
-              className="text-xs text-blue-500 hover:text-blue-700"
+              className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
             >
-              + Agregar horario
+              <commonIcons.plus className="h-3.5 w-3.5" aria-hidden="true" />
+              Agregar horario
             </button>
           </div>
         )}

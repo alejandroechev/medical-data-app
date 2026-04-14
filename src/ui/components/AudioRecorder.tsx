@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { commonIcons } from './icons';
 
 const CHECKPOINT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -42,7 +43,7 @@ export function AudioRecorder({ onRecordingComplete, onCheckpointSaved }: AudioR
     setCheckpointStatus('Guardando checkpoint...');
     try {
       await onCheckpointSaved(blob, durationRef.current);
-      setCheckpointStatus('Checkpoint guardado ✓');
+      setCheckpointStatus('Checkpoint guardado');
       setTimeout(() => setCheckpointStatus(null), 3000);
     } catch {
       setCheckpointStatus('Error en checkpoint');
@@ -137,7 +138,10 @@ export function AudioRecorder({ onRecordingComplete, onCheckpointSaved }: AudioR
           onClick={stopRecording}
           className="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
         >
-          ⏹ Detener y guardar
+          <span className="inline-flex items-center gap-1.5">
+            <commonIcons.stop className="h-4 w-4" aria-hidden="true" />
+            Detener y guardar
+          </span>
         </button>
       </div>
     );
@@ -151,7 +155,10 @@ export function AudioRecorder({ onRecordingComplete, onCheckpointSaved }: AudioR
         onClick={startRecording}
         className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-red-400 hover:text-red-500 transition-colors"
       >
-        🎙 Grabar audio
+        <span className="inline-flex items-center gap-1.5">
+          <commonIcons.record className="h-4 w-4" aria-hidden="true" />
+          Grabar audio
+        </span>
       </button>
     </div>
   );

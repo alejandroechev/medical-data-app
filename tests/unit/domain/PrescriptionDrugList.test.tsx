@@ -13,7 +13,7 @@ describe('PrescriptionDrugList', () => {
   it('should show empty message when no drugs', () => {
     render(<PrescriptionDrugList drugs={[]} onAdd={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('Sin medicamentos registrados')).toBeInTheDocument();
-    expect(screen.getByText('💊 Medicamentos (0)')).toBeInTheDocument();
+    expect(screen.getByText('Medicamentos (0)')).toBeInTheDocument();
   });
 
   it('should render existing drugs', () => {
@@ -24,7 +24,7 @@ describe('PrescriptionDrugList', () => {
     render(<PrescriptionDrugList drugs={drugs} onAdd={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('Amoxicilina')).toBeInTheDocument();
     expect(screen.getByText('Ibuprofeno')).toBeInTheDocument();
-    expect(screen.getByText('💊 Medicamentos (2)')).toBeInTheDocument();
+    expect(screen.getByText('Medicamentos (2)')).toBeInTheDocument();
     expect(screen.getByText(/500mg — cada 8h — 7 días/)).toBeInTheDocument();
   });
 
@@ -32,7 +32,7 @@ describe('PrescriptionDrugList', () => {
     const user = userEvent.setup();
     render(<PrescriptionDrugList drugs={[]} onAdd={vi.fn()} onDelete={vi.fn()} />);
 
-    await user.click(screen.getByText('+ Agregar medicamento'));
+    await user.click(screen.getByRole('button', { name: /agregar medicamento/i }));
     expect(screen.getByLabelText('Nombre del medicamento')).toBeInTheDocument();
     expect(screen.getByLabelText('Dosis')).toBeInTheDocument();
     expect(screen.getByLabelText('Frecuencia')).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('PrescriptionDrugList', () => {
     const mockAdd = vi.fn().mockResolvedValue(undefined);
     render(<PrescriptionDrugList drugs={[]} onAdd={mockAdd} onDelete={vi.fn()} />);
 
-    await user.click(screen.getByText('+ Agregar medicamento'));
+    await user.click(screen.getByRole('button', { name: /agregar medicamento/i }));
     await user.type(screen.getByLabelText('Nombre del medicamento'), 'Paracetamol');
     await user.type(screen.getByLabelText('Dosis'), '500mg');
     await user.type(screen.getByLabelText('Frecuencia'), 'cada 6h');
@@ -63,7 +63,7 @@ describe('PrescriptionDrugList', () => {
     const user = userEvent.setup();
     render(<PrescriptionDrugList drugs={[]} onAdd={vi.fn()} onDelete={vi.fn()} />);
 
-    await user.click(screen.getByText('+ Agregar medicamento'));
+    await user.click(screen.getByRole('button', { name: /agregar medicamento/i }));
     await user.click(screen.getByRole('button', { name: 'Agregar' }));
 
     expect(screen.getByText(/obligatorios/)).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('PrescriptionDrugList', () => {
     const user = userEvent.setup();
     render(<PrescriptionDrugList drugs={[]} onAdd={vi.fn()} onDelete={vi.fn()} />);
 
-    await user.click(screen.getByText('+ Agregar medicamento'));
+    await user.click(screen.getByRole('button', { name: /agregar medicamento/i }));
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
 
     expect(screen.queryByLabelText('Nombre del medicamento')).not.toBeInTheDocument();

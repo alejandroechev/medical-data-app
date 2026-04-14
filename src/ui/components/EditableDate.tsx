@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { commonIcons } from './icons';
 
 interface EditableDateProps {
   value: string;
@@ -43,7 +44,7 @@ export function EditableDate({ value, onSave }: EditableDateProps) {
           className="text-xs text-blue-500 hover:text-blue-700"
           aria-label="Editar fecha"
         >
-          ✏️
+          <commonIcons.edit className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     );

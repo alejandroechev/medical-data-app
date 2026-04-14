@@ -1,5 +1,6 @@
 import type { EventRecording } from '../../domain/models/event-recording';
 import { ConfirmDeleteButton } from './ConfirmDeleteButton';
+import { commonIcons } from './icons';
 
 interface RecordingsListProps {
   recordings: EventRecording[];
@@ -31,7 +32,7 @@ export function RecordingsList({ recordings, onDelete }: RecordingsListProps) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🎙</span>
+              <commonIcons.record className="h-5 w-5 text-gray-500" aria-hidden="true" />
               <span className="text-sm text-gray-700">
                 {rec.description ?? rec.fileName}
               </span>

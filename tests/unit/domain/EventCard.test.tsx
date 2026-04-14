@@ -39,7 +39,7 @@ describe('EventCard', () => {
 
   it('should show ISAPRE badge when approved', () => {
     render(<EventCard evento={mockEvento} onClick={() => {}} />);
-    expect(screen.getByText('ISAPRE ✓')).toBeInTheDocument();
+    expect(screen.getByText('ISAPRE')).toBeInTheDocument();
   });
 
   it('should not show insurance badge when status is none', () => {
@@ -58,8 +58,9 @@ describe('EventCard', () => {
 
   it('should show emergency icon for Urgencia type', () => {
     const urgencia: MedicalEvent = { ...mockEvento, type: 'Urgencia' };
-    render(<EventCard evento={urgencia} onClick={() => {}} />);
-    expect(screen.getByText('🚑')).toBeInTheDocument();
+    const { container } = render(<EventCard evento={urgencia} onClick={() => {}} />);
+    expect(screen.queryByText('🚑')).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
   it('should show Desconocido for patient without match', () => {

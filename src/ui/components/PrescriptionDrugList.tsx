@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { PrescriptionDrug } from '../../domain/models/prescription-drug';
 import { listAllPrescriptionDrugs } from '../../infra/store-provider';
 import { ConfirmDeleteButton } from './ConfirmDeleteButton';
+import { commonIcons } from './icons';
 
 interface PrescriptionDrugListProps {
   drugs: PrescriptionDrug[];
@@ -79,8 +80,9 @@ export function PrescriptionDrugList({ drugs, onAdd, onDelete }: PrescriptionDru
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <h3 className="text-sm font-medium text-gray-700 mb-3">
-        💊 Medicamentos ({drugs.length})
+      <h3 className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-3">
+        <commonIcons.treatments className="h-4 w-4" aria-hidden="true" />
+        Medicamentos ({drugs.length})
       </h3>
 
       {drugs.length === 0 && !showForm && (
@@ -208,7 +210,10 @@ export function PrescriptionDrugList({ drugs, onAdd, onDelete }: PrescriptionDru
           onClick={() => setShowForm(true)}
           className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 transition-colors"
         >
-          + Agregar medicamento
+          <span className="inline-flex items-center gap-1.5">
+            <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
+            Agregar medicamento
+          </span>
         </button>
       )}
     </div>

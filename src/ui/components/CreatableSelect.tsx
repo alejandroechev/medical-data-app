@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { commonIcons } from './icons';
 
 interface CreatableSelectProps {
   label: string;
@@ -54,14 +55,16 @@ export function CreatableSelect({
             onClick={handleCreate}
             disabled={saving || !newName.trim()}
             className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            aria-label={`Guardar ${label.toLowerCase()}`}
           >
-            {saving ? '...' : '✓'}
+            {saving ? '...' : <commonIcons.check className="h-4 w-4" aria-hidden="true" />}
           </button>
           <button
             onClick={() => { setAdding(false); setNewName(''); }}
             className="border border-gray-300 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label={`Cancelar agregar ${label.toLowerCase()}`}
           >
-            ✕
+            <commonIcons.close className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -89,8 +92,9 @@ export function CreatableSelect({
           onClick={() => setAdding(true)}
           className="border border-gray-300 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
           title={`Agregar ${label.toLowerCase()}`}
+          aria-label={`Agregar ${label.toLowerCase()}`}
         >
-          +
+          <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </div>

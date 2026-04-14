@@ -106,7 +106,7 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
 
     // Éxito y redirección a inicio
-    await expect(page.getByText('✓ Evento creado exitosamente')).toBeVisible();
+    await expect(page.getByText('Evento creado exitosamente')).toBeVisible();
     await page.waitForTimeout(1500); // esperar redirección
     await expect(page.locator('header')).toContainText('Registro Médico Familiar');
 
@@ -129,7 +129,7 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByLabel('Descripción').fill('Limpieza dental semestral');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
 
-    await expect(page.getByText('✓ Evento creado exitosamente')).toBeVisible();
+    await expect(page.getByText('Evento creado exitosamente')).toBeVisible();
     await page.waitForTimeout(1500);
 
     // Open detail and set ISAPRE to requested
@@ -204,6 +204,7 @@ test.describe('Medical Family Registry — E2E', () => {
 
     // Create event
     await page.getByLabel('Nuevo').click();
+    await expect(page.getByRole('heading', { name: 'Nuevo Evento' })).toBeVisible();
     await page.getByLabel('Descripción').fill('Evento a archivar');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
@@ -227,7 +228,7 @@ test.describe('Medical Family Registry — E2E', () => {
 
     await page.getByLabel('Mostrar archivados').check();
     await expect(page.getByText('Evento a archivar')).toBeVisible();
-    await expect(page.getByText('📦 Archivado')).toBeVisible();
+    await expect(page.getByText('Archivado', { exact: true })).toBeVisible();
 
     // Open archived event and unarchive it
     await page.getByText('Evento a archivar').click();

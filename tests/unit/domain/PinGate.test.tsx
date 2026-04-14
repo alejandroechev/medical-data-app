@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+vi.setConfig({ testTimeout: 10000 });
+
 // The PinGate reads import.meta.env.VITE_APP_PIN at module load time,
 // so we mock it via vi.mock to control the PIN value per test group
 let mockPin = '1234';

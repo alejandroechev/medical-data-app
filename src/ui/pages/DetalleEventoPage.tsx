@@ -12,6 +12,7 @@ import { ConfirmDeleteButton } from '../components/ConfirmDeleteButton';
 import { ClickableImage } from '../components/ImageModal';
 import { DrugCard } from '../components/DrugCard';
 import { DrugForm } from '../components/DrugForm';
+import { commonIcons, eventTypeIcons } from '../components/icons';
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
@@ -23,16 +24,6 @@ interface DetalleEventoPageProps {
   onDeleted?: () => void;
   onDuplicated?: (newId: string) => void;
 }
-
-const TYPE_ICONS: Record<string, string> = {
-  'Consulta Médica': '🩺',
-  'Consulta Dental': '🦷',
-  'Urgencia': '🚑',
-  'Cirugía': '🏥',
-  'Examen': '🔬',
-  'Receta': '💊',
-  'Otro': '📋',
-};
 
 export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: DetalleEventoPageProps) {
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
@@ -229,7 +220,7 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
   }
 
   const paciente = getFamilyMemberById(evento.patientId);
-  const icon = TYPE_ICONS[evento.type] ?? '📋';
+  const EventIcon = eventTypeIcons[evento.type] ?? commonIcons.clipboard;
   const isReceta = evento.type === 'Receta';
   const hasParent = isReceta && !!parentEvento;
   const derivedProfessionalId = hasParent && parentEvento?.professionalId ? parentEvento.professionalId : evento.professionalId;
@@ -239,7 +230,7 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
       {/* Header card */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
         <div className="flex items-center gap-3 mb-3">
-          <span className="text-3xl">{icon}</span>
+          <EventIcon className="h-8 w-8 text-blue-500" aria-hidden="true" />
           <div>
             <h2 className="text-lg font-semibold text-gray-800">{evento.type}</h2>
             <EditableDate value={evento.date} onSave={handleUpdateDate} />
@@ -358,7 +349,10 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
       {/* Treatments (any event type) */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
         <h3 className="text-sm font-medium text-gray-700 mb-3">
-          💊 Tratamientos ({drugs.length})
+          <span className="inline-flex items-center gap-1.5">
+            <commonIcons.treatments className="h-4 w-4" aria-hidden="true" />
+            Tratamientos ({drugs.length})
+          </span>
         </h3>
 
         {drugs.length === 0 && !showDrugForm && (
@@ -393,7 +387,10 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
             onClick={() => setShowDrugForm(true)}
             className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 transition-colors"
           >
-            + Agregar tratamiento
+            <span className="inline-flex items-center gap-1.5">
+              <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
+              Agregar tratamiento
+            </span>
           </button>
         )}
       </div>
@@ -421,7 +418,7 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
               const url = foto.googlePhotosUrl;
               const isPdf = url.toLowerCase().endsWith('.pdf') || foto.googlePhotosId.toLowerCase().endsWith('.pdf');
               const isImage = !isPdf && url.startsWith('http') && !url.startsWith('memory://');
-              const icon = isPdf ? '📄' : '📷';
+              const DocumentKindIcon = isPdf ? commonIcons.document : commonIcons.photo;
               return (
                 <div
                   key={foto.id}
@@ -435,7 +432,7 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
                     />
                   )}
                   <div className="flex items-center gap-2 p-2">
-                    <span className="text-lg">{icon}</span>
+                    <DocumentKindIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
                     <a
                       href={url}
                       target="_blank"
@@ -478,7 +475,10 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
           onClick={handleDuplicate}
           className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 transition-colors"
         >
-          📋 Copiar evento
+          <span className="inline-flex items-center gap-1.5">
+            <commonIcons.copy className="h-4 w-4" aria-hidden="true" />
+            Copiar evento
+          </span>
         </button>
         <ArchiveAction
           isArchived={evento.isArchived === true}

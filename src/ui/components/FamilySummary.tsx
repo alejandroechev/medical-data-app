@@ -5,6 +5,7 @@ import { getMemberColor } from '../../domain/models/family-member';
 import type { PatientDrug } from '../../domain/models/prescription-drug';
 import { formatSchedule } from '../../domain/models/prescription-drug';
 import type { FamilyMember } from '../../domain/models/family-member';
+import { commonIcons } from './icons';
 
 interface MemberSummary {
   member: FamilyMember;
@@ -95,17 +96,23 @@ export function FamilySummary({ onViewHistory }: FamilySummaryProps) {
                 </span>
                 <span className="text-xs text-gray-400">{s.totalEvents} eventos</span>
                 {s.activeDrugs.length > 0 && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                    💊 {s.activeDrugs.length}
+                  <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <commonIcons.treatments className="h-3.5 w-3.5" aria-hidden="true" />
+                    {s.activeDrugs.length}
                   </span>
                 )}
                 {hasPending && (
-                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-                    ⏳ {s.pendingIsapre + s.pendingInsurance}
+                  <span className="inline-flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                    <commonIcons.clock className="h-3.5 w-3.5" aria-hidden="true" />
+                    {s.pendingIsapre + s.pendingInsurance}
                   </span>
                 )}
               </div>
-              <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
+              {isExpanded ? (
+                <commonIcons.chevronUp className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              ) : (
+                <commonIcons.chevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              )}
             </button>
 
             {isExpanded && (
@@ -154,7 +161,10 @@ export function FamilySummary({ onViewHistory }: FamilySummaryProps) {
                     onClick={() => onViewHistory(s.member.id)}
                     className="w-full text-xs text-blue-600 hover:text-blue-800 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
                   >
-                    🔍 Ver historial de {s.member.name}
+                    <span className="inline-flex items-center gap-1">
+                      <commonIcons.search className="h-3.5 w-3.5" aria-hidden="true" />
+                      Ver historial de {s.member.name}
+                    </span>
                   </button>
                 )}
               </div>
