@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, archiveEvent, unarchiveEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug, createEvent } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
-import { EventActions, ArchiveAction } from '../components/EventActions';
+import { EventActions } from '../components/EventActions';
 import { EditableDescription } from '../components/EditableDescription';
 import { EditableDate } from '../components/EditableDate';
 import { AudioRecorder } from '../components/AudioRecorder';
@@ -21,11 +21,9 @@ import type { Professional, Location } from '../../domain/models/professional-lo
 
 interface DetalleEventoPageProps {
   eventoId: string;
-  onDeleted?: () => void;
-  onDuplicated?: (newId: string) => void;
 }
 
-export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: DetalleEventoPageProps) {
+export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
   const [evento, setEvento] = useState<MedicalEvent | null>(null);
   const [parentEvento, setParentEvento] = useState<MedicalEvent | null>(null);
   const [fotos, setFotos] = useState<EventPhoto[]>([]);
@@ -99,16 +97,6 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
     await reloadPhotos();
   };
 
-  const handleArchive = async () => {
-    await archiveEvent(eventoId);
-    onDeleted?.();
-  };
-
-  const handleUnarchive = async () => {
-    await unarchiveEvent(eventoId);
-    await loadPageData();
-  };
-
   const handleToggleIsapre = async (status: ReimbursementStatus) => {
     const updated = await updateEvent(eventoId, { isapreReimbursementStatus: status });
     setEvento(updated);
@@ -133,21 +121,6 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
     const updated = await updateEvent(eventoId, { cost: newCost });
     setEvento(updated);
     setEditingCost(false);
-  };
-
-  const handleDuplicate = async () => {
-    if (!evento) return;
-    const today = new Date().toISOString().split('T')[0];
-    const newEvent = await createEvent({
-      date: today,
-      type: evento.type,
-      description: evento.description,
-      patientId: evento.patientId,
-      professionalId: evento.professionalId,
-      locationId: evento.locationId,
-      cost: evento.cost,
-    });
-    onDuplicated?.(newEvent.id);
   };
 
   const handleRecordingComplete= async (blob: Blob, durationSeconds: number) => {
@@ -239,7 +212,7 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
         <EditableDescription value={evento.description} onSave={handleUpdateDescription} />
       </div>
 
-      {/* Details */}
+      {/* Details + Reembolsos */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Paciente</span>
@@ -344,6 +317,15 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
             </button>
           )}
         </div>
+
+        {/* Reembolsos inline */}
+        <EventActions
+          isapreReimbursementStatus={evento.isapreReimbursementStatus}
+          insuranceReimbursementStatus={evento.insuranceReimbursementStatus}
+          onChangeIsapreStatus={handleToggleIsapre}
+          onChangeInsuranceStatus={handleToggleInsurance}
+          inline
+        />
       </div>
 
       {/* Treatments (any event type) */}
@@ -394,14 +376,6 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
           </button>
         )}
       </div>
-
-      {/* Reembolsos */}
-      <EventActions
-        isapreReimbursementStatus={evento.isapreReimbursementStatus}
-        insuranceReimbursementStatus={evento.insuranceReimbursementStatus}
-        onChangeIsapreStatus={handleToggleIsapre}
-        onChangeInsuranceStatus={handleToggleInsurance}
-      />
 
       {/* Photos */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
@@ -468,24 +442,6 @@ export function DetalleEventoPage({ eventoId, onDeleted, onDuplicated }: Detalle
         </div>
       </div>
 
-      {/* Actions: Copy & Archive */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-3">
-        <h3 className="text-sm font-medium text-gray-700">Acciones</h3>
-        <button
-          onClick={handleDuplicate}
-          className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-50 transition-colors"
-        >
-          <span className="inline-flex items-center gap-1.5">
-            <commonIcons.copy className="h-4 w-4" aria-hidden="true" />
-            Copiar evento
-          </span>
-        </button>
-        <ArchiveAction
-          isArchived={evento.isArchived === true}
-          onArchive={handleArchive}
-          onUnarchive={handleUnarchive}
-        />
-      </div>
     </div>
   );
 }

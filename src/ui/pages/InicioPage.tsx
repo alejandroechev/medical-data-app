@@ -1,59 +1,33 @@
-import { useEvents } from '../hooks/useEventos';
-import { EventCard } from '../components/EventCard';
+import { useState, useEffect } from 'react';
 import { FamilySummary } from '../components/FamilySummary';
-import { commonIcons } from '../components/icons';
+import { ExpenseSummary } from '../components/ExpenseSummary';
+import { listEvents } from '../../infra/store-provider';
+import type { MedicalEvent } from '../../domain/models/medical-event';
 
 interface InicioPageProps {
-  onEventClick: (id: string) => void;
   onViewPatientHistory?: (patientId: string) => void;
+  onViewPatientTreatments?: (patientId: string) => void;
 }
 
-export function InicioPage({ onEventClick, onViewPatientHistory }: InicioPageProps) {
-  const { events, loading, error } = useEvents();
+export function InicioPage({ onViewPatientHistory, onViewPatientTreatments }: InicioPageProps) {
+  const [events, setEvents] = useState<MedicalEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Cargando eventos...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600 text-sm">Error: {error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (events.length === 0) {
-    return (
-      <div className="p-4 space-y-4">
-        <FamilySummary onViewHistory={onViewPatientHistory} />
-        <div className="flex flex-col items-center justify-center h-32 text-center">
-          <commonIcons.clipboard className="h-10 w-10 mb-3 text-gray-400" aria-hidden="true" />
-          <p className="text-gray-500 text-lg">Sin eventos médicos</p>
-          <p className="text-gray-400 text-sm mt-1">
-            Toca el botón "+" para registrar tu primer evento
-          </p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    listEvents().then((data) => {
+      setEvents(data);
+      setLoading(false);
+    });
+  }, []);
 
   return (
-    <div className="p-4 space-y-3">
-      <FamilySummary onViewHistory={onViewPatientHistory} />
+    <div className="p-4 space-y-4">
+      <FamilySummary
+        onViewHistory={onViewPatientHistory}
+        onViewTreatments={onViewPatientTreatments}
+      />
 
-      <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-        Eventos recientes
-      </h2>
-      {events.map((evento) => (
-        <EventCard key={evento.id} evento={evento} onClick={onEventClick} />
-      ))}
+      {!loading && <ExpenseSummary events={events} />}
     </div>
   );
 }

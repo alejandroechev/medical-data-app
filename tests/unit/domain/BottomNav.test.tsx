@@ -4,18 +4,17 @@ import userEvent from '@testing-library/user-event';
 import { BottomNav } from '../../../src/ui/components/BottomNav';
 
 describe('BottomNav', () => {
-  it('should render the four tabs', () => {
+  it('should render the three tabs', () => {
     render(<BottomNav currentPage="inicio" onNavigate={() => {}} />);
     expect(screen.getByLabelText('Inicio')).toBeInTheDocument();
-    expect(screen.getByLabelText('Nuevo')).toBeInTheDocument();
+    expect(screen.getByLabelText('Eventos')).toBeInTheDocument();
     expect(screen.getByLabelText('Tratamientos')).toBeInTheDocument();
-    expect(screen.getByLabelText('Historial')).toBeInTheDocument();
   });
 
   it('should highlight the active tab', () => {
-    render(<BottomNav currentPage="historial" onNavigate={() => {}} />);
-    const historialBtn = screen.getByLabelText('Historial');
-    expect(historialBtn.className).toContain('text-blue-600');
+    render(<BottomNav currentPage="eventos" onNavigate={() => {}} />);
+    const eventosBtn = screen.getByLabelText('Eventos');
+    expect(eventosBtn.className).toContain('text-blue-600');
   });
 
   it('should call onNavigate when clicked', async () => {
@@ -23,13 +22,13 @@ describe('BottomNav', () => {
     const handleNavigate = vi.fn();
     render(<BottomNav currentPage="inicio" onNavigate={handleNavigate} />);
 
-    await user.click(screen.getByLabelText('Nuevo'));
-    expect(handleNavigate).toHaveBeenCalledWith('nuevo-evento');
+    await user.click(screen.getByLabelText('Eventos'));
+    expect(handleNavigate).toHaveBeenCalledWith('eventos');
   });
 
   it('should use svg icons instead of emoji glyphs', () => {
     const { container } = render(<BottomNav currentPage="inicio" onNavigate={() => {}} />);
-    expect(container.querySelectorAll('svg').length).toBeGreaterThanOrEqual(4);
+    expect(container.querySelectorAll('svg').length).toBeGreaterThanOrEqual(3);
     expect(screen.queryByText('🏠')).not.toBeInTheDocument();
     expect(screen.queryByText('➕')).not.toBeInTheDocument();
   });

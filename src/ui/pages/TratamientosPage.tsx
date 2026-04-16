@@ -8,9 +8,9 @@ import { commonIcons } from '../components/icons';
 
 type FilterStatus = 'active' | 'all' | 'stopped';
 
-export function TratamientosPage() {
+export function TratamientosPage({ initialPatientId }: { initialPatientId?: string }) {
   const members = getFamilyMembers();
-  const [selectedPatient, setSelectedPatient] = useState(members[0]?.id ?? '');
+  const [selectedPatient, setSelectedPatient] = useState(initialPatientId ?? members[0]?.id ?? '');
   const [drugs, setDrugs] = useState<PatientDrug[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

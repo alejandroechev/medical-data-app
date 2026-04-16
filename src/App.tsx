@@ -11,15 +11,15 @@ import { PickupAlertBanner } from './ui/components/PickupAlertBanner';
 import { InicioPage } from './ui/pages/InicioPage';
 import { NuevoEventoPage } from './ui/pages/NuevoEventoPage';
 import { DetalleEventoPage } from './ui/pages/DetalleEventoPage';
-import { HistorialPage } from './ui/pages/HistorialPage';
+import { EventosPage } from './ui/pages/EventosPage';
 import { TratamientosPage } from './ui/pages/TratamientosPage';
 import { loadFamilyMembers } from './infra/supabase/family-member-store';
 
 const PAGE_TITLES: Record<string, string> = {
   'inicio': 'Registro Médico Familiar',
+  'eventos': 'Eventos',
   'nuevo-evento': 'Nuevo Evento',
   'detalle-evento': 'Detalle del Evento',
-  'historial': 'Historial',
   'tratamientos': 'Tratamientos',
 };
 
@@ -70,25 +70,25 @@ function App() {
         <main className="max-w-lg mx-auto pb-24">
           {currentPage === 'inicio' && (
             <InicioPage
+              onViewPatientHistory={(patientId) => navigateTo('eventos', { patientId })}
+              onViewPatientTreatments={(patientId) => navigateTo('tratamientos', { patientId })}
+            />
+          )}
+          {currentPage === 'eventos' && (
+            <EventosPage
               onEventClick={handleEventClick}
-              onViewPatientHistory={(patientId) => navigateTo('historial', { patientId })}
+              onCreateEvent={() => navigateTo('nuevo-evento')}
+              initialPatientId={params.patientId}
             />
           )}
           {currentPage === 'nuevo-evento' && (
-            <NuevoEventoPage onCreated={() => navigateTo('inicio')} />
+            <NuevoEventoPage onCreated={() => navigateTo('eventos')} />
           )}
           {currentPage === 'detalle-evento' && params.eventoId && (
-            <DetalleEventoPage
-              eventoId={params.eventoId}
-              onDeleted={() => navigateTo('inicio')}
-              onDuplicated={(id) => navigateTo('detalle-evento', { eventoId: id })}
-            />
-          )}
-          {currentPage === 'historial' && (
-            <HistorialPage onEventClick={handleEventClick} initialPatientId={params.patientId} />
+            <DetalleEventoPage eventoId={params.eventoId} />
           )}
           {currentPage === 'tratamientos' && (
-            <TratamientosPage />
+            <TratamientosPage initialPatientId={params.patientId} />
           )}
         </main>
 

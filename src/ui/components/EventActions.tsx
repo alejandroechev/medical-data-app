@@ -82,9 +82,10 @@ export function EventActions({
   insuranceReimbursementStatus,
   onChangeIsapreStatus,
   onChangeInsuranceStatus,
-}: Omit<EventActionsProps, 'isArchived' | 'onArchive' | 'onUnarchive'>) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-4">
+  inline,
+}: Omit<EventActionsProps, 'isArchived' | 'onArchive' | 'onUnarchive'> & { inline?: boolean }) {
+  const content = (
+    <>
       <h3 className="text-sm font-medium text-gray-700">Reembolsos</h3>
 
       <ReimbursementStatusControl
@@ -102,6 +103,16 @@ export function EventActions({
         onChange={onChangeInsuranceStatus}
         portalUrl={REEMBOLSO_LINKS.insurance}
       />
+    </>
+  );
+
+  if (inline) {
+    return <div className="space-y-4 border-t border-gray-100 pt-3 mt-3">{content}</div>;
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-4">
+      {content}
     </div>
   );
 }

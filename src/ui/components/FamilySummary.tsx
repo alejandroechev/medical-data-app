@@ -19,9 +19,10 @@ interface MemberSummary {
 
 interface FamilySummaryProps {
   onViewHistory?: (patientId: string) => void;
+  onViewTreatments?: (patientId: string) => void;
 }
 
-export function FamilySummary({ onViewHistory }: FamilySummaryProps) {
+export function FamilySummary({ onViewHistory, onViewTreatments }: FamilySummaryProps) {
   const members = getFamilyMembers();
   const [summaries, setSummaries] = useState<MemberSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,9 +146,13 @@ export function FamilySummary({ onViewHistory }: FamilySummaryProps) {
                   <div>
                     <p className="text-xs font-medium text-gray-500 mb-1">Tratamientos activos</p>
                     {s.activeDrugs.map((d) => (
-                      <p key={d.id} className="text-xs text-gray-600 ml-2">
+                      <button
+                        key={d.id}
+                        onClick={() => onViewTreatments?.(s.member.id)}
+                        className="block w-full text-left text-xs text-blue-600 hover:text-blue-800 ml-2 py-0.5"
+                      >
                         • {d.name} {d.dosage} — {formatSchedule(d.schedule)}
-                      </p>
+                      </button>
                     ))}
                   </div>
                 )}

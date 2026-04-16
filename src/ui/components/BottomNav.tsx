@@ -9,9 +9,8 @@ interface BottomNavProps {
 export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
   const tabs: { page: Page; label: string; icon: AppIcon }[] = [
     { page: 'inicio', label: 'Inicio', icon: commonIcons.home },
-    { page: 'nuevo-evento', label: 'Nuevo', icon: commonIcons.plusCircle },
+    { page: 'eventos', label: 'Eventos', icon: commonIcons.clipboard },
     { page: 'tratamientos', label: 'Tratamientos', icon: commonIcons.treatments },
-    { page: 'historial', label: 'Historial', icon: commonIcons.search },
   ];
 
   return (

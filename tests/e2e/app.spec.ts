@@ -54,14 +54,15 @@ test.describe('Medical Family Registry — E2E', () => {
   test('should show the bottom navigation bar', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByLabel('Inicio')).toBeVisible();
-    await expect(page.getByLabel('Nuevo')).toBeVisible();
+    await expect(page.getByLabel('Eventos')).toBeVisible();
     await expect(page.getByLabel('Tratamientos')).toBeVisible();
-    await expect(page.getByLabel('Historial')).toBeVisible();
+    
   });
 
   test('should navigate to the new event page', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await expect(page.locator('header')).toContainText('Nuevo Evento');
     await expect(page.getByLabel('Fecha')).toBeVisible();
     await expect(page.getByLabel('Tipo de evento')).toBeVisible();
@@ -69,28 +70,26 @@ test.describe('Medical Family Registry — E2E', () => {
     await expect(page.getByLabel('Descripción')).toBeVisible();
   });
 
-  test('should navigate to the history page', async ({ page }) => {
+  test('should navigate to the events page', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Historial').click();
-    await expect(page.locator('header')).toContainText('Historial');
-    await expect(page.getByLabel('Paciente')).toBeVisible();
-    await expect(page.getByLabel('Tipo')).toBeVisible();
-    await expect(page.getByLabel('Desde')).toBeVisible();
-    await expect(page.getByLabel('Hasta')).toBeVisible();
-    await expect(page.getByLabel('ISAPRE')).toBeVisible();
-    await expect(page.getByLabel('Seguro')).toBeVisible();
+    await page.getByLabel('Eventos').click();
+    await expect(page.locator('header')).toContainText('Eventos');
+    await expect(page.getByText('Filtros')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nuevo evento' })).toBeVisible();
   });
 
   test('should show validation errors when submitting empty form', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await expect(page.getByText('La descripción es obligatoria')).toBeVisible();
   });
 
   test('should go back to home with the back button', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await expect(page.locator('header')).toContainText('Nuevo Evento');
     await page.getByLabel('Volver').click();
     await expect(page.locator('header')).toContainText('Registro Médico Familiar');
@@ -98,7 +97,8 @@ test.describe('Medical Family Registry — E2E', () => {
 
   test('should have all event types available', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     const select = page.getByLabel('Tipo de evento');
     const options = await select.locator('option').allTextContents();
     expect(options).toContain('Consulta Médica');
@@ -112,7 +112,8 @@ test.describe('Medical Family Registry — E2E', () => {
 
   test('should have family members in the patient select', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     const select = page.getByLabel('Paciente');
     const options = await select.locator('option').allTextContents();
     expect(options.length).toBeGreaterThan(0);
@@ -121,7 +122,8 @@ test.describe('Medical Family Registry — E2E', () => {
 
   test('should have reimbursement checkboxes', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     // Reimbursement is now managed from event detail, not from creation form
     await expect(page.getByLabel('Fecha')).toBeVisible();
     await expect(page.getByLabel('Descripción')).toBeVisible();
@@ -132,22 +134,20 @@ test.describe('Medical Family Registry — E2E', () => {
   test('full flow: create event → see on home → view detail', async ({ page }) => {
     await page.goto('/');
 
-    // Inicio vacío
-    await expect(page.getByText('Sin eventos médicos')).toBeVisible();
-
     // Crear evento
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Tipo de evento').selectOption('Urgencia');
     await page.getByLabel('Paciente').selectOption({ label: 'Alejandro (Padre)' });
     await page.getByLabel('Descripción').fill('Dolor abdominal severo');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
 
-    // Éxito y redirección a inicio
+    // Éxito y redirección a eventos
     await expect(page.getByText('Evento creado exitosamente')).toBeVisible();
     await page.waitForTimeout(1500); // esperar redirección
-    await expect(page.locator('header')).toContainText('Registro Médico Familiar');
+    await expect(page.locator('header')).toContainText('Eventos');
 
-    // Evento visible en inicio
+    // Evento visible en la lista de eventos
     await expect(page.getByText('Dolor abdominal severo')).toBeVisible();
     await expect(page.getByText('Urgencia')).toBeVisible();
 
@@ -161,7 +161,8 @@ test.describe('Medical Family Registry — E2E', () => {
 
   test('full flow: create event and manage reembolso status', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Tipo de evento').selectOption('Consulta Dental');
     await page.getByLabel('Descripción').fill('Limpieza dental semestral');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
@@ -175,6 +176,7 @@ test.describe('Medical Family Registry — E2E', () => {
 
     // Verify the badge shows Solicitado
     await page.getByLabel('Volver').click();
+    await page.getByLabel('Eventos').click();
     await page.getByText('Limpieza dental semestral').click();
     // The ISAPRE Solicitado button should be disabled (current state)
     await expect(page.getByRole('button', { name: /ISAPRE Solicitado/i })).toBeDisabled();
@@ -184,32 +186,36 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.goto('/');
 
     // Crear dos eventos de tipos diferentes
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Tipo de evento').selectOption('Examen');
     await page.getByLabel('Descripción').fill('Examen de sangre');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
 
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Tipo de evento').selectOption('Consulta Médica');
     await page.getByLabel('Descripción').fill('Control general');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
 
     // Ir a historial y filtrar por Examen
-    await page.getByLabel('Historial').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByText('Filtros').click();
     await page.getByLabel('Tipo').selectOption('Examen');
 
     // Solo debe verse el examen
     await expect(page.getByText('Examen de sangre')).toBeVisible();
-    await expect(page.getByText('1 evento encontrado')).toBeVisible();
+    await expect(page.getByText('1 evento')).toBeVisible();
   });
 
   test('full flow: link and unlink a photo to an event', async ({ page }) => {
     await page.goto('/');
 
     // Create an event first
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Descripción').fill('Examen con foto adjunta');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
@@ -240,48 +246,36 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     // Create event
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await expect(page.getByRole('heading', { name: 'Nuevo Evento' })).toBeVisible();
     await page.getByLabel('Descripción').fill('Evento a archivar');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
 
-    // Go to detail
-    await page.getByText('Evento a archivar').click();
-    await expect(page.locator('header')).toContainText('Detalle del Evento');
+    // Should be on Eventos page after redirect
+    await expect(page.locator('header')).toContainText('Eventos');
 
-    // Archive the event
-    await page.getByRole('button', { name: /archivar evento/i }).click();
-    await expect(page.getByText(/¿estás seguro de archivar este evento\?/i)).toBeVisible();
-    await page.getByRole('button', { name: /sí, archivar/i }).click();
+    // Archive via context menu (right-click on event card)
+    await page.getByText('Evento a archivar').click({ button: 'right' });
+    await page.getByTestId('context-menu-archive').click();
 
-    // Back to home, event hidden by default
-    await expect(page.locator('header')).toContainText('Registro Médico Familiar');
+    // Event should be hidden by default
     await expect(page.getByText('Evento a archivar')).not.toBeVisible();
 
-    // History hides archived events until the toggle is enabled
-    await page.getByLabel('Historial').click();
-    await expect(page.getByText('Evento a archivar')).not.toBeVisible();
-
+    // Expand filters and show archived
+    await page.getByText('Filtros').click();
     await page.getByLabel('Mostrar archivados').check();
     await expect(page.getByText('Evento a archivar')).toBeVisible();
     await expect(page.getByText('Archivado', { exact: true })).toBeVisible();
-
-    // Open archived event and unarchive it
-    await page.getByText('Evento a archivar').click();
-    await expect(page.getByRole('button', { name: /desarchivar evento/i })).toBeVisible();
-    await page.getByRole('button', { name: /desarchivar evento/i }).click();
-
-    // Stay on detail page and the archive action becomes available again
-    await expect(page.locator('header')).toContainText('Detalle del Evento');
-    await expect(page.getByRole('button', { name: /archivar evento/i })).toBeVisible();
   });
 
   test('full flow: change reembolso status on event detail', async ({ page }) => {
     await page.goto('/');
 
     // Create event
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Descripción').fill('Consulta para reembolso');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
@@ -300,6 +294,7 @@ test.describe('Medical Family Registry — E2E', () => {
 
     // Go back and re-enter to verify persistence
     await page.getByLabel('Volver').click();
+    await page.getByLabel('Eventos').click();
     await page.getByText('Consulta para reembolso').click();
     await expect(page.getByRole('button', { name: /ISAPRE Solicitado/i })).toBeDisabled();
 
@@ -312,7 +307,8 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.goto('/');
 
     // Create event
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Descripción').fill('Descripción original');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
@@ -333,6 +329,7 @@ test.describe('Medical Family Registry — E2E', () => {
 
     // Go back and re-enter to verify persistence
     await page.getByLabel('Volver').click();
+    await page.getByLabel('Eventos').click();
     await page.getByText('Descripción actualizada').click();
     await expect(page.getByText('Descripción actualizada')).toBeVisible();
   });
@@ -341,7 +338,8 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.goto('/');
 
     // Create event
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Descripción').fill('Evento con fecha editable');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);
@@ -360,6 +358,7 @@ test.describe('Medical Family Registry — E2E', () => {
 
     // Go back and re-enter to verify persistence
     await page.getByLabel('Volver').click();
+    await page.getByLabel('Eventos').click();
     await page.getByText('Evento con fecha editable').click();
     await expect(page.getByText('2025-01-15')).toBeVisible();
   });
@@ -368,7 +367,8 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.goto('/');
 
     // Create event
-    await page.getByLabel('Nuevo').click();
+    await page.getByLabel('Eventos').click();
+    await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await page.getByLabel('Descripción').fill('Evento para ver links');
     await page.getByRole('button', { name: 'Guardar Evento' }).click();
     await page.waitForTimeout(1500);

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export type Page = 'inicio' | 'nuevo-evento' | 'detalle-evento' | 'historial' | 'tratamientos';
+export type Page = 'inicio' | 'eventos' | 'nuevo-evento' | 'detalle-evento' | 'tratamientos';
 
 interface NavigationState {
   page: Page;
