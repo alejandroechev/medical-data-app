@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { listPatientDrugsByPatient, createPatientDrug, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
+import { listPatientDrugsByPatient, listAllPatientDrugs, createPatientDrug, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
 import { DrugCard } from '../components/DrugCard';
 import { DrugForm } from '../components/DrugForm';
 import type { PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
@@ -10,17 +10,18 @@ type FilterStatus = 'active' | 'all' | 'stopped';
 
 export function TratamientosPage({ initialPatientId }: { initialPatientId?: string }) {
   const members = getFamilyMembers();
-  const [selectedPatient, setSelectedPatient] = useState(initialPatientId ?? members[0]?.id ?? '');
+  const [selectedPatient, setSelectedPatient] = useState(initialPatientId ?? '');
   const [drugs, setDrugs] = useState<PatientDrug[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('active');
 
   const loadDrugs = useCallback(async () => {
-    if (!selectedPatient) return;
     setLoading(true);
     try {
-      const data = await listPatientDrugsByPatient(selectedPatient);
+      const data = selectedPatient
+        ? await listPatientDrugsByPatient(selectedPatient)
+        : await listAllPatientDrugs();
       setDrugs(data);
     } finally {
       setLoading(false);
@@ -58,7 +59,9 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
     return true;
   });
 
+  const showAllPatients = !selectedPatient;
   const patientName = members.find((m) => m.id === selectedPatient)?.name;
+  const getPatientName = (patientId: string) => members.find((m) => m.id === patientId)?.name;
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -72,6 +75,7 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
             onChange={(e) => setSelectedPatient(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
           >
+            <option value="">Todos</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>{m.name} ({m.relationship})</option>
             ))}
@@ -112,7 +116,9 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
               <commonIcons.treatments className="h-8 w-8 mx-auto text-gray-400" aria-hidden="true" />
               <p className="text-gray-400 text-sm mt-2">
                 {filterStatus === 'active'
-                  ? `${patientName} no tiene tratamientos activos`
+                  ? showAllPatients
+                    ? 'No hay tratamientos activos'
+                    : `${patientName} no tiene tratamientos activos`
                   : 'Sin tratamientos registrados'}
               </p>
             </div>
@@ -123,6 +129,7 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
               <DrugCard
                 key={drug.id}
                 drug={drug}
+                patientName={showAllPatients ? getPatientName(drug.patientId) : undefined}
                 onEdit={handleEditDrug}
                 onStop={handleStopDrug}
                 onDelete={handleDeleteDrug}
@@ -135,20 +142,30 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
       {/* Add form */}
       {showForm ? (
         <DrugForm
-          patientId={selectedPatient}
+          patientId={selectedPatient || (members[0]?.id ?? '')}
           onSubmit={handleAddDrug}
           onCancel={() => setShowForm(false)}
+          showPatientSelector={showAllPatients}
+          members={members}
         />
       ) : (
-        <button
-          onClick={() => setShowForm(true)}
-          className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-        >
-          <span className="inline-flex items-center gap-1.5">
-            <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
-            Nuevo tratamiento
-          </span>
-        </button>
+        <div className="h-16" /> /* spacer for sticky button */
+      )}
+      {/* Sticky nuevo button */}
+      {!showForm && (
+        <div className="fixed bottom-20 left-0 right-0 z-40 px-4 safe-area-pb">
+          <div className="max-w-lg mx-auto">
+            <button
+              onClick={() => setShowForm(true)}
+              className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg"
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
+                Nuevo tratamiento
+              </span>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -294,16 +294,23 @@ export function EventosPage({ onEventClick, onCreateEvent, initialPatientId }: E
         </div>
       )}
 
-      {/* Nuevo Evento button */}
-      <button
-        onClick={onCreateEvent}
-        className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-      >
-        <span className="inline-flex items-center gap-1.5">
-          <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
-          Nuevo evento
-        </span>
-      </button>
+      {/* Spacer for sticky button */}
+      <div className="h-16" />
+
+      {/* Sticky nuevo button */}
+      <div className="fixed bottom-20 left-0 right-0 z-40 px-4 safe-area-pb">
+        <div className="max-w-lg mx-auto">
+          <button
+            onClick={onCreateEvent}
+            className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
+              Nuevo evento
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

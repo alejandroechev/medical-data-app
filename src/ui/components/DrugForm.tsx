@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CreatePatientDrugInput, DrugSchedule, DrugDuration, PatientDrug } from '../../domain/models/prescription-drug';
+import type { FamilyMember } from '../../domain/models/family-member';
 import { commonIcons } from './icons';
 
 interface DrugFormProps {
@@ -8,12 +9,15 @@ interface DrugFormProps {
   initialValues?: PatientDrug;
   onSubmit: (input: CreatePatientDrugInput) => Promise<void>;
   onCancel: () => void;
+  showPatientSelector?: boolean;
+  members?: FamilyMember[];
 }
 
-export function DrugForm({ patientId, eventId, initialValues, onSubmit, onCancel }: DrugFormProps) {
+export function DrugForm({ patientId: initialPatientId, eventId, initialValues, onSubmit, onCancel, showPatientSelector, members }: DrugFormProps) {
   const today = new Date().toISOString().split('T')[0];
   const nowTime = new Date().toTimeString().slice(0, 5);
 
+  const [selectedPatientId, setSelectedPatientId] = useState(initialPatientId);
   const [name, setName] = useState(initialValues?.name ?? '');
   const [dosage, setDosage] = useState(initialValues?.dosage ?? '');
   const [scheduleType, setScheduleType] = useState<'interval' | 'fixed'>(initialValues?.schedule.type ?? 'interval');
@@ -76,7 +80,7 @@ export function DrugForm({ patientId, eventId, initialValues, onSubmit, onCancel
     setError(null);
     try {
       await onSubmit({
-        patientId,
+        patientId: selectedPatientId,
         eventId,
         name: name.trim(),
         dosage: dosage.trim(),
@@ -97,6 +101,22 @@ export function DrugForm({ patientId, eventId, initialValues, onSubmit, onCancel
   return (
     <div className="space-y-3 border border-blue-200 rounded-lg p-3 bg-blue-50">
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {showPatientSelector && members && (
+        <div>
+          <label htmlFor="drug-form-paciente" className="block text-xs text-gray-500 mb-1">Paciente</label>
+          <select
+            id="drug-form-paciente"
+            value={selectedPatientId}
+            onChange={(e) => setSelectedPatientId(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
+          >
+            {members.map((m) => (
+              <option key={m.id} value={m.id}>{m.name} ({m.relationship})</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2">
         <div>
