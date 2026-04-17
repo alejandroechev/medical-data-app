@@ -1,19 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
-import { listPatientDrugsByPatient, listAllPatientDrugs, createPatientDrug, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
+import { listPatientDrugsByPatient, listAllPatientDrugs, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
 import { SwipeableDrugCard } from '../components/SwipeableDrugCard';
-import { DrugForm } from '../components/DrugForm';
-import type { PatientDrug, CreatePatientDrugInput } from '../../domain/models/prescription-drug';
+import type { PatientDrug } from '../../domain/models/prescription-drug';
 import { commonIcons } from '../components/icons';
 
 type FilterStatus = 'active' | 'all' | 'stopped';
 
-export function TratamientosPage({ initialPatientId, onDrugClick }: { initialPatientId?: string; onDrugClick?: (id: string) => void }) {
+export function TratamientosPage({ initialPatientId, onDrugClick, onCreateDrug }: { initialPatientId?: string; onDrugClick?: (id: string) => void; onCreateDrug?: () => void }) {
   const members = getFamilyMembers();
   const [selectedPatient, setSelectedPatient] = useState(initialPatientId ?? '');
   const [drugs, setDrugs] = useState<PatientDrug[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('active');
 
   const loadDrugs = useCallback(async () => {
@@ -31,12 +29,6 @@ export function TratamientosPage({ initialPatientId, onDrugClick }: { initialPat
   useEffect(() => {
     loadDrugs();
   }, [loadDrugs]);
-
-  const handleAddDrug = async (input: CreatePatientDrugInput) => {
-    await createPatientDrug(input);
-    setShowForm(false);
-    await loadDrugs();
-  };
 
   const handleStopDrug = async (id: string) => {
     await updatePatientDrug(id, { status: 'stopped', endDate: new Date().toISOString().split('T')[0] });
@@ -111,7 +103,7 @@ export function TratamientosPage({ initialPatientId, onDrugClick }: { initialPat
             {filteredDrugs.length} tratamiento{filteredDrugs.length !== 1 ? 's' : ''}
           </p>
 
-          {filteredDrugs.length === 0 && !showForm && (
+          {filteredDrugs.length === 0 && (
             <div className="text-center py-8">
               <commonIcons.treatments className="h-8 w-8 mx-auto text-gray-400" aria-hidden="true" />
               <p className="text-gray-400 text-sm mt-2">
@@ -140,34 +132,23 @@ export function TratamientosPage({ initialPatientId, onDrugClick }: { initialPat
         </>
       )}
 
-      {/* Add form */}
-      {showForm ? (
-        <DrugForm
-          patientId={selectedPatient || (members[0]?.id ?? '')}
-          onSubmit={handleAddDrug}
-          onCancel={() => setShowForm(false)}
-          showPatientSelector={showAllPatients}
-          members={members}
-        />
-      ) : (
-        <div className="h-16" /> /* spacer for sticky button */
-      )}
+      {/* Spacer for sticky button */}
+      <div className="h-16" />
+
       {/* Sticky nuevo button */}
-      {!showForm && (
-        <div className="fixed bottom-20 left-0 right-0 z-40 px-4 safe-area-pb">
-          <div className="max-w-lg mx-auto">
-            <button
-              onClick={() => setShowForm(true)}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg"
-            >
-              <span className="inline-flex items-center gap-1.5">
-                <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
-                Nuevo tratamiento
-              </span>
-            </button>
-          </div>
+      <div className="fixed bottom-20 left-0 right-0 z-40 px-4 safe-area-pb">
+        <div className="max-w-lg mx-auto">
+          <button
+            onClick={() => onCreateDrug?.()}
+            className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <commonIcons.plus className="h-4 w-4" aria-hidden="true" />
+              Nuevo tratamiento
+            </span>
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

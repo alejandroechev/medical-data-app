@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export type Page = 'inicio' | 'eventos' | 'nuevo-evento' | 'detalle-evento' | 'tratamientos' | 'detalle-tratamiento';
+export type Page = 'inicio' | 'eventos' | 'nuevo-evento' | 'detalle-evento' | 'tratamientos' | 'nuevo-tratamiento' | 'detalle-tratamiento';
 
 interface NavigationState {
   page: Page;
@@ -23,7 +23,7 @@ export function useNavigation() {
       if (prev.page === 'detalle-evento' || prev.page === 'nuevo-evento') {
         return { page: 'eventos', params: {} };
       }
-      if (prev.page === 'detalle-tratamiento') {
+      if (prev.page === 'detalle-tratamiento' || prev.page === 'nuevo-tratamiento') {
         return { page: 'tratamientos', params: {} };
       }
       return { page: 'inicio', params: {} };

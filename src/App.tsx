@@ -13,6 +13,7 @@ import { NuevoEventoPage } from './ui/pages/NuevoEventoPage';
 import { DetalleEventoPage } from './ui/pages/DetalleEventoPage';
 import { EventosPage } from './ui/pages/EventosPage';
 import { TratamientosPage } from './ui/pages/TratamientosPage';
+import { NuevoTratamientoPage } from './ui/pages/NuevoTratamientoPage';
 import { DetalleTratamientoPage } from './ui/pages/DetalleTratamientoPage';
 import { loadFamilyMembers } from './infra/supabase/family-member-store';
 
@@ -22,6 +23,7 @@ const PAGE_TITLES: Record<string, string> = {
   'nuevo-evento': 'Nuevo Evento',
   'detalle-evento': 'Detalle del Evento',
   'tratamientos': 'Tratamientos',
+  'nuevo-tratamiento': 'Nuevo Tratamiento',
   'detalle-tratamiento': 'Detalle del Tratamiento',
 };
 
@@ -93,7 +95,11 @@ function App() {
             <TratamientosPage
               initialPatientId={params.patientId}
               onDrugClick={(id) => navigateTo('detalle-tratamiento', { drugId: id })}
+              onCreateDrug={() => navigateTo('nuevo-tratamiento')}
             />
+          )}
+          {currentPage === 'nuevo-tratamiento' && (
+            <NuevoTratamientoPage onCreated={() => navigateTo('tratamientos')} />
           )}
           {currentPage === 'detalle-tratamiento' && params.drugId && (
             <DetalleTratamientoPage drugId={params.drugId} />
