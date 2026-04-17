@@ -3,7 +3,6 @@ import { listEvents, archiveEvent, createEvent } from '../../infra/store-provide
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
 import { listAllPatientDrugs } from '../../infra/store-provider';
 import { SwipeableEventCard } from '../components/SwipeableEventCard';
-import { ExpenseSummary } from '../components/ExpenseSummary';
 import { commonIcons } from '../components/icons';
 import type { MedicalEvent } from '../../domain/models/medical-event';
 
@@ -255,7 +254,6 @@ export function EventosPage({ onEventClick, onCreateEvent, initialPatientId }: E
           </div>
 
           {/* Expense summary when filters are active */}
-          <ExpenseSummary events={events} />
         </div>
       )}
 

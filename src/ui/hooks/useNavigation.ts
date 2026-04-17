@@ -18,7 +18,13 @@ export function useNavigation() {
   }, []);
 
   const goBack = useCallback(() => {
-    setState({ page: 'inicio', params: {} });
+    setState((prev) => {
+      // From detail/nuevo-evento, go back to eventos; otherwise go to inicio
+      if (prev.page === 'detalle-evento' || prev.page === 'nuevo-evento') {
+        return { page: 'eventos', params: {} };
+      }
+      return { page: 'inicio', params: {} };
+    });
   }, []);
 
   return {

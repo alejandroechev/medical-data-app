@@ -92,7 +92,7 @@ test.describe('Medical Family Registry — E2E', () => {
     await page.getByRole('button', { name: 'Nuevo evento' }).click();
     await expect(page.locator('header')).toContainText('Nuevo Evento');
     await page.getByLabel('Volver').click();
-    await expect(page.locator('header')).toContainText('Registro Médico Familiar');
+    await expect(page.locator('header')).toContainText('Eventos');
   });
 
   test('should have all event types available', async ({ page }) => {
