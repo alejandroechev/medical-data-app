@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { checkAuthStatus, registerDevice } from "../../infra/automerge/auth.js";
+import { checkAuthStatus, registerDevice, getStoredToken } from "../../infra/automerge/auth.js";
 import { getStorageBackend } from "../../infra/store-provider.js";
 import { commonIcons } from "./icons";
 
@@ -11,35 +11,37 @@ interface SyncAuthGateProps {
  * Gate component that requires device registration before showing the app.
  * Only active when VITE_STORAGE_BACKEND=automerge and the sync server requires auth.
  * Passes through immediately for supabase/memory backends.
+ * Uses optimistic auth: reads token from localStorage synchronously and renders
+ * immediately. Background-validates the token after the app is already showing.
  */
 export function SyncAuthGate({ children }: SyncAuthGateProps) {
-  const [status, setStatus] = useState<"checking" | "authenticated" | "needs-registration">("checking");
+  const backend = getStorageBackend();
+  const skipAuth = import.meta.env.VITE_DISABLE_SYNC_AUTH === "1" || backend !== "automerge";
+  const hasToken = !skipAuth && !!getStoredToken();
+
+  // Optimistic: if we have a token or auth is skipped, render immediately
+  const [status, setStatus] = useState<"authenticated" | "needs-registration">(
+    skipAuth || hasToken ? "authenticated" : "needs-registration"
+  );
   const [deviceName, setDeviceName] = useState("");
   const [registrationKey, setRegistrationKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Background-validate the token (if invalid, switch to registration)
   useEffect(() => {
-    if (import.meta.env.VITE_DISABLE_SYNC_AUTH === "1" || getStorageBackend() !== "automerge") {
-      setStatus("authenticated");
-      return;
-    }
+    if (skipAuth || !hasToken) return;
 
     checkAuthStatus()
-      .then((result) => setStatus(result.status))
-      .catch(() => setStatus("needs-registration"));
-  }, []);
-
-  if (status === "checking") {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center text-gray-500">
-          <commonIcons.retry className="h-8 w-8 mx-auto mb-2 animate-spin" aria-hidden="true" />
-          <p>Conectando con el servidor de sincronización...</p>
-        </div>
-      </div>
-    );
-  }
+      .then((result) => {
+        if (result.status === "needs-registration") {
+          setStatus("needs-registration");
+        }
+      })
+      .catch(() => {
+        // Network error — stay authenticated optimistically (local-first)
+      });
+  }, [skipAuth, hasToken]);
 
   if (status === "authenticated") {
     return <>{children}</>;
