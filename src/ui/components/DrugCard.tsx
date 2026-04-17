@@ -1,15 +1,11 @@
-import { useState } from 'react';
-import type { PatientDrug, DrugStatus, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
+import type { PatientDrug, DrugStatus } from '../../domain/models/prescription-drug';
 import { formatSchedule, formatDuration, getTreatmentProgress } from '../../domain/models/prescription-drug';
-import { DrugForm } from './DrugForm';
 import { commonIcons } from './icons';
 
 interface DrugCardProps {
   drug: PatientDrug;
   patientName?: string;
-  onEdit?: (id: string, input: UpdatePatientDrugInput) => Promise<void>;
-  onStop?: (id: string) => Promise<void>;
-  onDelete?: (id: string) => Promise<void>;
+  onClick?: (id: string) => void;
 }
 
 const STATUS_STYLES: Record<DrugStatus, { bg: string; label: string }> = {
@@ -18,37 +14,16 @@ const STATUS_STYLES: Record<DrugStatus, { bg: string; label: string }> = {
   stopped: { bg: 'bg-red-100 text-red-700', label: 'Detenido' },
 };
 
-export function DrugCard({ drug, patientName, onEdit, onStop, onDelete }: DrugCardProps) {
-  const [editing, setEditing] = useState(false);
+export function DrugCard({ drug, patientName, onClick }: DrugCardProps) {
   const statusStyle = STATUS_STYLES[drug.status];
   const progress = drug.status === 'active' ? getTreatmentProgress(drug) : null;
 
-  if (editing && onEdit) {
-    return (
-      <DrugForm
-        patientId={drug.patientId}
-        eventId={drug.eventId}
-        initialValues={drug}
-        onSubmit={async (input) => {
-          await onEdit(drug.id, {
-            name: input.name,
-            dosage: input.dosage,
-            schedule: input.schedule,
-            duration: input.duration,
-            startDate: input.startDate,
-            startTime: input.startTime ?? null,
-            isPermanent: input.isPermanent,
-            nextPickupDate: input.nextPickupDate ?? null,
-          });
-          setEditing(false);
-        }}
-        onCancel={() => setEditing(false)}
-      />
-    );
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 space-y-2">
+    <button
+      type="button"
+      onClick={() => onClick?.(drug.id)}
+      className="w-full text-left bg-white rounded-lg shadow-sm border border-gray-100 p-3 space-y-2 hover:shadow-md transition-shadow"
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -97,43 +72,6 @@ export function DrugCard({ drug, patientName, onEdit, onStop, onDelete }: DrugCa
           Próximo retiro: {drug.nextPickupDate}
         </p>
       )}
-
-      {/* Actions — available for all statuses */}
-      <div className="flex gap-2 pt-1">
-        {onEdit && (
-          <button
-            onClick={() => setEditing(true)}
-            className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
-          >
-            <span className="inline-flex items-center gap-1">
-              <commonIcons.edit className="h-3.5 w-3.5" aria-hidden="true" />
-              Editar
-            </span>
-          </button>
-        )}
-        {drug.status === 'active' && onStop && (
-          <button
-            onClick={() => onStop(drug.id)}
-            className="text-xs text-orange-600 hover:text-orange-800 border border-orange-200 px-2 py-1 rounded-lg hover:bg-orange-50 transition-colors"
-          >
-            <span className="inline-flex items-center gap-1">
-              <commonIcons.stopAction className="h-3.5 w-3.5" aria-hidden="true" />
-              Detener
-            </span>
-          </button>
-        )}
-        {onDelete && (
-          <button
-            onClick={() => onDelete(drug.id)}
-            className="text-xs text-red-500 hover:text-red-700 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
-          >
-            <span className="inline-flex items-center gap-1">
-              <commonIcons.trash className="h-3.5 w-3.5" aria-hidden="true" />
-              Eliminar
-            </span>
-          </button>
-        )}
-      </div>
-    </div>
+    </button>
   );
 }

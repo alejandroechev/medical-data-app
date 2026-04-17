@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
+import { getEventById, listPhotosByEvent, linkPhoto, unlinkPhoto, updateEvent, uploadPhoto, createRecording, listRecordingsByEvent, deleteRecording, listProfessionals, createProfessional, listLocations, createLocation, createPatientDrug, listPatientDrugsByEvent } from '../../infra/store-provider';
 import { getFamilyMemberById } from '../../infra/supabase/family-member-store';
 import { PhotoLinker } from '../components/PhotoLinker';
 import { EventActions } from '../components/EventActions';
@@ -16,7 +16,7 @@ import { commonIcons, eventTypeIcons } from '../components/icons';
 import type { MedicalEvent, ReimbursementStatus } from '../../domain/models/medical-event';
 import type { EventPhoto, LinkPhotoInput } from '../../domain/models/event-photo';
 import type { EventRecording } from '../../domain/models/event-recording';
-import type { PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
+import type { PatientDrug, CreatePatientDrugInput } from '../../domain/models/prescription-drug';
 import type { Professional, Location } from '../../domain/models/professional-location';
 
 interface DetalleEventoPageProps {
@@ -156,21 +156,6 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
   const handleAddDrug = async (input: CreatePatientDrugInput) => {
     await createPatientDrug(input);
     setShowDrugForm(false);
-    await reloadDrugs();
-  };
-
-  const handleEditDrug = async (id: string, input: UpdatePatientDrugInput) => {
-    await updatePatientDrug(id, input);
-    await reloadDrugs();
-  };
-
-  const handleStopDrug = async (id: string) => {
-    await updatePatientDrug(id, { status: 'stopped', endDate: new Date().toISOString().split('T')[0] });
-    await reloadDrugs();
-  };
-
-  const handleDeleteDrug = async (id: string) => {
-    await deletePatientDrug(id);
     await reloadDrugs();
   };
 
@@ -349,9 +334,6 @@ export function DetalleEventoPage({ eventoId }: DetalleEventoPageProps) {
               <DrugCard
                 key={drug.id}
                 drug={drug}
-                onEdit={handleEditDrug}
-                onStop={handleStopDrug}
-                onDelete={handleDeleteDrug}
               />
             ))}
           </div>

@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFamilyMembers } from '../../infra/supabase/family-member-store';
 import { listPatientDrugsByPatient, listAllPatientDrugs, createPatientDrug, updatePatientDrug, deletePatientDrug } from '../../infra/store-provider';
-import { DrugCard } from '../components/DrugCard';
+import { SwipeableDrugCard } from '../components/SwipeableDrugCard';
 import { DrugForm } from '../components/DrugForm';
-import type { PatientDrug, CreatePatientDrugInput, UpdatePatientDrugInput } from '../../domain/models/prescription-drug';
+import type { PatientDrug, CreatePatientDrugInput } from '../../domain/models/prescription-drug';
 import { commonIcons } from '../components/icons';
 
 type FilterStatus = 'active' | 'all' | 'stopped';
 
-export function TratamientosPage({ initialPatientId }: { initialPatientId?: string }) {
+export function TratamientosPage({ initialPatientId, onDrugClick }: { initialPatientId?: string; onDrugClick?: (id: string) => void }) {
   const members = getFamilyMembers();
   const [selectedPatient, setSelectedPatient] = useState(initialPatientId ?? '');
   const [drugs, setDrugs] = useState<PatientDrug[]>([]);
@@ -38,17 +38,17 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
     await loadDrugs();
   };
 
-  const handleEditDrug = async (id: string, input: UpdatePatientDrugInput) => {
-    await updatePatientDrug(id, input);
-    await loadDrugs();
-  };
-
   const handleStopDrug = async (id: string) => {
     await updatePatientDrug(id, { status: 'stopped', endDate: new Date().toISOString().split('T')[0] });
     await loadDrugs();
   };
 
-  const handleDeleteDrug = async (id: string) => {
+  const handleRestartDrug = async (id: string) => {
+    await updatePatientDrug(id, { status: 'active', endDate: null });
+    await loadDrugs();
+  };
+
+  const handleArchiveDrug = async (id: string) => {
     await deletePatientDrug(id);
     await loadDrugs();
   };
@@ -126,13 +126,14 @@ export function TratamientosPage({ initialPatientId }: { initialPatientId?: stri
 
           <div className="space-y-3">
             {filteredDrugs.map((drug) => (
-              <DrugCard
+              <SwipeableDrugCard
                 key={drug.id}
                 drug={drug}
                 patientName={showAllPatients ? getPatientName(drug.patientId) : undefined}
-                onEdit={handleEditDrug}
+                onClick={(id) => onDrugClick?.(id)}
                 onStop={handleStopDrug}
-                onDelete={handleDeleteDrug}
+                onRestart={handleRestartDrug}
+                onArchive={handleArchiveDrug}
               />
             ))}
           </div>
