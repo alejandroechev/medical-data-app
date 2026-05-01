@@ -1,0 +1,22 @@
+[
+  {
+    "id": "861ac938-aad9-4172-b21a-b7be9ff10676",
+    "nombre": "Alejandro",
+    "parentesco": "Padre"
+  },
+  {
+    "id": "73877ce7-d43f-47ad-8752-fc966e659189",
+    "nombre": "Daniela",
+    "parentesco": "Madre"
+  },
+  {
+    "id": "c8af6b39-c4ae-451c-87cc-9e68ab02b3f7",
+    "nombre": "Antonio",
+    "parentesco": "Hijo"
+  },
+  {
+    "id": "2c26a593-c699-41e9-8c57-5056349ef861",
+    "nombre": "Gaspar",
+    "parentesco": "Hijo"
+  }
+]
