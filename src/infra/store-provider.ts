@@ -14,14 +14,8 @@ import * as supabaseRecordingStore from './supabase/recording-store.js';
 import * as supabaseProfLocStore from './supabase/professional-location-store.js';
 import * as supabaseDrugStore from './supabase/prescription-drug-store.js';
 
-// Automerge stores are loaded lazily to avoid pulling WASM into non-automerge builds
-const automerge = () => ({
-  event: import('./automerge/medical-event-store.js'),
-  photo: import('./automerge/event-photo-store.js'),
-  recording: import('./automerge/recording-store.js'),
-  profLoc: import('./automerge/professional-location-store.js'),
-  drug: import('./automerge/prescription-drug-store.js'),
-});
+// Automerge stores are loaded lazily via worker-client (no WASM on main thread)
+const automerge = () => import('./automerge/worker-client.js');
 import { InMemoryMedicalEventStore } from './memory/medical-event-store.js';
 import { InMemoryEventPhotoStore } from './memory/event-photo-store.js';
 import { InMemoryPhotoUploader } from './memory/photo-uploader.js';
@@ -74,32 +68,32 @@ export function getStorageBackend(): StorageBackend {
 // --- Medical Events ---
 
 export async function createEvent(input: CreateMedicalEventInput): Promise<MedicalEvent> {
-  if (backend === 'automerge') return (await automerge().event).createEvent(input);
+  if (backend === 'automerge') return (await automerge()).createEvent(input);
   return backend === 'supabase' ? supabaseEventStore.createEvent(input) : memoryEventStore.create(input);
 }
 
 export async function getEventById(id: string): Promise<MedicalEvent | null> {
-  if (backend === 'automerge') return (await automerge().event).getEventById(id);
+  if (backend === 'automerge') return (await automerge()).getEventById(id);
   return backend === 'supabase' ? supabaseEventStore.getEventById(id) : memoryEventStore.getById(id);
 }
 
 export async function listEvents(filters?: MedicalEventFilters): Promise<MedicalEvent[]> {
-  if (backend === 'automerge') return (await automerge().event).listEvents(filters);
+  if (backend === 'automerge') return (await automerge()).listEvents(filters);
   return backend === 'supabase' ? supabaseEventStore.listEvents(filters) : memoryEventStore.list(filters);
 }
 
 export async function updateEvent(id: string, input: UpdateMedicalEventInput): Promise<MedicalEvent> {
-  if (backend === 'automerge') return (await automerge().event).updateEvent(id, input);
+  if (backend === 'automerge') return (await automerge()).updateEvent(id, input);
   return backend === 'supabase' ? supabaseEventStore.updateEvent(id, input) : memoryEventStore.update(id, input);
 }
 
 export async function deleteEvent(id: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().event).deleteEvent(id);
+  if (backend === 'automerge') return (await automerge()).deleteEvent(id);
   return backend === 'supabase' ? supabaseEventStore.deleteEvent(id) : memoryEventStore.delete(id);
 }
 
 export async function archiveEvent(id: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().event).archiveEvent(id);
+  if (backend === 'automerge') return (await automerge()).archiveEvent(id);
   if (backend === 'supabase') {
     await supabaseEventStore.updateEvent(id, { isArchived: true });
     return;
@@ -108,7 +102,7 @@ export async function archiveEvent(id: string): Promise<void> {
 }
 
 export async function unarchiveEvent(id: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().event).unarchiveEvent(id);
+  if (backend === 'automerge') return (await automerge()).unarchiveEvent(id);
   if (backend === 'supabase') {
     await supabaseEventStore.updateEvent(id, { isArchived: false });
     return;
@@ -119,102 +113,102 @@ export async function unarchiveEvent(id: string): Promise<void> {
 // --- Event Photos ---
 
 export async function linkPhoto(input: LinkPhotoInput): Promise<EventPhoto> {
-  if (backend === 'automerge') return (await automerge().photo).linkPhoto(input);
+  if (backend === 'automerge') return (await automerge()).linkPhoto(input);
   return backend === 'supabase' ? supabasePhotoStore.linkPhoto(input) : memoryPhotoStore.link(input);
 }
 
 export async function listPhotosByEvent(eventId: string): Promise<EventPhoto[]> {
-  if (backend === 'automerge') return (await automerge().photo).listPhotosByEvent(eventId);
+  if (backend === 'automerge') return (await automerge()).listPhotosByEvent(eventId);
   return backend === 'supabase' ? supabasePhotoStore.listPhotosByEvent(eventId) : memoryPhotoStore.listByEvent(eventId);
 }
 
 export async function unlinkPhoto(id: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().photo).unlinkPhoto(id);
+  if (backend === 'automerge') return (await automerge()).unlinkPhoto(id);
   return backend === 'supabase' ? supabasePhotoStore.unlinkPhoto(id) : memoryPhotoStore.unlink(id);
 }
 
 // --- Photo Storage ---
 
 export async function uploadPhoto(eventId: string, file: File): Promise<UploadResult> {
-  if (backend === 'automerge') return (await automerge().photo).uploadPhoto(eventId, file);
+  if (backend === 'automerge') return (await automerge()).uploadPhoto(eventId, file);
   return backend === 'supabase' ? supabasePhotoStorage.uploadPhoto(eventId, file) : memoryPhotoUploader.upload(eventId, file);
 }
 
 export async function deleteStoredPhoto(url: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().photo).deletePhoto(url);
+  if (backend === 'automerge') return (await automerge()).deletePhoto(url);
   return backend === 'supabase' ? supabasePhotoStorage.deletePhoto(url) : memoryPhotoUploader.delete(url);
 }
 
 // --- Recordings ---
 
 export async function createRecording(input: CreateRecordingInput): Promise<EventRecording> {
-  if (backend === 'automerge') return (await automerge().recording).createRecording(input);
+  if (backend === 'automerge') return (await automerge()).createRecording(input);
   return backend === 'supabase' ? supabaseRecordingStore.createRecording(input) : memoryRecordingStore.create(input);
 }
 
 export async function listRecordingsByEvent(eventId: string): Promise<EventRecording[]> {
-  if (backend === 'automerge') return (await automerge().recording).listRecordingsByEvent(eventId);
+  if (backend === 'automerge') return (await automerge()).listRecordingsByEvent(eventId);
   return backend === 'supabase' ? supabaseRecordingStore.listRecordingsByEvent(eventId) : memoryRecordingStore.listByEvent(eventId);
 }
 
 export async function deleteRecording(id: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().recording).deleteRecording(id);
+  if (backend === 'automerge') return (await automerge()).deleteRecording(id);
   return backend === 'supabase' ? supabaseRecordingStore.deleteRecording(id) : memoryRecordingStore.delete(id);
 }
 
 // --- Professionals ---
 
 export async function createProfessional(name: string, specialty?: string): Promise<Professional> {
-  if (backend === 'automerge') return (await automerge().profLoc).createProfessional(name, specialty);
+  if (backend === 'automerge') return (await automerge()).createProfessional(name, specialty);
   return backend === 'supabase' ? supabaseProfLocStore.createProfessional(name, specialty) : memoryProfessionalStore.create(name, specialty);
 }
 
 export async function listProfessionals(): Promise<Professional[]> {
-  if (backend === 'automerge') return (await automerge().profLoc).listProfessionals();
+  if (backend === 'automerge') return (await automerge()).listProfessionals();
   return backend === 'supabase' ? supabaseProfLocStore.listProfessionals() : memoryProfessionalStore.list();
 }
 
 export async function getProfessionalById(id: string): Promise<Professional | undefined> {
-  if (backend === 'automerge') return (await automerge().profLoc).getProfessionalById(id);
+  if (backend === 'automerge') return (await automerge()).getProfessionalById(id);
   return backend === 'supabase' ? supabaseProfLocStore.getProfessionalById(id) : memoryProfessionalStore.getById(id);
 }
 
 // --- Locations ---
 
 export async function createLocation(name: string): Promise<Location> {
-  if (backend === 'automerge') return (await automerge().profLoc).createLocation(name);
+  if (backend === 'automerge') return (await automerge()).createLocation(name);
   return backend === 'supabase' ? supabaseProfLocStore.createLocation(name) : memoryLocationStore.create(name);
 }
 
 export async function listLocations(): Promise<Location[]> {
-  if (backend === 'automerge') return (await automerge().profLoc).listLocations();
+  if (backend === 'automerge') return (await automerge()).listLocations();
   return backend === 'supabase' ? supabaseProfLocStore.listLocations() : memoryLocationStore.list();
 }
 
 export async function getLocationById(id: string): Promise<Location | undefined> {
-  if (backend === 'automerge') return (await automerge().profLoc).getLocationById(id);
+  if (backend === 'automerge') return (await automerge()).getLocationById(id);
   return backend === 'supabase' ? supabaseProfLocStore.getLocationById(id) : memoryLocationStore.getById(id);
 }
 
 // --- Prescription Drugs ---
 
 export async function createPrescriptionDrug(input: CreatePrescriptionDrugInput): Promise<PrescriptionDrug> {
-  if (backend === 'automerge') return (await automerge().drug).createPrescriptionDrug(input);
+  if (backend === 'automerge') return (await automerge()).createPrescriptionDrug(input);
   return backend === 'supabase' ? supabaseDrugStore.createPrescriptionDrug(input) : memoryDrugStore.create(input);
 }
 
 export async function listPrescriptionDrugsByEvent(eventId: string): Promise<PrescriptionDrug[]> {
-  if (backend === 'automerge') return (await automerge().drug).listPrescriptionDrugsByEvent(eventId);
+  if (backend === 'automerge') return (await automerge()).listPrescriptionDrugsByEvent(eventId);
   return backend === 'supabase' ? supabaseDrugStore.listPrescriptionDrugsByEvent(eventId) : memoryDrugStore.listByEvent(eventId);
 }
 
 export async function listAllPrescriptionDrugs(): Promise<PrescriptionDrug[]> {
-  if (backend === 'automerge') return (await automerge().drug).listAllPrescriptionDrugs();
+  if (backend === 'automerge') return (await automerge()).listAllPrescriptionDrugs();
   return backend === 'supabase' ? supabaseDrugStore.listAllPrescriptionDrugs() : memoryDrugStore.listAll();
 }
 
 export async function deletePrescriptionDrug(id: string): Promise<void> {
-  if (backend === 'automerge') return (await automerge().drug).deletePrescriptionDrug(id);
+  if (backend === 'automerge') return (await automerge()).deletePrescriptionDrug(id);
   return backend === 'supabase' ? supabaseDrugStore.deletePrescriptionDrug(id) : memoryDrugStore.delete(id);
 }
 
@@ -228,7 +222,7 @@ function notifyDrugsChanged() {
 
 export async function createPatientDrug(input: CreatePatientDrugInput): Promise<PatientDrug> {
   let result: PatientDrug;
-  if (backend === 'automerge') result = await (await automerge().drug).createPatientDrug(input);
+  if (backend === 'automerge') result = await (await automerge()).createPatientDrug(input);
   else result = backend === 'supabase' ? await supabaseDrugStore.createPatientDrug(input) : await memoryPatientDrugStore.create(input);
   notifyDrugsChanged();
   return result;
@@ -236,34 +230,34 @@ export async function createPatientDrug(input: CreatePatientDrugInput): Promise<
 
 export async function updatePatientDrug(id: string, input: UpdatePatientDrugInput): Promise<PatientDrug> {
   let result: PatientDrug;
-  if (backend === 'automerge') result = await (await automerge().drug).updatePatientDrug(id, input);
+  if (backend === 'automerge') result = await (await automerge()).updatePatientDrug(id, input);
   else result = backend === 'supabase' ? await supabaseDrugStore.updatePatientDrug(id, input) : await memoryPatientDrugStore.update(id, input);
   notifyDrugsChanged();
   return result;
 }
 
 export async function listPatientDrugsByPatient(patientId: string): Promise<PatientDrug[]> {
-  if (backend === 'automerge') return (await automerge().drug).listPatientDrugsByPatient(patientId);
+  if (backend === 'automerge') return (await automerge()).listPatientDrugsByPatient(patientId);
   return backend === 'supabase' ? supabaseDrugStore.listPatientDrugsByPatient(patientId) : memoryPatientDrugStore.listByPatient(patientId);
 }
 
 export async function listPatientDrugsByEvent(eventId: string): Promise<PatientDrug[]> {
-  if (backend === 'automerge') return (await automerge().drug).listPatientDrugsByEvent(eventId);
+  if (backend === 'automerge') return (await automerge()).listPatientDrugsByEvent(eventId);
   return backend === 'supabase' ? supabaseDrugStore.listPatientDrugsByEvent(eventId) : memoryPatientDrugStore.listByEvent(eventId);
 }
 
 export async function listActivePatientDrugs(patientId?: string): Promise<PatientDrug[]> {
-  if (backend === 'automerge') return (await automerge().drug).listActivePatientDrugs(patientId);
+  if (backend === 'automerge') return (await automerge()).listActivePatientDrugs(patientId);
   return backend === 'supabase' ? supabaseDrugStore.listActivePatientDrugs(patientId) : memoryPatientDrugStore.listActive(patientId);
 }
 
 export async function listAllPatientDrugs(): Promise<PatientDrug[]> {
-  if (backend === 'automerge') return (await automerge().drug).listAllPatientDrugs();
+  if (backend === 'automerge') return (await automerge()).listAllPatientDrugs();
   return backend === 'supabase' ? supabaseDrugStore.listAllPatientDrugs() : memoryPatientDrugStore.listAll();
 }
 
 export async function deletePatientDrug(id: string): Promise<void> {
-  if (backend === 'automerge') await (await automerge().drug).deletePatientDrug(id);
+  if (backend === 'automerge') await (await automerge()).deletePatientDrug(id);
   else backend === 'supabase' ? await supabaseDrugStore.deletePatientDrug(id) : await memoryPatientDrugStore.delete(id);
   notifyDrugsChanged();
 }
