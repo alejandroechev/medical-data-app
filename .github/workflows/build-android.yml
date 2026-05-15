@@ -54,6 +54,48 @@ jobs:
       - name: Initialize Tauri Android
         run: npx tauri android init
 
+      - name: Add microphone permission to Android manifest
+        run: |
+          MANIFEST="src-tauri/gen/android/app/src/main/AndroidManifest.xml"
+          sed -i 's|<application|<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n\n    <application|' "$MANIFEST"
+          echo "--- AndroidManifest.xml (first 15 lines) ---"
+          head -15 "$MANIFEST"
+
+      - name: Override MainActivity to grant WebView permissions
+        run: |
+          ACTIVITY_DIR="src-tauri/gen/android/app/src/main/java/app/stormlab/medtracker"
+          mkdir -p "$ACTIVITY_DIR"
+          cat > "$ACTIVITY_DIR/MainActivity.kt" << 'KOTLIN'
+          package app.stormlab.medtracker
+
+          import android.Manifest
+          import android.content.pm.PackageManager
+          import android.webkit.PermissionRequest
+          import android.webkit.WebChromeClient
+          import android.webkit.WebView
+          import androidx.core.app.ActivityCompat
+
+          class MainActivity : TauriActivity() {
+            override fun onWebViewCreate(webView: WebView) {
+              // Request microphone permission at runtime if not granted
+              if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 0)
+              }
+
+              // Auto-grant WebView permission requests (e.g., navigator.mediaDevices.getUserMedia)
+              webView.webChromeClient = object : WebChromeClient() {
+                override fun onPermissionRequest(request: PermissionRequest) {
+                  runOnUiThread {
+                    request.grant(request.resources)
+                  }
+                }
+              }
+            }
+          }
+          KOTLIN
+          echo "--- MainActivity.kt ---"
+          cat "$ACTIVITY_DIR/MainActivity.kt"
+
       - name: Copy app icons to Android project
         run: |
           cp -r src-tauri/icons/android/mipmap-* src-tauri/gen/android/app/src/main/res/
