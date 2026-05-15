@@ -52,6 +52,7 @@ export function CreatableSelect({
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
           />
           <button
+            type="button"
             onClick={handleCreate}
             disabled={saving || !newName.trim()}
             className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
@@ -60,6 +61,7 @@ export function CreatableSelect({
             {saving ? '...' : <commonIcons.check className="h-4 w-4" aria-hidden="true" />}
           </button>
           <button
+            type="button"
             onClick={() => { setAdding(false); setNewName(''); }}
             className="border border-gray-300 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
             aria-label={`Cancelar agregar ${label.toLowerCase()}`}
@@ -89,6 +91,7 @@ export function CreatableSelect({
           ))}
         </select>
         <button
+          type="button"
           onClick={() => setAdding(true)}
           className="border border-gray-300 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
           title={`Agregar ${label.toLowerCase()}`}

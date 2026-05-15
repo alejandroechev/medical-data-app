@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDocHandle, waitForDoc } from "./repo.js";
+import { stripUndefined } from "./strip-undefined.js";
 import type {
   MedicalEvent,
   CreateMedicalEventInput,
@@ -12,21 +13,21 @@ export async function createEvent(input: CreateMedicalEventInput): Promise<Medic
   const now = new Date().toISOString();
   const id = uuidv4();
 
-  const event: MedicalEvent = {
+  const event: MedicalEvent = stripUndefined({
     id,
     date: input.date,
     type: input.type,
     description: input.description,
     patientId: input.patientId,
-    professionalId: input.professionalId,
-    locationId: input.locationId,
-    parentEventId: input.parentEventId,
-    cost: input.cost,
+    professionalId: input.professionalId ?? undefined,
+    locationId: input.locationId ?? undefined,
+    parentEventId: input.parentEventId ?? undefined,
+    cost: input.cost ?? undefined,
     isapreReimbursementStatus: input.isapreReimbursementStatus ?? "none",
     insuranceReimbursementStatus: input.insuranceReimbursementStatus ?? "none",
     createdAt: now,
     updatedAt: now,
-  };
+  });
 
   handle.change((d) => {
     if (!d.medicalEvents) d.medicalEvents = {};
@@ -90,10 +91,22 @@ export async function updateEvent(id: string, input: UpdateMedicalEventInput): P
     if (input.type !== undefined) e.type = input.type;
     if (input.description !== undefined) e.description = input.description;
     if (input.patientId !== undefined) e.patientId = input.patientId;
-    if (input.professionalId !== undefined) e.professionalId = input.professionalId ?? undefined;
-    if (input.locationId !== undefined) e.locationId = input.locationId ?? undefined;
-    if (input.parentEventId !== undefined) e.parentEventId = input.parentEventId ?? undefined;
-    if (input.cost !== undefined) e.cost = input.cost ?? undefined;
+    if (input.professionalId !== undefined) {
+      if (input.professionalId) e.professionalId = input.professionalId;
+      else delete e.professionalId;
+    }
+    if (input.locationId !== undefined) {
+      if (input.locationId) e.locationId = input.locationId;
+      else delete e.locationId;
+    }
+    if (input.parentEventId !== undefined) {
+      if (input.parentEventId) e.parentEventId = input.parentEventId;
+      else delete e.parentEventId;
+    }
+    if (input.cost !== undefined) {
+      if (input.cost !== null) e.cost = input.cost;
+      else delete e.cost;
+    }
     if (input.isapreReimbursementStatus !== undefined) e.isapreReimbursementStatus = input.isapreReimbursementStatus;
     if (input.insuranceReimbursementStatus !== undefined) e.insuranceReimbursementStatus = input.insuranceReimbursementStatus;
     if (input.isArchived !== undefined) e.isArchived = input.isArchived;

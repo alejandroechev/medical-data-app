@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDocHandle, waitForDoc } from "./repo.js";
+import { stripUndefined } from "./strip-undefined.js";
 import type { Professional, Location } from "../../domain/models/professional-location.js";
 
 // --- Professionals ---
@@ -9,7 +10,7 @@ export async function createProfessional(name: string, specialty?: string): Prom
   const id = uuidv4();
   const now = new Date().toISOString();
 
-  const professional: Professional = { id, name, specialty, createdAt: now };
+  const professional: Professional = stripUndefined({ id, name, specialty, createdAt: now });
 
   handle.change((d) => {
     if (!d.professionals) d.professionals = {};

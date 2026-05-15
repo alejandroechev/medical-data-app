@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDocHandle, waitForDoc } from "./repo.js";
+import { stripUndefined } from "./strip-undefined.js";
 import type {
   PrescriptionDrug,
   CreatePrescriptionDrugInput,
@@ -15,7 +16,7 @@ export async function createPrescriptionDrug(input: CreatePrescriptionDrugInput)
   const id = uuidv4();
   const now = new Date().toISOString();
 
-  const drug: PrescriptionDrug = {
+  const drug: PrescriptionDrug = stripUndefined({
     id,
     eventId: input.eventId,
     name: input.name,
@@ -23,7 +24,7 @@ export async function createPrescriptionDrug(input: CreatePrescriptionDrugInput)
     frequency: input.frequency,
     durationDays: input.durationDays,
     createdAt: now,
-  };
+  });
 
   handle.change((d) => {
     if (!d.prescriptionDrugs) d.prescriptionDrugs = {};
@@ -59,7 +60,7 @@ export async function createPatientDrug(input: CreatePatientDrugInput): Promise<
   const id = uuidv4();
   const now = new Date().toISOString();
 
-  const drug: PatientDrug = {
+  const drug: PatientDrug = stripUndefined({
     id,
     patientId: input.patientId,
     eventId: input.eventId,
@@ -73,7 +74,7 @@ export async function createPatientDrug(input: CreatePatientDrugInput): Promise<
     nextPickupDate: input.nextPickupDate,
     status: "active",
     createdAt: now,
-  };
+  });
 
   handle.change((d) => {
     if (!d.patientDrugs) d.patientDrugs = {};
@@ -96,10 +97,19 @@ export async function updatePatientDrug(id: string, input: UpdatePatientDrugInpu
     if (input.schedule !== undefined) drug.schedule = input.schedule;
     if (input.duration !== undefined) drug.duration = input.duration;
     if (input.startDate !== undefined) drug.startDate = input.startDate;
-    if (input.startTime !== undefined) drug.startTime = input.startTime ?? undefined;
-    if (input.endDate !== undefined) drug.endDate = input.endDate ?? undefined;
+    if (input.startTime !== undefined) {
+      if (input.startTime) drug.startTime = input.startTime;
+      else delete drug.startTime;
+    }
+    if (input.endDate !== undefined) {
+      if (input.endDate) drug.endDate = input.endDate;
+      else delete drug.endDate;
+    }
     if (input.isPermanent !== undefined) drug.isPermanent = input.isPermanent;
-    if (input.nextPickupDate !== undefined) drug.nextPickupDate = input.nextPickupDate ?? undefined;
+    if (input.nextPickupDate !== undefined) {
+      if (input.nextPickupDate) drug.nextPickupDate = input.nextPickupDate;
+      else delete drug.nextPickupDate;
+    }
     if (input.status !== undefined) drug.status = input.status;
   });
 

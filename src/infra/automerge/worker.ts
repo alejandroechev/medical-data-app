@@ -55,6 +55,18 @@ function toPlain<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+/**
+ * Strip properties whose value is `undefined`. Automerge does not allow
+ * assigning `undefined` — fields must be omitted (or set to `null`) instead.
+ */
+function stripUndefined<T>(obj: T): T {
+  const out = {} as Record<string, unknown>;
+  for (const k in obj as Record<string, unknown>) {
+    if ((obj as Record<string, unknown>)[k] !== undefined) out[k] = (obj as Record<string, unknown>)[k];
+  }
+  return out as T;
+}
+
 interface WorkerConfig {
   wsUrl: string;
   docUrl: string;
@@ -152,21 +164,21 @@ const handlers: Record<string, (...args: any[]) => any> = {
   createEvent(input: CreateMedicalEventInput): MedicalEvent {
     const now = new Date().toISOString();
     const id = uuidv4();
-    const event: MedicalEvent = {
+    const event: MedicalEvent = stripUndefined({
       id,
       date: input.date,
       type: input.type,
       description: input.description,
       patientId: input.patientId,
-      professionalId: input.professionalId,
-      locationId: input.locationId,
-      parentEventId: input.parentEventId,
-      cost: input.cost,
+      professionalId: input.professionalId ?? undefined,
+      locationId: input.locationId ?? undefined,
+      parentEventId: input.parentEventId ?? undefined,
+      cost: input.cost ?? undefined,
       isapreReimbursementStatus: input.isapreReimbursementStatus ?? "none",
       insuranceReimbursementStatus: input.insuranceReimbursementStatus ?? "none",
       createdAt: now,
       updatedAt: now,
-    };
+    });
     handle!.change((d) => {
       if (!d.medicalEvents) d.medicalEvents = {};
       d.medicalEvents[id] = event;
@@ -213,10 +225,22 @@ const handlers: Record<string, (...args: any[]) => any> = {
       if (input.type !== undefined) e.type = input.type;
       if (input.description !== undefined) e.description = input.description;
       if (input.patientId !== undefined) e.patientId = input.patientId;
-      if (input.professionalId !== undefined) e.professionalId = input.professionalId ?? undefined;
-      if (input.locationId !== undefined) e.locationId = input.locationId ?? undefined;
-      if (input.parentEventId !== undefined) e.parentEventId = input.parentEventId ?? undefined;
-      if (input.cost !== undefined) e.cost = input.cost ?? undefined;
+      if (input.professionalId !== undefined) {
+        if (input.professionalId) e.professionalId = input.professionalId;
+        else delete e.professionalId;
+      }
+      if (input.locationId !== undefined) {
+        if (input.locationId) e.locationId = input.locationId;
+        else delete e.locationId;
+      }
+      if (input.parentEventId !== undefined) {
+        if (input.parentEventId) e.parentEventId = input.parentEventId;
+        else delete e.parentEventId;
+      }
+      if (input.cost !== undefined) {
+        if (input.cost !== null) e.cost = input.cost;
+        else delete e.cost;
+      }
       if (input.isapreReimbursementStatus !== undefined) e.isapreReimbursementStatus = input.isapreReimbursementStatus;
       if (input.insuranceReimbursementStatus !== undefined) e.insuranceReimbursementStatus = input.insuranceReimbursementStatus;
       if (input.isArchived !== undefined) e.isArchived = input.isArchived;
@@ -254,14 +278,14 @@ const handlers: Record<string, (...args: any[]) => any> = {
   linkPhoto(input: LinkPhotoInput): EventPhoto {
     const id = uuidv4();
     const now = new Date().toISOString();
-    const photo: EventPhoto = {
+    const photo: EventPhoto = stripUndefined({
       id,
       eventId: input.eventId,
       googlePhotosUrl: input.googlePhotosUrl,
       googlePhotosId: input.googlePhotosId,
       description: input.description,
       createdAt: now,
-    };
+    });
     handle!.change((d) => {
       if (!d.eventPhotos) d.eventPhotos = {};
       d.eventPhotos[id] = photo;
@@ -288,7 +312,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
   createRecording(input: CreateRecordingInput): EventRecording {
     const id = uuidv4();
     const now = new Date().toISOString();
-    const recording: EventRecording = {
+    const recording: EventRecording = stripUndefined({
       id,
       eventId: input.eventId,
       recordingUrl: input.recordingUrl,
@@ -296,7 +320,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
       durationSeconds: input.durationSeconds,
       description: input.description,
       createdAt: now,
-    };
+    });
     handle!.change((d) => {
       if (!d.eventRecordings) d.eventRecordings = {};
       d.eventRecordings[id] = recording;
@@ -323,7 +347,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
   createProfessional(name: string, specialty?: string): Professional {
     const id = uuidv4();
     const now = new Date().toISOString();
-    const professional: Professional = { id, name, specialty, createdAt: now };
+    const professional: Professional = stripUndefined({ id, name, specialty, createdAt: now });
     handle!.change((d) => {
       if (!d.professionals) d.professionals = {};
       d.professionals[id] = professional;
@@ -373,7 +397,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
   createPrescriptionDrug(input: CreatePrescriptionDrugInput): PrescriptionDrug {
     const id = uuidv4();
     const now = new Date().toISOString();
-    const drug: PrescriptionDrug = {
+    const drug: PrescriptionDrug = stripUndefined({
       id,
       eventId: input.eventId,
       name: input.name,
@@ -381,7 +405,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
       frequency: input.frequency,
       durationDays: input.durationDays,
       createdAt: now,
-    };
+    });
     handle!.change((d) => {
       if (!d.prescriptionDrugs) d.prescriptionDrugs = {};
       d.prescriptionDrugs[id] = drug;
@@ -414,7 +438,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
   createPatientDrug(input: CreatePatientDrugInput): PatientDrug {
     const id = uuidv4();
     const now = new Date().toISOString();
-    const drug: PatientDrug = {
+    const drug: PatientDrug = stripUndefined({
       id,
       patientId: input.patientId,
       eventId: input.eventId,
@@ -428,7 +452,7 @@ const handlers: Record<string, (...args: any[]) => any> = {
       nextPickupDate: input.nextPickupDate,
       status: "active",
       createdAt: now,
-    };
+    });
     handle!.change((d) => {
       if (!d.patientDrugs) d.patientDrugs = {};
       d.patientDrugs[id] = drug;
@@ -446,10 +470,19 @@ const handlers: Record<string, (...args: any[]) => any> = {
       if (input.schedule !== undefined) drug.schedule = input.schedule;
       if (input.duration !== undefined) drug.duration = input.duration;
       if (input.startDate !== undefined) drug.startDate = input.startDate;
-      if (input.startTime !== undefined) drug.startTime = input.startTime ?? undefined;
-      if (input.endDate !== undefined) drug.endDate = input.endDate ?? undefined;
+      if (input.startTime !== undefined) {
+        if (input.startTime) drug.startTime = input.startTime;
+        else delete drug.startTime;
+      }
+      if (input.endDate !== undefined) {
+        if (input.endDate) drug.endDate = input.endDate;
+        else delete drug.endDate;
+      }
       if (input.isPermanent !== undefined) drug.isPermanent = input.isPermanent;
-      if (input.nextPickupDate !== undefined) drug.nextPickupDate = input.nextPickupDate ?? undefined;
+      if (input.nextPickupDate !== undefined) {
+        if (input.nextPickupDate) drug.nextPickupDate = input.nextPickupDate;
+        else delete drug.nextPickupDate;
+      }
       if (input.status !== undefined) drug.status = input.status;
     });
     return toPlain(handle!.doc()!.patientDrugs[id]);
